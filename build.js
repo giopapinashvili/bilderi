@@ -1,4 +1,4 @@
-// აწყობს საიტს: src/ საქაღალდიდან ქმნის index.html, editor/index.html და templates/index.html ფაილებს.
+// აწყობს საიტს: src/ საქაღალდიდან ქმნის public/ საქაღალდის გვერდებს.
 // გაშვება: node build.js
 const fs = require('fs');
 const path = require('path');
@@ -13,6 +13,6 @@ const inline = (page) => r(page)
 
 if (/<\/script/i.test(r('src/templates/supra.js') + r('src/demo-art.js') + JSON.stringify(samples))) throw new Error('inline script would break');
 
-out('index.html', inline('src/pages/landing.html'));
-out('editor/index.html', inline('src/pages/editor.html'));
-out('templates/index.html', inline('src/pages/templates.html'));
+out('public/index.html', inline('src/pages/landing.html'));
+out('public/editor/index.html', inline('src/pages/editor.html'));
+out('public/templates/index.html', inline('src/pages/templates.html'));

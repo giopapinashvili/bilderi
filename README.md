@@ -11,7 +11,9 @@
 - `src/templates/supra.js` — შაბლონი: საიტის აღწერას (JSON) HTML გვერდად აქცევს
 - `src/samples/` — ნიმუში-საიტები
 - `src/pages/` — გვერდების წყარო
-- `build.js` — `node build.js` აწყობს `index.html`, `editor/index.html` და `templates/index.html` ფაილებს
+- `public/` — მზა საიტი, რომელსაც Cloudflare აჩვენებს
+- `build.js` — `node build.js` აწყობს `public/` საქაღალდის გვერდებს
+- `wrangler.jsonc` — Cloudflare Worker-ის პარამეტრები
 
-## Cloudflare Pages
-Framework preset: None. Build command: ცარიელი. Build output directory: `/`.
+## Cloudflare
+Worker `bilderi`, დაკავშირებულია ამ რეპოსთან. ყოველ push-ზე Cloudflare თავისით აქვეყნებს `public/` საქაღალდეს (`npx wrangler deploy`).

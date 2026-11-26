@@ -1,0 +1,9 @@
+{
+  // Cloudflare Worker: ემსახურება public/ საქაღალდის ფაილებს (სტატიკური საიტი)
+  "name": "bilderi",
+  "compatibility_date": "2026-11-26",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  }
+}
