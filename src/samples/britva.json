@@ -1,0 +1,201 @@
+{
+  "template": "supra",
+  "slug": "britva",
+  "name": "ბრიტვა",
+  "kind": "ბარბერშოპი",
+  "category": "services",
+  "meta": {
+    "title": "ბრიტვა, ბარბერშოპი დიდუბეში",
+    "description": "კლასიკური და თანამედროვე შეჭრა, წვერი და სველი პარსვა. ჩაწერა WhatsApp-ით."
+  },
+  "theme": {
+    "style": "poster",
+    "font": "modern",
+    "corners": "sharp",
+    "colors": {
+      "bg": "#ffffff",
+      "ink": "#14213d",
+      "surface": "#e8edf5",
+      "accent": "#c1272d",
+      "accentInk": "#ffffff"
+    }
+  },
+  "contact": {
+    "phone": "+995 555 77 88 99",
+    "whatsapp": "995555778899",
+    "address": "წერეთლის გამზ. 45, დიდუბე, თბილისი",
+    "instagram": "britva.barber"
+  },
+  "hours": [
+    {
+      "days": "ყოველდღე",
+      "time": "10:00–21:00"
+    }
+  ],
+  "navButton": {
+    "label": "ჩაწერა",
+    "link": "@whatsapp",
+    "bar": true
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "variant": "poster",
+      "tone": "inverse",
+      "tagline": "კლასიკური და თანამედროვე შეჭრა, წვერი ცხელი პირსახოცით. ჩაეწერე ერთ წუთში, WhatsApp-ით.",
+      "note": "ყოველდღე 10:00–21:00",
+      "image": {
+        "src": "demo:barber",
+        "alt": "ბარბერის სავარძელი და ბოძი"
+      },
+      "buttons": [
+        {
+          "label": "ჩაწერა",
+          "link": "@whatsapp"
+        },
+        {
+          "label": "ფასები",
+          "link": "#services"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "kind": "services",
+      "layout": "list",
+      "id": "services",
+      "tone": "base",
+      "title": "ფასები",
+      "order": true,
+      "orderLabel": "ჩაწერა",
+      "orderText": "გამარჯობა! მინდა ჩავეწერო:",
+      "items": [
+        {
+          "title": "თმის შეჭრა",
+          "meta": "40 წთ",
+          "price": 35
+        },
+        {
+          "title": "შეჭრა მანქანით",
+          "meta": "25 წთ",
+          "price": 25
+        },
+        {
+          "title": "წვერის ფორმა",
+          "meta": "30 წთ",
+          "price": 25
+        },
+        {
+          "title": "შეჭრა და წვერი",
+          "meta": "1 სთ",
+          "price": 55,
+          "text": "ყველაზე ხშირად ამას ირჩევენ"
+        },
+        {
+          "title": "სველი პარსვა",
+          "meta": "40 წთ",
+          "price": 35,
+          "text": "ცხელი პირსახოცი, სამართებელი და ზეთი"
+        },
+        {
+          "title": "ბავშვის შეჭრა",
+          "meta": "30 წთ",
+          "price": 25,
+          "text": "12 წლამდე"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "kind": "team",
+      "layout": "people",
+      "id": "team",
+      "tone": "surface",
+      "title": "ბარბერები",
+      "items": [
+        {
+          "title": "გიო",
+          "text": "კლასიკური შეჭრა და სველი პარსვა",
+          "image": {
+            "src": "demo:person4",
+            "alt": "გიო"
+          }
+        },
+        {
+          "title": "ლუკა",
+          "text": "ფეიდი და თანამედროვე ფორმები",
+          "image": {
+            "src": "demo:person1",
+            "alt": "ლუკა"
+          }
+        },
+        {
+          "title": "ანი",
+          "text": "გრძელი თმა და ბავშვები",
+          "image": {
+            "src": "demo:person3",
+            "alt": "ანი"
+          }
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "kind": "features",
+      "layout": "icons",
+      "tone": "base",
+      "title": "რას მიიღებ",
+      "inNav": false,
+      "items": [
+        {
+          "icon": "clock",
+          "title": "დროზე",
+          "text": "ჩაწერის დროს გელოდებით, რიგის გარეშე."
+        },
+        {
+          "icon": "coffee",
+          "title": "ყავა ან ლუდი",
+          "text": "სანამ ელოდები, ჩვენზეა."
+        },
+        {
+          "icon": "shield",
+          "title": "სუფთა ხელსაწყოები",
+          "text": "ყოველი კლიენტის შემდეგ ვასტერილიზებთ."
+        },
+        {
+          "icon": "card",
+          "title": "ნებისმიერი გადახდა",
+          "text": "ბარათით, ნაღდით ან გადარიცხვით."
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "id": "gallery",
+      "tone": "surface",
+      "title": "ბარბერშოპი",
+      "inNav": false,
+      "images": [
+        {
+          "src": "demo:barber",
+          "alt": "სავარძელი"
+        },
+        {
+          "src": "demo:tools",
+          "alt": "ხელსაწყოები"
+        },
+        {
+          "src": "demo:person4",
+          "alt": "ნამუშევარი"
+        }
+      ]
+    },
+    {
+      "type": "visit",
+      "id": "visit",
+      "tone": "inverse",
+      "title": "სად ვართ",
+      "note": "მეტროსთან ორ წუთში, მეორე სადარბაზოში."
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ადმინ პანელი, ბილდერი</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,300..900&display=swap">
+<style>
+/*PCSS*/
+/* VOICE  საქმიანი და მოკლე: აგენტი ტელეფონიდან ორ წუთში ამატებს ბინას
+   IDEA   ორგანაიზერი, სადაც თითო ფურცელი ერთი ბინაა */
+body{background:var(--soft)}
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:14px;max-width:1100px;margin:0 auto;padding:10px var(--pad);min-height:64px}
+.back{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;text-decoration:none}
+.ttl{flex:1}
+.ttl small{display:block;font-size:13px;color:var(--muted)}
+.ttl b{font-size:19px;font-weight:800;font-stretch:80%}
+.tabs{display:flex;gap:4px;max-width:1100px;margin:0 auto;padding:0 var(--pad);overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:none;min-height:46px;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--red)}
+main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.bar .inp{flex:1 1 220px;min-height:46px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{min-height:38px;padding:0 12px;border:1.5px solid var(--line);border-radius:99px;background:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.stat b{display:block;font-size:30px;font-weight:800;font-stretch:72%;line-height:1}
+.stat span{font-size:13.5px;color:var(--muted)}
+.list{display:grid;gap:10px}
+.row{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
+.row img,.row .noimg{width:96px;height:72px;border-radius:10px;object-fit:cover;background:var(--soft)}
+.row h3{font-size:17px;font-weight:700;font-stretch:100%;letter-spacing:0;line-height:1.3}
+.row p{font-size:14px;color:var(--muted);margin-top:2px}
+.row .pr{font-weight:800;font-size:17px;margin-top:4px}
+.row .acts{display:flex;gap:6px;align-items:center}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--ink-2);margin-right:4px}
+.pill.sale{background:#EAF0FF;color:#1B2B9E}.pill.rent{background:#FFF4DE;color:#7A4A00}.pill.reserved{background:#FDECEF;color:#A1102A}.pill.sold,.pill.rented{background:var(--ink);color:#fff}.pill.hid{background:#eee;color:#555}
+.ib{display:grid;place-items:center;width:40px;height:40px;border:1.5px solid var(--line);border-radius:11px;background:#fff;cursor:pointer}
+.ib:hover{border-color:var(--ink)}
+.empty{text-align:center;padding:48px 20px;background:#fff;border:1.5px dashed var(--line-2);border-radius:20px}
+.empty h2{font-size:30px;margin-bottom:8px}
+.empty p{color:var(--muted);margin-bottom:18px}
+.fab{position:fixed;right:20px;bottom:20px;z-index:30;box-shadow:0 14px 30px -12px rgba(232,37,63,.8)}
+.state{display:grid;place-items:center;gap:12px;padding:80px 20px;color:var(--muted);text-align:center}
+/* ფორმა */
+.sheet .mbox{width:min(720px,100%);padding:0;display:flex;flex-direction:column;max-height:calc(100vh - 32px)}
+.sh-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.sh-head h2{flex:1;font-size:26px}
+.sh-body{padding:20px;overflow:auto}
+.sh-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--line);background:#fff}
+.sh-foot .btn{flex:1}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--soft);margin-bottom:14px}
+.seg button{flex:1;min-height:42px;border:0;border-radius:9px;background:none;font-weight:600;cursor:pointer}
+.seg button[aria-pressed=true]{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:6px}
+.ph{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:4/3;background:var(--soft)}
+.ph img{width:100%;height:100%;object-fit:cover}
+.ph .cv{position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;background:var(--red);color:#fff;padding:2px 7px;border-radius:99px}
+.ph .ov{position:absolute;inset:auto 0 0;display:flex;justify-content:space-between;padding:4px;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.ph .ov button{width:30px;height:30px;border:0;border-radius:8px;background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer}
+.addph{display:grid;place-items:center;gap:4px;aspect-ratio:4/3;border:2px dashed var(--line-2);border-radius:12px;background:#fff;font-weight:600;font-size:14px;color:var(--ink-2);cursor:pointer}
+.feats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.feats label{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:1.5px solid var(--line);border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;background:#fff}
+.feats input{accent-color:var(--red)}
+.feats label:has(input:checked){border-color:var(--ink);background:var(--soft)}
+.hint{font-size:13px;color:var(--muted);margin:-6px 0 14px}
+.sec-t{font-size:15px;font-weight:700;margin:6px 0 10px;color:var(--ink)}
+.togl{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;font-weight:600}
+.togl input{width:22px;height:22px;accent-color:var(--red)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px}
+.card h2{font-size:24px;margin-bottom:12px}
+.pub{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:16px;font-size:14.5px}
+.pub .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#1f9d55;margin-right:8px}
+.pub.off .dot{background:#c7c2cf}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:72px minmax(0,1fr)}.row img,.row .noimg{width:72px;height:60px}.row .acts{grid-column:1/-1;justify-content:flex-end}.g3{grid-template-columns:1fr 1fr}.sheet{padding:0;place-items:end}.sheet .mbox{border-radius:22px 22px 0 0;max-height:94vh}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="back" href="/app/" aria-label="ჩემი საიტები"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <div class="ttl"><small>ადმინ პანელი</small><b id="s-name">…</b></div>
+    <a class="btn btn-line btn-sm" id="view" href="#" target="_blank" rel="noopener" hidden>საიტის ნახვა</a>
+    <a class="btn btn-ink btn-sm" id="design" href="#">დიზაინი</a>
+  </div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="list" aria-selected="true">განცხადებები</button>
+    <button type="button" role="tab" data-tab="info" aria-selected="false">კონტაქტი და აგენტი</button>
+  </div>
+</header>
+<main id="main"><div class="state"><span class="spin"></span>იტვირთება…</div></main>
+<button class="btn btn-red fab" type="button" id="fab" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ბინის დამატება</button>
+
+<div class="modal sheet" id="sheet" aria-hidden="true">
+  <form class="mbox" id="form" role="dialog" aria-modal="true" aria-labelledby="f-t" novalidate>
+    <div class="sh-head"><h2 id="f-t">ახალი განცხადება</h2><button class="x" type="button" data-close aria-label="დახურვა" style="position:static"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sh-body" id="f-body"></div>
+    <div class="sh-foot"><button class="btn btn-line" type="button" data-close>გაუქმება</button><button class="btn btn-red" type="submit" id="f-save">შენახვა</button></div>
+  </form>
+</div>
+<input type="file" id="file" accept="image/*" multiple hidden>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="/js/firebase-config.js"></script>
+<script>
+/*ART*/
+</script>
+<script>
+/*BACKEND*/
+</script>
+<script>
+{
+  const SITE_ORIGIN = 'https://bilderi.pages.dev';
+  const ID = new URLSearchParams(location.search).get('site');
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const DEALS = { sale: 'იყიდება', rent: 'ქირავდება', daily: 'დღიურად' };
+  const STATES = { '': 'აქტიური', reserved: 'დაჯავშნილია', sold: 'გაყიდულია', rented: 'გაქირავებულია' };
+  const TYPES = ['ბინა', 'კერძო სახლი', 'აგარაკი', 'კომერციული ფართი', 'მიწის ნაკვეთი', 'ოფისი'];
+  const CONDS = ['ახალი რემონტი', 'ძველი რემონტი', 'მიმდინარე რემონტი', 'თეთრი კარკასი', 'შავი კარკასი', 'მწვანე კარკასი', 'დიზაინერული რემონტი'];
+  const FEATS = ['აივანი', 'ლიფტი', 'პარკინგი', 'ცენტრალური გათბობა', 'კონდიციონერი', 'ავეჯით', 'ტექნიკით', 'ბუნებრივი აირი', 'ინტერნეტი', 'სარდაფი', 'ეზო', 'ბუხარი', 'ტერასა', 'ხედით'];
+  const I = {
+    edit: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    left: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    right: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>',
+    x: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    plus: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+  };
+  let site = null, IMGS = {}, published = null, uploaded = new Set(), tab = 'list', q = '', fDeal = '', editing = null, draft = null, toastT = 0;
+  const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200); };
+  const money = (n, cur) => { const s = String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return cur === '₾' ? s + ' ₾' : '$' + s; };
+  const srcOf = (src) => (!src ? '' : src.startsWith('img:') ? IMGS[src.slice(4)] || '' : src.startsWith('demo:') ? (window.DemoArt ? DemoArt.uri(src.slice(5), site.artKey || 'kvadrati') : '') : src);
+  const liveUrl = () => SITE_ORIGIN + '/s/' + site.slug + '/';
+
+  /* ---------- ფოტოს შეკუმშვა (როგორც რედაქტორში) ---------- */
+  const compress = (file) => new Promise((res, rej) => {
+    if (!/^image\//.test(file.type)) return rej(new Error('type'));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, 1600 / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      let qq = 0.82, out = cv.toDataURL('image/jpeg', qq);
+      while (out.length > 900000 && qq > 0.45) { qq -= 0.12; out = cv.toDataURL('image/jpeg', qq); }
+      res(out);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('read')); };
+    im.src = url;
+  });
+
+  /* ---------- შენახვა და გამოქვეყნება ---------- */
+  async function persist(msg) {
+    const used = new Set((JSON.stringify(site).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)));
+    for (const id of used) if (!uploaded.has(id) && IMGS[id]) { await Backend.saveImage(ID, id, IMGS[id]); uploaded.add(id); }
+    let live = false;
+    if (published) {
+      // საიტი უკვე გამოქვეყნებულია: ცვლილება მაშინვე საიტზეც ჩანს
+      const prev = await Backend.getPublished(site.slug).catch(() => null);
+      const payload = clone(site);
+      payload.brand = payload.brand || {};
+      if (prev && prev.brand && prev.brand.favicon) payload.brand.favicon = prev.brand.favicon;
+      if (prev && prev.meta && prev.meta.image && !(payload.meta && payload.meta.image)) { payload.meta = payload.meta || {}; payload.meta.image = prev.meta.image; }
+      await Backend.publish(ID, site.slug, payload, IMGS);
+      published = JSON.stringify(site);
+      live = true;
+    }
+    await Backend.saveSite(ID, site, published);
+    toast(msg + (live ? '. საიტზეც განახლდა.' : '. საიტზე გამოჩნდება გამოქვეყნების შემდეგ.'));
+  }
+
+  /* ---------- სია ---------- */
+  function vList() {
+    const L = site.listings || (site.listings = []);
+    const act = L.filter((l) => !l.state && !l.hidden).length;
+    const shown = L.filter((l) => (!fDeal || (fDeal === 'done' ? ['sold', 'rented'].includes(l.state) : (l.deal || 'sale') === fDeal && !['sold', 'rented'].includes(l.state)))
+      && (!q || [l.title, l.district, l.address, l.ref].join(' ').toLowerCase().includes(q.toLowerCase())));
+    const pub = `<div class="pub${published ? '' : ' off'}"><span><span class="dot"></span>${published ? 'საიტი გამოქვეყნებულია. ცვლილებები საიტზე მაშინვე ჩანს.' : 'საიტი ჯერ არ გამოქვეყნებულა. გამოაქვეყნე დიზაინის რედაქტორიდან.'}</span>${published ? `<a class="lnk" href="${esc(liveUrl())}" target="_blank" rel="noopener">${esc(liveUrl().replace('https://', ''))}</a>` : `<a class="btn btn-red btn-sm" href="/editor/?site=${encodeURIComponent(ID)}">გამოქვეყნება</a>`}</div>`;
+    const stats = `<div class="stats"><div class="stat"><b>${act}</b><span>აქტიური</span></div><div class="stat"><b>${L.filter((l) => l.deal === 'rent' && !l.state).length}</b><span>ქირავდება</span></div><div class="stat"><b>${L.filter((l) => l.state === 'reserved').length}</b><span>დაჯავშნილი</span></div><div class="stat"><b>${L.filter((l) => ['sold', 'rented'].includes(l.state)).length}</b><span>დასრულებული</span></div></div>`;
+    if (!L.length) return pub + `<div class="empty"><h2>პირველი ბინა დაამატე</h2><p>ფოტოები, ფასი და ძირითადი ინფორმაცია. ორი წუთის საქმეა და საიტზე მაშინვე გამოჩნდება.</p><button class="btn btn-red" type="button" data-new>${I.plus}ბინის დამატება</button></div>`;
+    return pub + stats + `<div class="bar"><input class="inp" type="search" id="q" placeholder="ძებნა: სათაური, უბანი, ID" value="${esc(q)}"><div class="chips">${[['', 'ყველა'], ['sale', 'იყიდება'], ['rent', 'ქირავდება'], ['done', 'დასრულებული']].map(([v, l]) => `<button type="button" data-fd="${v}" aria-pressed="${fDeal === v}">${l}</button>`).join('')}</div></div>
+<div class="list">${shown.map((l) => { const ph = (l.photos || [])[0], src = ph && srcOf(ph.src); return `<article class="row">${src ? `<img src="${esc(src)}" alt="">` : '<div class="noimg"></div>'}<div><h3>${esc(l.title || 'უსათაურო')}</h3><p><span class="pill ${esc(l.deal || 'sale')}">${DEALS[l.deal] || DEALS.sale}</span>${l.state ? `<span class="pill ${esc(l.state)}">${STATES[l.state]}</span>` : ''}${l.hidden ? '<span class="pill hid">დამალულია</span>' : ''}${esc([l.district, l.rooms && l.rooms + ' ოთახი', l.area && l.area + ' მ²'].filter(Boolean).join(', '))}</p><div class="pr">${money(l.price, l.currency)}${l.deal === 'rent' ? ' / თვე' : ''} <span style="font-weight:500;font-size:13px;color:var(--muted)">#${esc(l.ref || l.id)}</span></div></div>
+<div class="acts"><select class="inp" data-state="${esc(l.id)}" aria-label="სტატუსი" style="min-height:40px;width:auto;padding:6px 10px;font-size:14px">${Object.entries(STATES).map(([v, t]) => `<option value="${v}"${(l.state || '') === v ? ' selected' : ''}>${t}</option>`).join('')}</select><button class="ib" type="button" data-edit="${esc(l.id)}" aria-label="რედაქტირება">${I.edit}</button><button class="ib" type="button" data-del="${esc(l.id)}" aria-label="წაშლა">${I.del}</button></div></article>`; }).join('') || '<p style="color:var(--muted);padding:20px 4px">ასეთი განცხადება ვერ მოიძებნა.</p>'}</div>`;
+  }
+
+  /* ---------- კონტაქტი და აგენტი ---------- */
+  function vInfo() {
+    const c = site.contact || {}, a = site.agent || {}, aimg = a.image && srcOf(a.image.src);
+    return `<form id="info"><div class="card"><h2>აგენტი</h2><p class="hint" style="margin:0 0 14px">ეს ბარათი ყველა ბინის გვერდზე ჩანს, ღილაკებით „მოწერა" და „დარეკვა".</p>
+<div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">${aimg ? `<img src="${esc(aimg)}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover">` : '<div style="width:72px;height:72px;border-radius:50%;background:var(--soft)"></div>'}<button class="btn btn-line btn-sm" type="button" id="ag-ph">ფოტოს ${aimg ? 'შეცვლა' : 'ატვირთვა'}</button></div>
+<div class="g2"><label class="fld"><span class="lt">სახელი</span><input class="inp" name="a.name" value="${esc(a.name)}"></label><label class="fld"><span class="lt">როლი</span><input class="inp" name="a.role" value="${esc(a.role)}" placeholder="უძრავი ქონების აგენტი"></label>
+<label class="fld"><span class="lt">ტელეფონი</span><input class="inp" name="a.phone" value="${esc(a.phone)}" inputmode="tel"></label><label class="fld"><span class="lt">WhatsApp</span><input class="inp" name="a.whatsapp" value="${esc(a.whatsapp)}" inputmode="tel" placeholder="995555123456"></label></div></div>
+<div class="card"><h2>ოფისი</h2><div class="g2"><label class="fld"><span class="lt">ტელეფონი</span><input class="inp" name="c.phone" value="${esc(c.phone)}" inputmode="tel"></label><label class="fld"><span class="lt">WhatsApp</span><input class="inp" name="c.whatsapp" value="${esc(c.whatsapp)}" inputmode="tel"></label></div>
+<label class="fld"><span class="lt">მისამართი</span><input class="inp" name="c.address" value="${esc(c.address)}"></label><div class="g2"><label class="fld"><span class="lt">Instagram</span><input class="inp" name="c.instagram" value="${esc(c.instagram)}"></label><label class="fld"><span class="lt">Facebook</span><input class="inp" name="c.facebook" value="${esc(c.facebook)}"></label></div></div>
+<button class="btn btn-red wide" type="submit">შენახვა</button></form>`;
+  }
+
+  function render() {
+    $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+    $('#main').innerHTML = tab === 'list' ? vList() : vInfo();
+    $('#fab').hidden = tab !== 'list' || !(site.listings || []).length;
+    const qi = $('#q'); if (qi) qi.addEventListener('input', () => { q = qi.value; const p = qi.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); });
+  }
+
+  /* ---------- ბინის ფორმა ---------- */
+  const val = (l, k) => esc(l[k] ?? '');
+  function vForm() {
+    const l = draft;
+    const sel = (name, list, cur, ph) => `<select class="inp" name="${name}">${ph ? `<option value="">${ph}</option>` : ''}${list.map((v) => `<option${v === cur ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select>`;
+    return `<div class="sec-t">ფოტოები</div><div class="photos">${(l.photos || []).map((ph, k) => `<div class="ph"><img src="${esc(srcOf(ph.src))}" alt="">${k === 0 ? '<span class="cv">მთავარი</span>' : ''}<div class="ov"><button type="button" data-pm="${k}" data-d="-1" aria-label="მარცხნივ"${k === 0 ? ' disabled' : ''}>${I.left}</button><button type="button" data-pd="${k}" aria-label="წაშლა">${I.x}</button><button type="button" data-pm="${k}" data-d="1" aria-label="მარჯვნივ">${I.right}</button></div></div>`).join('')}<button class="addph" type="button" id="addph">${I.plus}ფოტოები</button></div><p class="hint" style="margin:0 0 16px">პირველი ფოტო ბარათზე ჩანს. რამდენიმე ერთად შეგიძლია აირჩიო.</p>
+<div class="seg" role="group" aria-label="გარიგება">${Object.entries(DEALS).map(([v, t]) => `<button type="button" data-deal="${v}" aria-pressed="${(l.deal || 'sale') === v}">${t}</button>`).join('')}</div>
+<label class="fld"><span class="lt">სათაური</span><input class="inp" name="title" value="${val(l, 'title')}" placeholder="მაგ. 3 ოთახიანი ბინა ვაკის პარკთან" required maxlength="90"></label>
+<div class="g2"><label class="fld"><span class="lt">ფასი</span><input class="inp" name="price" value="${val(l, 'price')}" inputmode="numeric" placeholder="125000" required></label><label class="fld"><span class="lt">ვალუტა</span>${sel('currency', ['$', '₾'], l.currency || '$')}</label></div>
+<div class="g3"><label class="fld"><span class="lt">ფართი, მ²</span><input class="inp" name="area" value="${val(l, 'area')}" inputmode="decimal"></label><label class="fld"><span class="lt">ოთახები</span><input class="inp" name="rooms" value="${val(l, 'rooms')}" inputmode="numeric"></label><label class="fld"><span class="lt">საძინებელი</span><input class="inp" name="bedrooms" value="${val(l, 'bedrooms')}" inputmode="numeric"></label>
+<label class="fld"><span class="lt">სართული</span><input class="inp" name="floor" value="${val(l, 'floor')}" inputmode="numeric"></label><label class="fld"><span class="lt">სართულები სულ</span><input class="inp" name="floors" value="${val(l, 'floors')}" inputmode="numeric"></label><label class="fld"><span class="lt">ტიპი</span>${sel('type', TYPES, l.type || 'ბინა')}</label></div>
+<div class="g2"><label class="fld"><span class="lt">უბანი</span><input class="inp" name="district" value="${val(l, 'district')}" placeholder="მაგ. ვაკე" list="dl-d"></label><label class="fld"><span class="lt">მისამართი</span><input class="inp" name="address" value="${val(l, 'address')}" placeholder="ქუჩა და ნომერი"></label></div>
+<datalist id="dl-d">${[...new Set((site.listings || []).map((x) => x.district).filter(Boolean))].map((d) => `<option value="${esc(d)}">`).join('')}</datalist>
+<label class="fld"><span class="lt">მდგომარეობა</span>${sel('condition', CONDS, l.condition, 'აირჩიე')}</label>
+<div class="sec-t">რა არის</div><div class="feats">${[...new Set([...FEATS, ...(l.features || [])])].map((f) => `<label><input type="checkbox" name="feat" value="${esc(f)}"${(l.features || []).includes(f) ? ' checked' : ''}>${esc(f)}</label>`).join('')}</div>
+<label class="fld"><span class="lt">აღწერა</span><textarea class="inp" name="desc" rows="5" placeholder="რით არის კარგი ეს ბინა, ხედი, მეზობლობა, ტრანსპორტი...">${esc(l.desc || '')}</textarea></label>
+<label class="togl">რჩეული (სიაში პირველი ჩანს)<input type="checkbox" name="featured"${l.featured ? ' checked' : ''}></label>
+<label class="togl">დამალვა საიტიდან<input type="checkbox" name="hidden"${l.hidden ? ' checked' : ''}></label>`;
+  }
+  const readForm = () => {
+    const f = $('#form'), g = (n) => (f.elements[n] ? f.elements[n].value.trim() : '');
+    const num = (n) => { const v = g(n).replace(/[\s,]/g, ''); return v === '' ? '' : Number(v); };
+    Object.assign(draft, { title: g('title'), price: num('price'), currency: g('currency') || '$', area: num('area'), rooms: num('rooms'), bedrooms: num('bedrooms'), floor: num('floor'), floors: num('floors'), type: g('type'), district: g('district'), address: g('address'), condition: g('condition'), desc: f.elements.desc.value.trim(),
+      features: $$('input[name=feat]:checked', f).map((x) => x.value), featured: f.elements.featured.checked, hidden: f.elements.hidden.checked });
+  };
+  const drawForm = () => { const st = $('#f-body').scrollTop; $('#f-body').innerHTML = vForm(); $('#f-body').scrollTop = st; };
+  let lastFocus = null;
+  function openForm(id) {
+    editing = id;
+    const L = site.listings || [];
+    const cur = id ? L.find((x) => x.id === id) : null;
+    draft = cur ? clone(cur) : { deal: 'sale', currency: '$', type: 'ბინა', photos: [], features: [] };
+    $('#f-t').textContent = cur ? 'განცხადების შეცვლა' : 'ახალი განცხადება';
+    drawForm();
+    lastFocus = document.activeElement;
+    $('#sheet').classList.add('open'); $('#sheet').setAttribute('aria-hidden', 'false');
+    setTimeout(() => { const t = $('#form').elements.title; if (t && !cur) t.focus(); }, 60);
+  }
+  const closeForm = () => { $('#sheet').classList.remove('open'); $('#sheet').setAttribute('aria-hidden', 'true'); if (lastFocus && lastFocus.focus) lastFocus.focus(); };
+
+  let fileTarget = 'listing';
+  $('#file').addEventListener('change', async () => {
+    const files = Array.from($('#file').files || []);
+    let n = 0;
+    for (const f of files) {
+      try {
+        const data = await compress(f);
+        const id = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        IMGS[id] = data; n++;
+        if (fileTarget === 'agent') { site.agent = site.agent || {}; site.agent.image = { src: 'img:' + id, alt: site.agent.name || '' }; }
+        else { readForm(); draft.photos = draft.photos || []; draft.photos.push({ src: 'img:' + id, alt: draft.title || '' }); }
+      } catch (e) { toast('ეს ფაილი ფოტოდ ვერ წავიკითხე. სცადე JPG ან PNG.'); }
+    }
+    if (!n) return;
+    if (fileTarget === 'agent') { try { await persist('ფოტო შეინახა'); } catch (e) { toast(Backend.message(e)); } render(); }
+    else { drawForm(); toast(n > 1 ? `დაემატა ${n} ფოტო` : 'ფოტო დაემატა'); }
+  });
+
+  /* ---------- მოქმედებები ---------- */
+  document.addEventListener('click', async (e) => {
+    const t = e.target;
+    if (t.closest('[data-close]') || t === $('#sheet')) return closeForm();
+    const tb = t.closest('[data-tab]'); if (tb) { tab = tb.dataset.tab; return render(); }
+    if (t.closest('[data-new]') || t.closest('#fab')) return openForm(null);
+    const fd = t.closest('[data-fd]'); if (fd) { fDeal = fd.dataset.fd; return render(); }
+    const ed = t.closest('[data-edit]'); if (ed) return openForm(ed.dataset.edit);
+    const dl = t.closest('[data-del]');
+    if (dl) {
+      const l = site.listings.find((x) => x.id === dl.dataset.del);
+      if (!confirm(`„${l.title}" წაიშლება საიტიდან. გავაგრძელოთ?`)) return;
+      site.listings = site.listings.filter((x) => x !== l); render();
+      try { await persist('განცხადება წაიშალა'); } catch (err) { toast(Backend.message(err)); }
+      return;
+    }
+    if (t.closest('#addph')) { fileTarget = 'listing'; $('#file').multiple = true; $('#file').value = ''; return $('#file').click(); }
+    if (t.closest('#ag-ph')) { fileTarget = 'agent'; $('#file').multiple = false; $('#file').value = ''; return $('#file').click(); }
+    const dbtn = t.closest('[data-deal]'); if (dbtn) { readForm(); draft.deal = dbtn.dataset.deal; return drawForm(); }
+    const pm = t.closest('[data-pm]');
+    if (pm) { readForm(); const k = +pm.dataset.pm, j = k + +pm.dataset.d, a = draft.photos; if (j >= 0 && j < a.length) { [a[k], a[j]] = [a[j], a[k]]; drawForm(); } return; }
+    const pd = t.closest('[data-pd]'); if (pd) { readForm(); draft.photos.splice(+pd.dataset.pd, 1); return drawForm(); }
+  });
+  document.addEventListener('change', async (e) => {
+    const s = e.target.closest('[data-state]');
+    if (!s) return;
+    const l = site.listings.find((x) => x.id === s.dataset.state);
+    if (s.value) l.state = s.value; else delete l.state;
+    render();
+    try { await persist('სტატუსი შეიცვალა'); } catch (err) { toast(Backend.message(err)); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#sheet').classList.contains('open')) closeForm(); });
+
+  $('#form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    readForm();
+    const f = $('#form');
+    if (!draft.title) { f.elements.title.setAttribute('aria-invalid', 'true'); f.elements.title.focus(); return toast('ჩაწერე სათაური.'); }
+    if (draft.price === '' || isNaN(draft.price)) { f.elements.price.setAttribute('aria-invalid', 'true'); f.elements.price.focus(); return toast('ჩაწერე ფასი ციფრებით.'); }
+    for (const k of Object.keys(draft)) if (draft[k] === '' || draft[k] === false || (Array.isArray(draft[k]) && !draft[k].length && k !== 'photos')) delete draft[k];
+    const L = site.listings || (site.listings = []);
+    if (editing) { const i = L.findIndex((x) => x.id === editing); L[i] = draft; }
+    else {
+      const max = L.reduce((m, x) => Math.max(m, Number(x.ref) || 1000), 1000);
+      draft.ref = String(max + 1);
+      draft.id = 'l' + Date.now().toString(36);
+      L.unshift(draft);
+    }
+    const b = $('#f-save'); b.disabled = true; b.textContent = 'ინახება…';
+    try { await persist(editing ? 'განცხადება შეიცვალა' : 'განცხადება დაემატა'); closeForm(); render(); }
+    catch (err) { toast(Backend.message(err)); }
+    b.disabled = false; b.textContent = 'შენახვა';
+  });
+  document.addEventListener('submit', async (e) => {
+    if (e.target.id !== 'info') return;
+    e.preventDefault();
+    const f = e.target; site.agent = site.agent || {}; site.contact = site.contact || {};
+    for (const el of f.elements) { if (!el.name) continue; const [o, k] = el.name.split('.'); (o === 'a' ? site.agent : site.contact)[k] = el.value.trim(); }
+    try { await persist('შენახულია'); } catch (err) { toast(Backend.message(err)); }
+  });
+
+  /* ---------- ჩატვირთვა ---------- */
+  (async () => {
+    if (!ID) { $('#main').innerHTML = '<div class="state"><p>საიტი არ არის არჩეული.</p><a class="btn btn-line" href="/app/">ჩემი საიტები</a></div>'; return; }
+    if (!Backend.configured()) { $('#main').innerHTML = '<div class="state"><p>შესვლა ჯერ ჩართული არ არის.</p></div>'; return; }
+    let u = null;
+    try { u = await Backend.user(); } catch (e) { /* ქვემოთ */ }
+    if (!u) { location.href = '/login/?next=' + encodeURIComponent('/admin/?site=' + ID); return; }
+    try {
+      const r = await Backend.loadSite(ID);
+      site = r.site; IMGS = r.imgs || {}; published = r.published || null;
+      Object.keys(IMGS).forEach((k) => uploaded.add(k));
+    } catch (e) { $('#main').innerHTML = `<div class="state"><p>${esc(Backend.message(e))}</p><a class="btn btn-line" href="/app/">ჩემი საიტები</a></div>`; return; }
+    $('#s-name').textContent = site.name || 'საიტი';
+    document.title = (site.name || 'საიტი') + ', ადმინ პანელი';
+    $('#design').href = '/editor/?site=' + encodeURIComponent(ID);
+    if (published) { $('#view').hidden = false; $('#view').href = liveUrl(); }
+    if (!site.listings && !(site.sections || []).some((s) => s.type === 'listings')) tab = 'info';
+    render();
+  })();
+}
+</script>
+</body>
+</html>

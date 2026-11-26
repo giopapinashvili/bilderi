@@ -76,7 +76,10 @@ a.addr:hover{text-decoration:underline}
 .mp div{height:100%;border-radius:19px;overflow:hidden;background:var(--b)}
 .mp b{display:flex;align-items:flex-end;height:44%;padding:10px;background:var(--c);color:var(--tc);font-weight:800;font-stretch:72%;font-size:20px;line-height:1}
 .state{grid-column:1/-1;display:grid;place-items:center;gap:12px;padding:60px 20px;color:var(--ink-2);text-align:center}
-.styles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:6px 0 16px}
+.cats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.cats button{min-height:36px;padding:0 12px;border:1.5px solid var(--line);border-radius:99px;background:#fff;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.cats button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.styles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
 .st{display:grid;gap:8px;padding:8px;border:1.5px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s}
 .st:hover{border-color:var(--line-2)}
 .st[aria-checked=true]{border-color:var(--cob);box-shadow:0 0 0 3px var(--cob-s)}
@@ -116,8 +119,9 @@ a.addr:hover{text-decoration:underline}
     <h2 id="new-t">ახალი საიტი</h2>
     <p class="lead">ჩაწერე ძირითადი ინფორმაცია. დანარჩენს რედაქტორში შეცვლი.</p>
     <label class="fld"><span class="lt">ბიზნესის სახელი</span><input class="inp" id="n-name" placeholder="მაგ. ფინჯანი" required maxlength="60"></label>
-    <div class="lbl">საწყისი სტილი</div>
-    <div class="styles" id="styles" role="radiogroup" aria-label="საწყისი სტილი"></div>
+    <div class="lbl">შაბლონი</div>
+    <div class="cats" id="cats" role="group" aria-label="ბიზნესის ტიპი"></div>
+    <div class="styles" id="styles" role="radiogroup" aria-label="შაბლონი"></div>
     <div class="row2">
       <label class="fld"><span class="lt">ტელეფონი<small style="margin:0;display:inline">არასავალდებულო</small></span><input class="inp" id="n-phone" inputmode="tel" placeholder="+995 5XX XX XX XX"></label>
       <label class="fld"><span class="lt">მისამართი<small style="margin:0;display:inline">არასავალდებულო</small></span><input class="inp" id="n-addr" placeholder="ქუჩა, ქალაქი"></label>
@@ -143,12 +147,15 @@ a.addr:hover{text-decoration:underline}
 <script>
 {
   const SAMPLES = /*SAMPLES*/;
+  const CATS = { realestate: 'უძრავი ქონება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
+  const FEAT = ['finjani', 'dzveli-ubani', 'talgha'].map((k) => SAMPLES.find((s) => s.slug === k)).filter(Boolean);
+  const NEW = new URLSearchParams(location.search).get('new');
   const LIMIT = 3, SITE_ORIGIN = 'https://bilderi.pages.dev';
   const siteUrl = (slug) => SITE_ORIGIN + '/s/' + slug + '/';
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  let sites = [], style = SAMPLES[0].slug, delId = null, toastT = 0;
+  let sites = [], style = (SAMPLES.find((x) => x.slug === NEW) || SAMPLES[0]).slug, cat = (SAMPLES.find((x) => x.slug === style) || {}).category || 'food', delId = null, toastT = 0;
   const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3000); };
   const IC = {
     plus: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
@@ -193,14 +200,14 @@ a.addr:hover{text-decoration:underline}
     $('#new-top').disabled = n >= LIMIT;
     if (!n) {
       $('#grid').innerHTML = `<div class="empty"><div><h2>პირველი საიტი 10 წუთის საქმეა</h2><p>აირჩიე სტილი, ჩაწერე სახელი და რედაქტორში შეცვალე მენიუ, ფასები და ფოტოები.</p><button class="btn btn-red" type="button" data-new>${IC.plus}საიტის შექმნა</button></div>
-<div class="ephones" aria-hidden="true">${SAMPLES.map((s, i) => { const [c, tc] = hero(s); return `<div class="mp" style="--r:${[-7, 0, 7][i]}deg;--y:${[30, 0, 30][i]}px"><div style="--b:${s.theme.colors.bg};--c:${c};--tc:${tc}"><b>${esc(s.name)}</b></div></div>`; }).join('')}</div></div>`;
+<div class="ephones" aria-hidden="true">${FEAT.map((s, i) => { const [c, tc] = hero(s); return `<div class="mp" style="--r:${[-7, 0, 7][i]}deg;--y:${[30, 0, 30][i]}px"><div style="--b:${s.theme.colors.bg};--c:${c};--tc:${tc}"><b>${esc(s.name)}</b></div></div>`; }).join('')}</div></div>`;
       return;
     }
     $('#grid').innerHTML = sites.map((x) => {
       const st = !x.published ? ['', 'მონახაზი'] : x.changed ? ['chg', 'გამოუქვეყნებელი ცვლილებები'] : ['live', 'გამოქვეყნებული'];
       return `<article class="card"><div>${thumb(x.site, x.id)}</div><div class="body"><h3>${esc(x.name || 'უსახელო')}</h3>${x.live ? `<a class="addr" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">${esc(siteUrl(x.live).replace(/^https:\/\//, '').replace(/\/$/, ''))}</a>` : `<span class="addr muted">${esc(siteUrl(x.slug || 'saiti').replace(/^https:\/\//, '').replace(/\/$/, ''))}</span>`}
 <div class="meta"><span class="pill ${st[0]}"><i></i>${st[1]}</span><span>შეცვლილია ${ago(x.updated)}</span></div>
-<div class="acts"><a class="btn btn-ink btn-sm" href="/editor/?site=${encodeURIComponent(x.id)}">რედაქტირება</a>${x.live ? `<a class="btn btn-line btn-sm" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">ნახვა</a>` : ''}
+<div class="acts"><a class="btn btn-ink btn-sm" href="/editor/?site=${encodeURIComponent(x.id)}">რედაქტირება</a>${x.site && (x.site.listings || (x.site.sections || []).some((q) => q.type === 'listings')) ? `<a class="btn btn-red btn-sm" href="/admin/?site=${encodeURIComponent(x.id)}">ბინები</a>` : ''}${x.live ? `<a class="btn btn-line btn-sm" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">ნახვა</a>` : ''}
 <div class="more"><button class="ib" type="button" data-more="${esc(x.id)}" aria-label="სხვა მოქმედებები" aria-expanded="false" aria-haspopup="menu">${IC.more}</button>
 <div class="menu" role="menu"><button type="button" role="menuitem" class="danger" data-del="${esc(x.id)}">საიტის წაშლა</button></div></div></div></div></article>`;
     }).join('') + `<button class="add" type="button" data-new${n >= LIMIT ? ' disabled' : ''}><span class="plus">${IC.plus}</span>ახალი საიტი<small>${n >= LIMIT ? `უფასოდ ${LIMIT} საიტამდე შეგიძლია. ახალი რომ დაამატო, ერთ-ერთი წაშალე.` : `კიდევ ${LIMIT - n} საიტის შექმნა შეგიძლია`}</small></button>`;
@@ -218,7 +225,12 @@ a.addr:hover{text-decoration:underline}
   $$('.modal').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-close]')) close(m); }));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { $$('.modal.open').forEach(close); $$('.menu.open').forEach((x) => x.classList.remove('open')); } });
 
-  $('#styles').innerHTML = SAMPLES.map((s) => { const [c, tc] = hero(s); return `<button type="button" role="radio" class="st${s.theme.font === 'classic' ? ' serif' : ''}" data-style="${s.slug}" aria-checked="${s.slug === style}"><span class="sw" style="--c:${c};--tc:${tc}">${esc(s.name)}</span><small>${esc(s.kind)}</small></button>`; }).join('');
+  const drawStyles = () => {
+    $('#cats').innerHTML = Object.entries(CATS).filter(([k]) => SAMPLES.some((s) => s.category === k)).map(([k, l]) => `<button type="button" data-cat="${k}" aria-pressed="${k === cat}">${l}</button>`).join('');
+    $('#styles').innerHTML = SAMPLES.filter((s) => (s.category || 'food') === cat).map((s) => { const [c, tc] = hero(s); return `<button type="button" role="radio" class="st${s.theme.font === 'classic' ? ' serif' : ''}" data-style="${s.slug}" aria-checked="${s.slug === style}"><span class="sw" style="--c:${c};--tc:${tc}">${esc(s.name)}</span><small>${esc(s.kind)}</small></button>`; }).join('');
+  };
+  drawStyles();
+  $('#cats').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (!b) return; cat = b.dataset.cat; const first = SAMPLES.find((s) => (s.category || 'food') === cat); if (first && !SAMPLES.some((s) => s.slug === style && s.category === cat)) style = first.slug; drawStyles(); });
   $('#styles').addEventListener('click', (e) => { const b = e.target.closest('[data-style]'); if (!b) return; style = b.dataset.style; $$('[data-style]').forEach((x) => x.setAttribute('aria-checked', String(x === b))); });
   const openNew = () => { if (sites.length >= LIMIT) return toast(`უფასოდ ${LIMIT} საიტამდე შეგიძლია.`); $('#n-msg').innerHTML = ''; open($('#new')); setTimeout(() => $('#n-name').focus(), 50); };
   document.addEventListener('click', (e) => {
@@ -263,13 +275,14 @@ a.addr:hover{text-decoration:underline}
     if (!Backend.configured()) { $('#grid').innerHTML = '<div class="state"><p>შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია.</p><a class="btn btn-line" href="/editor/">რედაქტორი სატესტო რეჟიმში</a></div>'; return; }
     let u = null;
     try { u = await Backend.user(); } catch (e) { return fail(e); }
-    if (!u) { location.href = '/login/?next=' + encodeURIComponent('/app/'); return; }
+    if (!u) { location.href = '/login/?next=' + encodeURIComponent('/app/' + (NEW ? '?new=' + encodeURIComponent(NEW) : '')); return; }
     const name = u.displayName || (u.email || '').split('@')[0] || 'მომხმარებელი';
     $('#who').hidden = false;
     $('#who-name').textContent = name;
     $('#who-mail').textContent = u.email || '';
     $('#av').innerHTML = u.photoURL ? `<img src="${esc(u.photoURL)}" alt="" referrerpolicy="no-referrer">` : esc(name.charAt(0).toUpperCase());
-    load();
+    await load();
+    if (NEW) { history.replaceState(null, '', '/app/'); openNew(); }
   })();
 }
 </script>

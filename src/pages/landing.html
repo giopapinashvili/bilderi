@@ -183,6 +183,13 @@ svg{display:block}
 .res p{grid-column:1/-1;margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}
 .card.hot .res strong{text-decoration:underline}
 
+.tfilter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+.tfilter button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1.5px solid var(--line);border-radius:99px;background:#fff;font:inherit;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .15s}
+.tfilter button:hover{border-color:var(--ink)}
+.tfilter button span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tfilter button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.tfilter button[aria-pressed=true] span{color:rgba(255,255,255,.7)}
+.tpl[hidden]{display:none}
 .tpls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 .tpl .pv{position:relative;height:clamp(440px,40vw,540px);border-radius:16px;overflow:hidden;background:var(--soft)}
 .tpl .pv iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none}
@@ -269,6 +276,8 @@ svg{display:block}
 .top-act{margin-left:auto;gap:10px}
 .top-act .btn{min-height:44px;padding:0 14px;font-size:15px}
 .steps{grid-template-columns:minmax(0,1fr);max-width:560px}
+.tfilter{flex-wrap:nowrap;overflow-x:auto;margin:0 calc(var(--pad)*-1) 20px;padding:0 var(--pad);scrollbar-width:none}
+.tfilter button{flex:none}
 .tpls{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px;margin:0 calc(var(--pad)*-1);padding:4px var(--pad) 12px;scrollbar-width:none}
 .tpl{flex:0 0 min(80vw,340px);scroll-snap-align:center}
 }
@@ -448,8 +457,9 @@ body{font-size:16px}
   <div class="wrap">
     <div class="sec-head">
       <h2>დაიწყე მზა დიზაინით</h2>
-      <p>ფერებს, ფოტოებს და ტექსტს შენ შეცვლი. მიიტანე მაუსი და საიტი თავისით ჩამოსქროლდება.</p>
+      <p>კაფეს, სალონის, სასტუმროს თუ მაღაზიისთვის. ფერებს, ფოტოებს და ტექსტს შენ შეცვლი. მიიტანე მაუსი და საიტი თავისით ჩამოსქროლდება.</p>
     </div>
+    <div class="tfilter" id="tfilter" role="group" aria-label="ბიზნესის ტიპი"></div>
     <div class="tpls" id="tpls"></div>
   </div>
 </section>
@@ -512,7 +522,9 @@ body{font-size:16px}
 </script>
 <script>
 {
-  const SITES = /*SAMPLES*/;
+  const ALL = /*SAMPLES*/;
+  const SITES = ['finjani', 'dzveli-ubani', 'talgha'].map((k) => ALL.find((s) => s.slug === k)).filter(Boolean);
+  const CATS = { all: 'ყველა', realestate: 'უძრავი ქონება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
   const DOMAIN = 'bilderi.pages.dev/s/';
   const DUR = 6500;
   const PICK = { finjani: [0, 2], 'dzveli-ubani': [1, 0], talgha: [0, 1] };
@@ -523,7 +535,7 @@ body{font-size:16px}
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const money = (p) => (Number.isInteger(p) ? p : Number(p).toFixed(2));
   const cache = {};
-  const page = (i) => cache[i] || (cache[i] = Supra.renderSite(DemoArt.apply(SITES[i])).replace(/ loading="lazy"/g, ''));
+  const page = (s) => cache[s.slug] || (cache[s.slug] = Supra.renderSite(DemoArt.apply(s)).replace(/ loading="lazy"/g, ''));
   const hero = (s) => {
     const h = s.sections.find((x) => x.type === 'hero');
     const c = s.theme.colors;
@@ -547,6 +559,7 @@ body{font-size:16px}
     const a = e.target.closest('[data-demo]');
     if (!a) return;
     e.preventDefault();
+    if (LIVE && a.dataset.tpl) { location.href = '/app/?new=' + encodeURIComponent(a.dataset.tpl); return; }
     if (LIVE && ROUTES[a.dataset.demo]) { location.href = ROUTES[a.dataset.demo]; return; }
     toast(MSG[a.dataset.demo] || MSG.page);
   });
@@ -580,7 +593,7 @@ body{font-size:16px}
     box.classList.add('fade');
     setTimeout(() => {
       frame.onload = () => { box.classList.remove('fade'); if (after) after(); };
-      frame.srcdoc = page(i);
+      frame.srcdoc = page(SITES[i]);
     }, reduce ? 0 : 240);
   };
   const scrollPhone = () => {
@@ -667,15 +680,20 @@ body{font-size:16px}
   }
 
   /* შაბლონები: გრძელი გვერდი, რომელიც მაუსზე ჩამოსქროლდება */
-  $('#tpls').innerHTML = SITES.map((s, i) => {
+  const tplCard = (s) => {
     const c = s.theme.colors;
-    return `<article class="card tpl" data-i="${i}">
+    return `<article class="card tpl" data-slug="${esc(s.slug)}" data-cat="${esc(s.category || 'food')}">
 <div class="pv"><iframe title="${esc(s.name)}, შაბლონის ნიმუში" tabindex="-1" aria-hidden="true"></iframe></div>
 <div class="tpl-meta"><div><h3>${esc(s.name)}</h3><p>${esc(s.kind)}</p></div><span class="dots"><i style="--c:${hero(s).bg}"></i><i style="--c:${c.accent}"></i><i style="--c:${c.surface}"></i></span></div>
-<div class="tpl-act"><button class="btn btn-line btn-sm" type="button" data-view="${i}">ნახვა</button><a class="btn btn-red btn-sm" href="#" data-demo="signup">ამით დაწყება</a></div></article>`;
-  }).join('');
+<div class="tpl-act"><button class="btn btn-line btn-sm" type="button" data-view="${esc(s.slug)}">ნახვა</button><a class="btn btn-red btn-sm" href="#" data-demo="signup" data-tpl="${esc(s.slug)}">ამით დაწყება</a></div></article>`;
+  };
+  $('#tfilter').innerHTML = Object.entries(CATS).filter(([k]) => k === 'all' || ALL.some((s) => s.category === k)).map(([k, l]) => `<button type="button" data-tcat="${k}" aria-pressed="${k === 'all'}">${l}<span>${k === 'all' ? ALL.length : ALL.filter((s) => s.category === k).length}</span></button>`).join('');
+  $('#tpls').innerHTML = ALL.map(tplCard).join('');
+  // iframe-ები მხოლოდ მაშინ იტვირთება, როცა ბარათი ეკრანთან მიახლოვდება
+  const lazy = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { lazy.unobserve(en.target); en.target._load(); } }), { rootMargin: '300px' });
   $$('.tpl').forEach((card) => {
     const box = card.querySelector('.pv'), fr = card.querySelector('iframe');
+    const s = ALL.find((x) => x.slug === card.dataset.slug);
     let H = 0, k = 1;
     const size = () => {
       k = box.clientWidth / 390;
@@ -686,7 +704,8 @@ body{font-size:16px}
     };
     const measure = () => { const d = fr.contentDocument; if (d && d.documentElement) { H = d.documentElement.scrollHeight; size(); } };
     fr.onload = () => { measure(); const d = fr.contentDocument; if (d && d.fonts) d.fonts.ready.then(measure); };
-    fr.srcdoc = page(Number(card.dataset.i));
+    card._load = () => { fr.srcdoc = page(s); };
+    lazy.observe(card);
     new ResizeObserver(size).observe(box);
     card.addEventListener('pointerenter', () => {
       card.classList.add('hot');
@@ -701,16 +720,24 @@ body{font-size:16px}
       fr.style.transform = 'translateY(0) scale(' + k + ')';
     });
   });
+  $('#tfilter').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tcat]');
+    if (!b) return;
+    const c = b.dataset.tcat;
+    $$('[data-tcat]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    $$('.tpl').forEach((card) => { card.hidden = c !== 'all' && card.dataset.cat !== c; });
+  });
 
   /* სრული ნახვა */
   const modal = $('#modal'), mStage = $('#m-stage'), mf = $('#m-frame');
   let lastFocus = null;
   const setDev = (phone) => { mStage.classList.toggle('ph', phone); $('#m-desk').setAttribute('aria-pressed', String(!phone)); $('#m-ph').setAttribute('aria-pressed', String(phone)); };
-  const openModal = (i) => {
+  const openModal = (slug) => {
+    const s = ALL.find((x) => x.slug === slug) || ALL[0];
     lastFocus = document.activeElement;
-    $('#m-title').textContent = SITES[i].name;
-    $('#m-kind').textContent = SITES[i].kind + ', ' + DOMAIN + SITES[i].slug;
-    mf.srcdoc = page(i);
+    $('#m-title').textContent = s.name;
+    $('#m-kind').textContent = s.kind + ', ' + DOMAIN + s.slug;
+    mf.srcdoc = page(s);
     setDev(window.innerWidth < 700);
     modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -721,7 +748,7 @@ body{font-size:16px}
     document.body.style.overflow = '';
     if (lastFocus) lastFocus.focus();
   };
-  document.addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) openModal(Number(b.dataset.view)); });
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) openModal(b.dataset.view); });
   $('#m-close').addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });

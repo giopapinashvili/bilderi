@@ -111,6 +111,26 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .add-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-s)}
 .add-btn.sm{min-height:40px;font-size:13px}
 .types{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.types-h{grid-column:1/-1;margin:10px 2px 0;font-size:12.5px;font-weight:700;color:var(--muted)}
+.types-h:first-child{margin-top:0}
+.i-top.np{grid-template-columns:minmax(0,1fr) 32px}
+.i-more .fld{margin:0}
+.i-more .lt{font-size:12.5px}
+.i-2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.icons-pick{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.icons-pick button{display:grid;place-items:center;aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);cursor:pointer;padding:0}
+.icons-pick button svg{width:20px;height:20px}
+.icons-pick button[aria-pressed=true]{border-color:var(--cob);background:var(--cob);color:#fff}
+.mini-img{display:flex;align-items:center;gap:8px}
+.mini-img img{width:52px;height:40px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+.mini-img .btn-txt{font-size:13px}
+.styles4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.styles4 .optc b{font-size:24px;line-height:1.05;display:block;padding:8px 0 4px}
+.sam-h{margin:12px 2px 6px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.sam-h:first-child{margin-top:0}
+.sams{display:flex;flex-wrap:wrap;gap:6px}
+.sams button{min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:99px;background:#fff;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.sams button:hover{border-color:var(--ink)}
 .type{display:grid;gap:4px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s var(--ease),box-shadow .15s}
 .type:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:0 12px 22px -16px rgba(26,20,35,.5)}
 .type .sic{margin-bottom:4px}
@@ -401,8 +421,21 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     about: sv('<path d="M4 6h16M4 10h16M4 14h10M4 18h12"/>'),
     gallery: sv('<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>'),
     visit: sv('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
-    cta: sv('<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M8 12h8"/>')
+    cta: sv('<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M8 12h8"/>'),
+    services: sv('<circle cx="6" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8 8.5L20 18M8 15.5L20 6"/>'),
+    products: sv('<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>'),
+    rooms: sv('<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>'),
+    plans: sv('<rect x="3" y="5" width="7" height="14" rx="2"/><rect x="14" y="5" width="7" height="14" rx="2"/><path d="M6 9h1M17 9h1"/>'),
+    features: sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'),
+    team: sv('<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M16 14c2.8 0 5 2 5 5"/>'),
+    reviews: sv('<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>'),
+    faq: sv('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>'),
+    steps: sv('<path d="M4 18h5v-5h5V8h6"/><circle cx="4" cy="18" r="1"/>'),
+    events: sv('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+    listings: sv('<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>')
   };
+  const secIc = (s) => IC[s.type === 'cards' ? s.kind || 'features' : s.type] || IC.about;
+  const lab = (s) => Supra.label(s);
   $$('[data-ic]').forEach((el) => { el.outerHTML = IC[el.dataset.ic] || ''; });
 
   const PRESETS = [
@@ -414,13 +447,30 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     { name: 'ღამე', c: { bg: '#141414', ink: '#f3efe8', surface: '#202020', accent: '#f2c14e', accentInk: '#141414' } }
   ];
   const TYPES = [
+    { h: 'ძირითადი' },
+    { type: 'listings', name: 'განცხადებები', desc: 'ბინები ფილტრებით და ცალკე გვერდებით' },
     { type: 'menu', name: 'მენიუ', desc: 'კატეგორიები, კერძები და ფასები' },
+    { type: 'services', name: 'სერვისები და ფასები', desc: 'ფასების სია, ხანგრძლივობით' },
+    { type: 'products', name: 'პროდუქტები', desc: 'ფოტო, ფასი და შეკვეთის ღილაკი' },
+    { type: 'rooms', name: 'ოთახები', desc: 'ფოტო, ფასი ღამეში, დაჯავშნა' },
+    { type: 'plans', name: 'პაკეტები და ფასები', desc: 'აბონემენტები ან პაკეტები' },
     { type: 'about', name: 'ჩვენ შესახებ', desc: 'ტექსტი და ფოტო' },
     { type: 'gallery', name: 'ფოტოები', desc: 'ფოტოების ბადე' },
+    { h: 'ნდობა და ინფორმაცია' },
+    { type: 'features', name: 'უპირატესობები', desc: 'ხატულა, სათაური და ტექსტი' },
+    { type: 'team', name: 'გუნდი', desc: 'ფოტო, სახელი და როლი' },
+    { type: 'reviews', name: 'შეფასებები', desc: 'რას ამბობენ კლიენტები' },
+    { type: 'events', name: 'განრიგი', desc: 'ღონისძიებები ან ვარჯიშები' },
+    { type: 'steps', name: 'ნაბიჯები', desc: 'როგორ შევუკვეთოთ ან მოვიდეთ' },
+    { type: 'faq', name: 'ხშირი კითხვები', desc: 'კითხვა და პასუხი' },
+    { h: 'სხვა' },
     { type: 'cta', name: 'ბანერი', desc: 'სათაური და ღილაკები' },
     { type: 'visit', name: 'მისამართი', desc: 'საათები, კონტაქტი, რუკა' },
     { type: 'hero', name: 'მთავარი ბლოკი', desc: 'სახელი, ფოტო, ღილაკები' }
   ];
+  const CATS = { realestate: 'უძრავი ქონება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
+  const STYLES = [['poster', 'აბრა', 'დიდი, თამამი სათაურები'], ['elegant', 'ელეგანტური', 'მსუბუქი, შუაში, თხელი ხაზები'], ['warm', 'თბილი', 'რბილი ბარათები ჩრდილით'], ['clean', 'სუფთა', 'მაღაზიისთვის, პროდუქტი მთავარია']];
+
   const RESERVED = ['admin', 'api', 'app', 'www', 'mail', 'bog', 'tbc', 'bank', 'gov', 'police', 'support', 'help', 'login', 'bilderi', 'pay'];
   const TAKEN = ['cafe', 'restaurant', 'tbilisi', 'batumi', 'pizza', 'coffee'];
 
@@ -591,7 +641,7 @@ a{cursor:default}
     $$('[data-sec]', doc).forEach((el) => {
       const i = Number(el.dataset.sec), on = state.tab === 'sections' && !state.adding && state.sec === i;
       el.classList.toggle('sel', on);
-      if (on) el.setAttribute('data-label', L[site.sections[i].type] || ''); else el.removeAttribute('data-label');
+      if (on) el.setAttribute('data-label', lab(site.sections[i]) || ''); else el.removeAttribute('data-label');
     });
   };
   const draw = () => {
@@ -717,7 +767,7 @@ a{cursor:default}
   const colors = () => ((site.theme = site.theme || {}).colors = site.theme.colors || {});
   const hex6 = (h) => { h = String(h || '#000000'); return h.length === 4 ? '#' + h.slice(1).split('').map((c) => c + c).join('') : h; };
   const secId = (s) => s.id || s.type;
-  const secTitle = (s) => (s.type === 'hero' ? site.name : s.title || s.navLabel || L[s.type]);
+  const secTitle = (s) => (s.type === 'hero' ? site.name : s.title || s.navLabel || lab(s));
   const grp = (title, body, side) => `<div class="grp"><h4>${title}${side ? `<small>${side}</small>` : ''}</h4>${body}</div>`;
   const fld = (label, path, o = {}) => {
     const v = get(site, path);
@@ -761,15 +811,15 @@ a{cursor:default}
   };
   const navEd = (i) => {
     const s = site.sections[i];
-    const def = !!Supra.NAV_DEFAULT[s.type];
+    const def = !!Supra.NAV_ON[s.type];
     const on = s.inNav ?? def;
-    return togl('ზედა მენიუში ჩვენება', `sections.${i}.inNav`, def) + (on ? fld('სახელი ზედა მენიუში', `sections.${i}.navLabel`, { ph: Supra.NAV_DEFAULT[s.type] || s.title || L[s.type] }) : '');
+    return togl('ზედა მენიუში ჩვენება', `sections.${i}.inNav`, def) + (on ? fld('სახელი ზედა მენიუში', `sections.${i}.navLabel`, { ph: Supra.NAV_DEFAULT[s.type] || s.title || lab(s) }) : '');
   };
 
   function pSections() {
     return `<div class="p-head"><h2>სექციები</h2></div><p class="p-sub">დააჭირე სექციას და შეცვალე ყველაფერი. გადამრთველით საიტზე ჩანს ან იმალება.</p>
 <div class="slist">${site.sections.map((s, i) => `<div class="srow${s.enabled === false ? ' off' : ''}" data-act="open" data-x="${i}" tabindex="0" role="button" aria-label="${esc(secTitle(s))}">
-<span class="sic">${IC[s.type] || IC.about}</span><span class="tx"><b>${esc(secTitle(s))}</b><small>${esc(L[s.type])}</small></span>
+<span class="sic">${secIc(s)}</span><span class="tx"><b>${esc(secTitle(s))}</b><small>${esc(lab(s))}</small></span>
 <span class="mv"><button class="ib sm" type="button" data-act="move" data-path="sections.${i}" data-x="-1"${i === 0 ? ' disabled' : ''} aria-label="ზემოთ">${IC.up}</button><button class="ib sm" type="button" data-act="move" data-path="sections.${i}" data-x="1"${i === site.sections.length - 1 ? ' disabled' : ''} aria-label="ქვემოთ">${IC.down}</button></span>
 <label class="sw-wrap" title="საიტზე ჩვენება"><input type="checkbox" class="sw" data-bind="sections.${i}.enabled" data-rerender="1"${s.enabled !== false ? ' checked' : ''} aria-label="საიტზე ჩვენება"></label></div>`).join('')}</div>
 <button class="add-btn" type="button" data-act="adding">${IC.plus}სექციის დამატება</button>`;
@@ -777,7 +827,7 @@ a{cursor:default}
   function pAdd() {
     const hasHero = site.sections.some((s) => s.type === 'hero');
     return `<div class="p-head"><button class="ib" type="button" data-act="back" aria-label="უკან">${IC.back}</button><h2>ახალი სექცია</h2></div><p class="p-sub">აირჩიე, რა დაემატოს. სექცია ბოლოში ჩაჯდება, მერე სადაც გინდა გადაიტან.</p>
-<div class="types">${TYPES.filter((t) => t.type !== 'hero' || !hasHero).map((t) => `<button class="type" type="button" data-act="add" data-x="${t.type}"><span class="sic">${IC[t.type]}</span><b>${t.name}</b><small>${t.desc}</small></button>`).join('')}</div>`;
+<div class="types">${TYPES.filter((t) => t.type !== 'hero' || !hasHero).map((t) => (t.h ? `<p class="types-h">${t.h}</p>` : `<button class="type" type="button" data-act="add" data-x="${t.type}"><span class="sic">${IC[t.type]}</span><b>${t.name}</b><small>${t.desc}</small></button>`)).join('')}</div>`;
   }
   function menuEd(i) {
     const P = `sections.${i}`, cats = site.sections[i].categories || [];
@@ -789,10 +839,51 @@ a{cursor:default}
 ${open ? `<div class="items">${items.map((it, j) => {
         const ip = `${cp}.items.${j}`, more = openItems.has(ip);
         return `<div class="it${more ? ' open' : ''}"><div class="i-top"><input class="inp" data-bind="${ip}.name" value="${esc(it.name)}" placeholder="კერძის სახელი" aria-label="კერძი"><span class="price"><input class="inp" data-bind="${ip}.price" data-type="num" inputmode="decimal" value="${esc(it.price ?? '')}" aria-label="ფასი"><em>₾</em></span><button class="ib sm" type="button" data-act="item" data-path="${ip}" aria-expanded="${more}" aria-label="დეტალები">${IC.more}</button></div>
-${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="${esc(it.desc || '')}" placeholder="აღწერა, მაგ. რძით ან შვრიის რძით"><div class="i-row"><input class="inp" data-bind="${ip}.tag" value="${esc(it.tag || '')}" placeholder="იარლიყი, მაგ. ახალი"><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="-1"${j === 0 ? ' disabled' : ''} aria-label="ზემოთ">${IC.up}</button><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="1"${j === items.length - 1 ? ' disabled' : ''} aria-label="ქვემოთ">${IC.down}</button><button class="ib sm danger" type="button" data-act="del" data-path="${ip}" aria-label="კერძის წაშლა">${IC.del}</button></div></div>` : ''}</div>`;
+${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="${esc(it.desc || '')}" placeholder="აღწერა, მაგ. რძით ან შვრიის რძით">${site.sections[i].layout === 'photos' ? miniImg(ip + '.image') : ''}<div class="i-row"><input class="inp" data-bind="${ip}.tag" value="${esc(it.tag || '')}" placeholder="იარლიყი, მაგ. ახალი"><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="-1"${j === 0 ? ' disabled' : ''} aria-label="ზემოთ">${IC.up}</button><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="1"${j === items.length - 1 ? ' disabled' : ''} aria-label="ქვემოთ">${IC.down}</button><button class="ib sm danger" type="button" data-act="del" data-path="${ip}" aria-label="კერძის წაშლა">${IC.del}</button></div></div>` : ''}</div>`;
       }).join('')}<button class="add-btn sm" type="button" data-act="push" data-path="${cp}.items" data-x="item">${IC.plus}კერძის დამატება</button></div>` : ''}</div>`;
     }).join('') + `<button class="add-btn" type="button" data-act="push" data-path="${P}.categories" data-x="cat">${IC.plus}კატეგორიის დამატება</button>`;
   }
+  // პატარა ფოტო ბარათის ან კერძის დეტალებში
+  function miniImg(path) {
+    const im = get(site, path), src = im && srcOf(im.src);
+    return src
+      ? `<div class="mini-img"><img src="${esc(src)}" alt=""><button class="btn btn-line btn-xs" type="button" data-act="img" data-path="${path}" data-x="photo">${IC.swap}შეცვლა</button><button class="btn-txt danger" type="button" data-act="img-del" data-path="${path}">წაშლა</button></div>`
+      : `<button class="add-btn sm" type="button" data-act="img" data-path="${path}" data-x="photo">${IC.image}ფოტოს დამატება</button>`;
+  }
+  // ერთი სია, ბევრი სექციისთვის: ბარათები, შეფასებები, კითხვები, ნაბიჯები, განრიგი
+  const FIELDS = {
+    title: ['სახელი', 'text'], text: ['აღწერა', 'area'], price: ['ფასი', 'num'], oldPrice: ['ძველი ფასი (გადახაზული)', 'num'],
+    unit: ['ფასის შემდეგ', 'text', 'მაგ. / ღამე ან -დან'], meta: ['დამატებითი ხაზი', 'text', 'მაგ. 45 წთ ან 2 სტუმარი'], badge: ['იარლიყი', 'text', 'მაგ. ახალი'],
+    icon: ['ხატულა', 'icon'], image: ['ფოტო', 'image'], featured: ['გამოყოფა ჩარჩოთი', 'toggle'],
+    q: ['კითხვა', 'text'], a: ['პასუხი', 'area'], name: ['სახელი', 'text'], note: ['მინაწერი', 'text', 'მაგ. ქალაქი ან თარიღი'], stars: ['ვარსკვლავები', 'stars'], date: ['დღე ან თარიღი', 'text', 'მაგ. პარასკევი, 6 დეკ.']
+  };
+  const iconPick = (path) => { const cur = get(site, path) || 'star'; return `<div class="icons-pick">${Supra.ICONS.map((n) => `<button type="button" data-act="set" data-path="${path}" data-x="${n}" aria-pressed="${cur === n}" aria-label="${n}">${Supra.icon(n)}</button>`).join('')}</div>`; };
+  function fieldEd(ip, k) {
+    const [label, kind, ph] = FIELDS[k], path = `${ip}.${k}`;
+    if (kind === 'area') return fld(label, path, { rows: 2, ph });
+    if (kind === 'num') return `<label class="fld"><span class="lt">${label}</span><span class="price"><input class="inp" data-bind="${path}" data-type="num" inputmode="decimal" value="${esc(get(site, path) ?? '')}"><em>₾</em></span></label>`;
+    if (kind === 'icon') return `<div class="fld"><span class="lt">${label}</span>${iconPick(path)}</div>`;
+    if (kind === 'image') return `<div class="fld"><span class="lt">${label}</span>${miniImg(path)}</div>`;
+    if (kind === 'toggle') return togl(label, path, false);
+    if (kind === 'stars') { const v = Number(get(site, path) || 0); return `<label class="fld"><span class="lt">${label}</span><select class="inp" data-bind="${path}" data-type="int">${[5, 4, 3, 0].map((n) => `<option value="${n}"${v === n ? ' selected' : ''}>${n ? '★'.repeat(n) : 'არ ჩანს'}</option>`).join('')}</select></label>`; }
+    return fld(label, path, { ph });
+  }
+  // spec: main (მთავარი ველი), price (ფასი გვერდით), more (დანარჩენი ველები), add (ღილაკის ტექსტი), x (ახალი ელემენტის ტიპი)
+  function itemsEd(i, spec) {
+    const P = `sections.${i}.items`, items = site.sections[i].items || [];
+    return items.map((it, j) => {
+      const ip = `${P}.${j}`, more = openItems.has(ip);
+      const pr = spec.price ? `<span class="price"><input class="inp" data-bind="${ip}.price" data-type="num" inputmode="decimal" value="${esc(it.price ?? '')}" aria-label="ფასი"><em>₾</em></span>` : '';
+      return `<div class="it${more ? ' open' : ''}"><div class="i-top${pr ? '' : ' np'}"><input class="inp" data-bind="${ip}.${spec.main}" value="${esc(it[spec.main] ?? '')}" placeholder="${esc(FIELDS[spec.main][0])}" aria-label="${esc(FIELDS[spec.main][0])}">${pr}<button class="ib sm" type="button" data-act="item" data-path="${ip}" aria-expanded="${more}" aria-label="დეტალები">${IC.more}</button></div>
+${more ? `<div class="i-more">${spec.more.map((k) => fieldEd(ip, k)).join('')}<div class="i-row"><span style="flex:1"></span><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="-1"${j === 0 ? ' disabled' : ''} aria-label="ზემოთ">${IC.up}</button><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="1"${j === items.length - 1 ? ' disabled' : ''} aria-label="ქვემოთ">${IC.down}</button><button class="ib sm danger" type="button" data-act="del" data-path="${ip}" aria-label="წაშლა">${IC.del}</button></div></div>` : ''}</div>`;
+    }).join('') + `<button class="add-btn sm" type="button" data-act="push" data-path="${P}" data-x="${spec.x}">${IC.plus}${spec.add}</button>`;
+  }
+  const CARD_SPEC = {
+    grid: (s) => ({ main: 'title', price: true, more: [...(s.media === false ? [] : ['image']), 'text', 'meta', 'unit', 'oldPrice', 'badge', 'featured'], add: 'ბარათის დამატება', x: 'card' }),
+    list: () => ({ main: 'title', price: true, more: ['meta', 'unit', 'text'], add: 'სერვისის დამატება', x: 'card' }),
+    icons: () => ({ main: 'title', more: ['icon', 'text'], add: 'დამატება', x: 'card' }),
+    people: () => ({ main: 'title', more: ['image', 'text'], add: 'ადამიანის დამატება', x: 'person' })
+  };
   function galEd(i) {
     const P = `sections.${i}.images`, ims = site.sections[i].images || [];
     return `<div class="gal">${ims.map((im, k) => `<div class="g-it"><img src="${esc(srcOf(im.src))}" alt=""><div class="g-ov"><button type="button" data-act="move" data-path="${P}.${k}" data-x="-1" aria-label="მარცხნივ">${IC.left}</button><button type="button" data-act="img" data-path="${P}.${k}" data-x="photo" aria-label="შეცვლა">${IC.swap}</button><button type="button" data-act="move" data-path="${P}.${k}" data-x="1" aria-label="მარჯვნივ">${IC.right}</button><button type="button" class="danger" data-act="del" data-path="${P}.${k}" aria-label="წაშლა">${IC.del}</button></div></div>`).join('')}
@@ -805,20 +896,21 @@ ${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="$
   function pSection(i) {
     const s = site.sections[i], P = `sections.${i}`;
     const n = site.sections.length;
-    let h = `<div class="p-head"><button class="ib" type="button" data-act="back" aria-label="სექციებზე დაბრუნება">${IC.back}</button><h2>${esc(L[s.type])}</h2>
+    let h = `<div class="p-head"><button class="ib" type="button" data-act="back" aria-label="სექციებზე დაბრუნება">${IC.back}</button><h2>${esc(lab(s))}</h2>
 <button class="ib" type="button" data-act="move" data-path="${P}" data-x="-1"${i === 0 ? ' disabled' : ''} aria-label="ზემოთ" title="ზემოთ">${IC.up}</button><button class="ib" type="button" data-act="move" data-path="${P}" data-x="1"${i === n - 1 ? ' disabled' : ''} aria-label="ქვემოთ" title="ქვემოთ">${IC.down}</button><button class="ib" type="button" data-act="dup" data-path="${P}" aria-label="დუბლირება" title="დუბლირება">${IC.dup}</button><button class="ib danger" type="button" data-act="del" data-path="${P}" aria-label="სექციის წაშლა" title="წაშლა">${IC.del}</button></div>
 <p class="p-sub">ტექსტი აქაც შეიცვლება და პირდაპირ საიტზეც.</p>`;
     const seg = (path, opts) => { const cur = get(site, path) ?? opts[0][0]; return `<div class="cards2">${opts.map(([v, l, pic]) => `<button type="button" class="optc" data-act="set" data-path="${path}" data-x="${v}" aria-pressed="${String(cur) === String(v)}">${pic}<small>${l}</small></button>`).join('')}</div>`; };
     const pic = (a) => `<span class="lay">${a}</span>`;
     if (s.type === 'hero') {
-      h += grp('განლაგება', seg(`${P}.variant`, [['poster', 'ფოტო ქვემოთ', pic('<i style="width:40px;height:10px"></i><i style="width:24px;height:22px;opacity:.6"></i>')], ['photo', 'ფოტო ფონად', pic('<i style="width:64px;height:34px;opacity:.6"></i>')]]));
-      h += grp('ტექსტი', fld('სათაური (ბიზნესის სახელი)', 'name') + fld('ქვესათაური', `${P}.tagline`, { rows: 3 }) + fld('მოკლე შენიშვნა', `${P}.note`, { ph: 'მაგ. ყოველდღე 08:00-დან' }));
+      h += grp('განლაგება', seg(`${P}.variant`, [['poster', 'დიდი სახელი, ფოტო ქვემოთ', pic('<i style="width:40px;height:10px"></i><i style="width:24px;height:22px;opacity:.6"></i>')], ['photo', 'ფოტო ფონად', pic('<i style="width:64px;height:34px;opacity:.6"></i>')], ['split', 'ტექსტი და ფოტო გვერდიგვერდ', pic('<i style="width:26px;height:8px"></i><i style="width:24px;height:30px;opacity:.6"></i>')], ['center', 'შუაში, ფოტო ქვემოთ', pic('<i style="width:30px;height:8px;margin:0 auto"></i>')]]));
+      h += grp('ტექსტი', (s.variant === 'split' || s.variant === 'center' ? fld('პატარა წარწერა სახელის ზემოთ', `${P}.kicker`, { ph: 'მაგ. საცხობი საბურთალოზე' }) : '') + fld('სათაური (ბიზნესის სახელი)', 'name') + fld('ქვესათაური', `${P}.tagline`, { rows: 3 }) + fld('მოკლე შენიშვნა', `${P}.note`, { ph: 'მაგ. ყოველდღე 08:00-დან' }));
       h += grp('ფოტო', imgFld(`${P}.image`, 'photo'));
       h += grp('ღილაკები', btnsEd(`${P}.buttons`));
       if (s.variant !== 'photo') h += grp('ფონი', tonesEd(i));
     } else if (s.type === 'menu') {
+      h += grp('განლაგება', seg(`${P}.layout`, [['list', 'სია წერტილებით', pic('<i style="width:40px;height:4px"></i><i style="width:12px;height:4px"></i>')], ['photos', 'ბარათები ფოტოებით', pic('<i style="width:20px;height:20px;opacity:.6"></i><i style="width:20px;height:20px;opacity:.6"></i>')]]));
       h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
-      h += grp('კატეგორიები და კერძები', menuEd(i));
+      h += grp('კატეგორიები და კერძები', menuEd(i) + (s.layout === 'photos' ? '<p class="hint">ფოტოს დასამატებლად კერძის გვერდით სამ წერტილს დააჭირე.</p>' : ''));
       h += grp('ღილაკები', btnsEd(`${P}.buttons`));
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     } else if (s.type === 'about') {
@@ -841,6 +933,44 @@ ${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="$
       h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('ტექსტი', `${P}.text`, { rows: 3 }));
       h += grp('ღილაკები', btnsEd(`${P}.buttons`));
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'cards') {
+      const lay = s.layout || 'grid';
+      h += grp('განლაგება', seg(`${P}.layout`, [['grid', 'ბარათები', pic('<i style="width:20px;height:24px;opacity:.6"></i><i style="width:20px;height:24px;opacity:.6"></i>')], ['list', 'ფასების სია', pic('<i style="width:40px;height:4px"></i><i style="width:12px;height:4px"></i>')], ['icons', 'ხატულებით', pic('<i style="width:12px;height:12px;border-radius:50%"></i><i style="width:30px;height:5px"></i>')], ['people', 'ადამიანები', pic('<i style="width:18px;height:24px;opacity:.6;border-radius:9px 9px 3px 3px"></i><i style="width:18px;height:24px;opacity:.6;border-radius:9px 9px 3px 3px"></i>')]]));
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp(lab(s), itemsEd(i, CARD_SPEC[lay](s)), (s.items || []).length + '');
+      if (lay === 'grid') h += grp('ფოტოები', togl('ფოტოები ბარათებზე', `${P}.media`, true));
+      if (lay === 'grid' || lay === 'list') {
+        h += grp('შეკვეთის ღილაკი', togl('ყველა ბარათზე ღილაკი', `${P}.order`, false) + (s.order ? fld('ღილაკის ტექსტი', `${P}.orderLabel`, { ph: 'შეკვეთა' }) + fld('WhatsApp-ის მზა ტექსტი', `${P}.orderText`, { ph: 'გამარჯობა! მაინტერესებს:', hint: 'კლიენტს WhatsApp გაეხსნება ამ ტექსტით და ბარათის სახელით.' }) : '<p class="hint">ჩართე და კლიენტი WhatsApp-ით ერთი დაჭერით მოგწერს.</p>'));
+      }
+      h += grp('ღილაკები ქვემოთ', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'listings') {
+      const n = (site.listings || []).length;
+      h += grp('განცხადებები', `<p class="hint" style="margin-top:0">${n ? `საიტზე ${n} განცხადებაა.` : 'განცხადებები ჯერ არ არის.'} ბინებს, ფოტოებს და ფასებს ადმინ პანელიდან ამატებ: იქ მარტივი ფორმაა და ტელეფონიდანაც მოსახერხებელია.</p>${REMOTE ? `<a class="btn btn-red wide" href="/admin/?site=${encodeURIComponent(SITE_ID)}">ადმინ პანელის გახსნა</a>` : '<p class="hint">ადმინ პანელი შესვლის შემდეგ გაიხსნება, „ჩემი საიტებიდან".</p>'}`);
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp('პარამეტრები', togl('ფილტრები (გარიგება, უბანი, ოთახები)', `${P}.filters`, true) + togl('გაყიდულიც ჩანდეს', `${P}.showDone`, true));
+      h += grp('ღილაკები ქვემოთ', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'reviews') {
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + `<div class="i-2">${fld('შეფასება', `${P}.score`, { ph: 'მაგ. 4.9' })}${fld('შეფასების წყარო', `${P}.scoreNote`, { ph: 'მაგ. Google-ზე 200 შეფასება' })}</div>`);
+      h += grp('შეფასებები', itemsEd(i, { main: 'name', more: ['text', 'note', 'stars'], add: 'შეფასების დამატება', x: 'review' }), (s.items || []).length + '');
+      h += grp('ღილაკები', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'faq') {
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp('კითხვები', itemsEd(i, { main: 'q', more: ['a'], add: 'კითხვის დამატება', x: 'qa' }), (s.items || []).length + '');
+      h += grp('ღილაკები', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'steps') {
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp('ნაბიჯები', itemsEd(i, { main: 'title', more: ['text'], add: 'ნაბიჯის დამატება', x: 'step' }), (s.items || []).length + '');
+      h += grp('ღილაკები', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'events') {
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp('ჩანაწერები', itemsEd(i, { main: 'title', more: ['date', 'meta', 'text'], add: 'დამატება', x: 'event' }), (s.items || []).length + '');
+      h += grp('ღილაკები', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     }
     return h;
   }
@@ -848,11 +978,12 @@ ${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="$
     const c = colors(), t = site.theme;
     const same = (p) => ['bg', 'ink', 'surface', 'accent', 'accentInk'].every((k) => String(c[k] || '').toLowerCase() === p.c[k]);
     return `<div class="p-head"><h2>დიზაინი</h2></div><p class="p-sub">ფერები, შრიფტი და ფორმები მთელ საიტზე ერთად იცვლება.</p>
+${grp('საიტის სტილი', `<div class="styles4">${STYLES.map(([v, l, d]) => `<button type="button" class="optc" data-act="set" data-path="theme.style" data-x="${v}" aria-pressed="${(t.style || 'poster') === v}"><b class="${t.font === 'classic' ? 'serif' : ''}" style="${{ poster: 'font-weight:800;font-stretch:74%', elegant: 'font-weight:500;font-stretch:100%;text-align:center;border-bottom:2px solid currentColor;padding-bottom:6px', warm: 'font-weight:760;font-stretch:100%;background:var(--soft);border-radius:12px;padding:8px 10px', clean: 'font-weight:700;font-stretch:87.5%;font-size:20px' }[v]}">${esc((site.name || 'აბგ').slice(0, 8))}</b><small><strong>${l}</strong>. ${d}</small></button>`).join('')}</div><p class="hint">სტილი სათაურებს, ბარათებს და ფოტოებს ცვლის. ფერები ქვემოთ ცალკე იცვლება.</p>`)}
 ${grp('მზა ფერები', `<div class="presets">${PRESETS.map((p, i) => `<button type="button" class="preset" data-act="preset" data-x="${i}" aria-pressed="${same(p)}"><span>${['bg', 'surface', 'accent', 'ink', 'accentInk'].map((k) => `<i style="--c:${p.c[k]}"></i>`).join('')}</span>${p.name}</button>`).join('')}</div>`)}
 ${grp('საიტის ფერები', colorFld('ფონი', 'theme.colors.bg') + colorFld('ტექსტი', 'theme.colors.ink') + colorFld('მეორე ფონი', 'theme.colors.surface') + colorFld('მთავარი ფერი (ღილაკები)', 'theme.colors.accent') + colorFld('ტექსტი მთავარ ფერზე', 'theme.colors.accentInk'))}
 ${grp('შრიფტი', `<div class="cards2">${[['modern', 'თანამედროვე, ვიწრო', ''], ['classic', 'კლასიკური, სერიფიანი', 'serif']].map(([v, l, cl]) => `<button type="button" class="optc" data-act="set" data-path="theme.font" data-x="${v}" aria-pressed="${(t.font || 'modern') === v}"><b class="${cl}">${esc((site.name || 'აბგ').slice(0, 9))}</b><small>${l}</small></button>`).join('')}</div>`)}
 ${grp('კუთხეები და ღილაკების ფორმა', `<div class="seg">${[['sharp', 'მკვეთრი', 0], ['soft', 'რბილი', 6], ['round', 'მრგვალი', 14]].map(([v, l, r]) => `<button type="button" data-act="set" data-path="theme.corners" data-x="${v}" aria-pressed="${(t.corners || 'soft') === v}"><span class="corner" style="border-top-left-radius:${r}px"></span>${l}</button>`).join('')}</div>`)}
-${grp('სხვა ნიმუშით დაწყება', `<div class="seg">${SAMPLES.map((s) => `<button type="button" data-act="sample" data-x="${s.slug}">${esc(s.name)}</button>`).join('')}</div><p class="hint">მთელი საიტი შეიცვლება ნიმუშით. გაუქმების ღილაკით ყოველთვის დაბრუნდები.</p>`)}`;
+${grp('სხვა შაბლონით დაწყება', Object.entries(CATS).map(([k, l]) => { const list = SAMPLES.filter((x) => (x.category || 'food') === k); return list.length ? `<p class="sam-h">${l}</p><div class="sams">${list.map((x) => `<button type="button" data-act="sample" data-x="${x.slug}" title="${esc(x.kind)}">${esc(x.name)}</button>`).join('')}</div>` : ''; }).join('') + `<p class="hint">მთელი საიტი შეიცვლება ნიმუშით. გაუქმების ღილაკით ყოველთვის დაბრუნდები.</p>`)}`;
   }
   function pInfo() {
     const b = site.brand = site.brand || {};
@@ -865,7 +996,7 @@ ${grp('ლოგო', imgFld('brand.logo', 'logo', { alt: false, empty: 'ლო�
 ${grp('პატარა ლოგო ბრაუზერში', `<div class="favs"><div class="tabprev"><img src="${esc(favUrl())}" alt=""><span>${esc((site.meta && site.meta.title) || site.name)}</span></div><img src="${esc(favUrl())}" width="40" height="40" alt="პატარა ლოგო"></div>
 <div class="seg">${[['auto', 'ასოთი'], ['logo', 'ლოგოდან'], ['custom', 'საკუთარი']].map(([v, l]) => `<button type="button" data-act="set" data-path="brand.faviconMode" data-x="${v}" aria-pressed="${mode === v}"${v === 'logo' && !hasLogo ? ' disabled title="ჯერ ლოგო ატვირთე"' : ''}>${l}</button>`).join('')}</div>
 <p class="hint">ჩანს ბრაუზერის ჩანართში, სანიშნეებში და ტელეფონის მთავარ ეკრანზე.${mode === 'auto' ? ' ახლა სახელის პირველი ასოა მთავარ ფერზე.' : ''}</p>${mode === 'custom' ? imgFld('brand.faviconImg', 'favicon', { alt: false, empty: 'კვადრატული ხატულის ატვირთვა' }) : ''}`)}
-${grp('ზედა ღილაკი', togl('ჩვენება', 'navButton.show', true) + (get(site, 'navButton.show') === false ? '' : fld('ტექსტი', 'navButton.label', { ph: 'დარეკვა' }) + linkEd('navButton', '@phone')))}
+${grp('ზედა ღილაკი', togl('ჩვენება', 'navButton.show', true) + (get(site, 'navButton.show') === false ? '' : fld('ტექსტი', 'navButton.label', { ph: 'დარეკვა' }) + linkEd('navButton', '@phone') + togl('ტელეფონზე ქვემოთაც ჩანდეს', 'navButton.bar', false) + '<p class="hint">ტელეფონზე ეს ღილაკი ეკრანის ქვედა ნაწილში მუდმივად ჩანს. კარგია შეკვეთისთვის და ჩაწერისთვის.</p>'))}
 ${grp('კონტაქტი', fld('ტელეფონი', 'contact.phone', { im: 'tel', ph: '+995 5XX XX XX XX' }) + fld('WhatsApp', 'contact.whatsapp', { im: 'tel', ph: '995555123456', hint: 'მხოლოდ ციფრები, ქვეყნის კოდით.' }) + fld('მისამართი', 'contact.address') + fld('რუკაზე საძიებო სიტყვა', 'contact.mapQuery', { ph: 'თუ მისამართი რუკაზე არ იძებნება' }) + fld('Instagram', 'contact.instagram', { pre: '@', ph: 'saxeli' }) + fld('Facebook', 'contact.facebook', { pre: 'facebook.com/', ph: 'saxeli' }))}
 ${grp('სამუშაო საათები', hours.map((r, k) => `<div class="hrow"><input class="inp" data-bind="hours.${k}.days" value="${esc(r.days)}" placeholder="დღეები" aria-label="დღეები"><input class="inp" data-bind="hours.${k}.time" value="${esc(r.time)}" placeholder="10:00–22:00" aria-label="საათები"><button class="ib sm danger" type="button" data-act="del" data-path="hours.${k}" aria-label="წაშლა">${IC.del}</button></div>`).join('') + `<button class="add-btn sm" type="button" data-act="push" data-path="hours" data-x="hour">${IC.plus}რიგის დამატება</button>`)}
 ${grp('ქვედა ზოლი', fld('დამატებითი ტექსტი', 'footer.text', { ph: '© 2026 ' + (site.name || '') }))}`;
@@ -965,6 +1096,12 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     cat: () => ({ name: 'ახალი კატეგორია', items: [{ name: 'ახალი კერძი', price: 10 }] }),
     para: () => 'ახალი აბზაცი. დაწერე, რით გამოირჩევით.',
     hour: () => ({ days: 'შაბათი', time: '10:00–22:00' }),
+    card: (path) => { const s = get(site, path.replace(/\.items$/, '')) || {}; return s.layout === 'icons' ? { icon: 'star', title: 'ახალი', text: 'მოკლედ აღწერე.' } : s.layout === 'list' ? { title: 'ახალი სერვისი', meta: '30 წთ', price: 30 } : { title: 'ახალი', text: 'მოკლე აღწერა', price: 20 }; },
+    person: () => ({ title: 'სახელი გვარი', text: 'როლი' }),
+    review: () => ({ name: 'სახელი', text: 'რა მოეწონა კლიენტს.', stars: 5 }),
+    qa: () => ({ q: 'ახალი კითხვა?', a: 'პასუხი.' }),
+    step: () => ({ title: 'ახალი ნაბიჯი', text: 'მოკლედ აღწერე.' }),
+    event: () => ({ date: 'პარასკევი', title: 'ახალი ღონისძიება', meta: '20:00' }),
     btn: (path) => { const n = (get(site, path) || []).length; return { label: n ? 'ახალი ღილაკი' : 'მენიუს ნახვა', link: n ? '@phone' : '#menu', style: n ? 'outline' : 'solid' }; }
   };
   const newId = (type) => { let id = type, n = 2; while (site.sections.some((s) => secId(s) === id)) id = type + '-' + n++; return id; };
@@ -974,6 +1111,17 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     about: () => ({ type: 'about', tone: 'surface', title: 'ჩვენ შესახებ', paragraphs: ['მოგვიყევით თქვენს ისტორიაზე: როდის გაიხსენით, რით გამოირჩევით და რატომ უნდა გესტუმრონ.'] }),
     gallery: () => ({ type: 'gallery', tone: 'base', title: 'ფოტოები', images: [] }),
     visit: () => ({ type: 'visit', tone: 'base', title: 'გვესტუმრეთ' }),
+    listings: () => { site.listings = site.listings || []; return { type: 'listings', tone: 'base', title: 'განცხადებები', navLabel: 'ბინები' }; },
+    services: () => ({ type: 'cards', kind: 'services', layout: 'list', tone: 'surface', title: 'სერვისები და ფასები', order: true, orderLabel: 'ჩაწერა', orderText: 'გამარჯობა! მინდა ჩავეწერო:', items: [{ title: 'პირველი სერვისი', meta: '45 წთ', price: 40 }, { title: 'მეორე სერვისი', meta: '1 სთ', price: 60, unit: '-დან' }] }),
+    products: () => ({ type: 'cards', kind: 'products', layout: 'grid', tone: 'base', title: 'პროდუქტები', order: true, orderLabel: 'შეკვეთა', orderText: 'გამარჯობა! მინდა შევუკვეთო:', items: [{ title: 'პირველი პროდუქტი', text: 'მოკლე აღწერა', price: 25 }, { title: 'მეორე პროდუქტი', text: 'მოკლე აღწერა', price: 40 }, { title: 'მესამე პროდუქტი', text: 'მოკლე აღწერა', price: 60 }] }),
+    rooms: () => ({ type: 'cards', kind: 'rooms', layout: 'grid', tone: 'base', title: 'ოთახები', order: true, orderLabel: 'დაჯავშნა', orderText: 'გამარჯობა! მინდა დავჯავშნო:', items: [{ title: 'ორადგილიანი', meta: '2 სტუმარი', text: 'საუზმით', price: 150, unit: '/ ღამე' }, { title: 'საოჯახო', meta: '4 სტუმარი', text: 'საუზმით', price: 220, unit: '/ ღამე' }] }),
+    plans: () => ({ type: 'cards', kind: 'plans', layout: 'grid', media: false, tone: 'surface', title: 'პაკეტები', order: true, orderLabel: 'არჩევა', orderText: 'გამარჯობა! მაინტერესებს:', items: [{ title: 'საბაზისო', text: 'რა შედის', price: 50 }, { title: 'სტანდარტი', text: 'რა შედის', price: 90, badge: 'ყველაზე ხშირად', featured: true }, { title: 'სრული', text: 'რა შედის', price: 150 }] }),
+    features: () => ({ type: 'cards', kind: 'features', layout: 'icons', tone: 'base', title: 'რატომ ჩვენ', inNav: false, items: [{ icon: 'clock', title: 'დროზე', text: 'მოკლედ აღწერე.' }, { icon: 'shield', title: 'გარანტია', text: 'მოკლედ აღწერე.' }, { icon: 'heart', title: 'სიყვარულით', text: 'მოკლედ აღწერე.' }] }),
+    team: () => ({ type: 'cards', kind: 'team', layout: 'people', tone: 'base', title: 'გუნდი', items: [{ title: 'სახელი გვარი', text: 'როლი' }, { title: 'სახელი გვარი', text: 'როლი' }, { title: 'სახელი გვარი', text: 'როლი' }] }),
+    reviews: () => ({ type: 'reviews', tone: 'surface', title: 'რას ამბობენ', inNav: false, items: [{ stars: 5, text: 'რა მოეწონა კლიენტს.', name: 'სახელი' }, { stars: 5, text: 'რა მოეწონა კლიენტს.', name: 'სახელი' }] }),
+    faq: () => ({ type: 'faq', tone: 'base', title: 'ხშირი კითხვები', inNav: false, items: [{ q: 'როგორ შევუკვეთო?', a: 'მოგვწერეთ WhatsApp-ზე ან დაგვირეკეთ.' }, { q: 'გადახდა როგორ შეიძლება?', a: 'ბარათით ან ნაღდით.' }] }),
+    steps: () => ({ type: 'steps', tone: 'surface', title: 'როგორ მუშაობს', inNav: false, items: [{ title: 'მოგვწერეთ', text: 'მოკლედ აღწერე.' }, { title: 'შევთანხმდეთ', text: 'მოკლედ აღწერე.' }, { title: 'მიიღეთ', text: 'მოკლედ აღწერე.' }] }),
+    events: () => ({ type: 'events', tone: 'base', title: 'განრიგი', items: [{ date: 'პარასკევი', title: 'პირველი ღონისძიება', text: 'მოკლე აღწერა', meta: '20:00' }, { date: 'შაბათი', title: 'მეორე ღონისძიება', meta: '21:00' }] }),
     cta: () => ({ type: 'cta', tone: 'accent', title: 'დაჯავშნე მაგიდა', text: 'შაბათ-კვირას ადგილები სწრაფად ივსება. დაგვირეკე ან მოგვწერე.', inNav: false, buttons: [{ label: 'დარეკვა', link: '@phone', style: 'solid' }, { label: 'WhatsApp', link: '@whatsapp', style: 'outline' }] })
   };
   const after = (sel) => { commit(); renderPanel(); refresh(); if (sel != null) setTimeout(() => scrollToSec(sel), 60); };
@@ -1003,7 +1151,7 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
       toast(isSec ? 'სექცია წაიშალა' : 'წაიშალა', 'დაბრუნება', () => jump(-1));
     },
     dup: (p) => { const [, i] = parentOf(p); const c = clone(site.sections[i]); c.id = newId(c.type); site.sections.splice(i + 1, 0, c); state.sec = i + 1; after(i + 1); toast('სექცია დუბლირდა'); },
-    push: (p, x) => { const arr = get(site, p) || []; arr.push(NEW[x](p)); set(site, p, arr); if (x === 'item') openItems.add(`${p}.${arr.length - 1}`); after(); },
+    push: (p, x) => { const arr = get(site, p) || []; arr.push(NEW[x](p)); set(site, p, arr); if (['item', 'card', 'person', 'review', 'qa', 'step', 'event'].includes(x)) openItems.add(`${p}.${arr.length - 1}`); after(); },
     set: (p, x) => { set(site, p, x === 'true' ? true : x === 'false' ? false : x); after(); },
     tone: (p, x) => { set(site, p + '.tone', x); if (x === 'custom' && !get(site, p + '.bg')) set(site, p + '.bg', '#ffd23f'); after(); },
     preset: (p, x) => { site.theme = site.theme || {}; site.theme.colors = Object.assign({}, PRESETS[Number(x)].c); after(); },
@@ -1079,6 +1227,9 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
       if (!a) return;
       e.preventDefault();
       const h = a.getAttribute('href') || '';
+      const pg = h.match(/^(?:\.\.\/\.\.\/)?p\/([\w-]+)\/$/);
+      if (pg) { vframe.srcdoc = Supra.renderSite(resolve(), { page: pg[1] }); return; }
+      if (h.startsWith('../../')) { const anchor = h.slice(6); vframe.srcdoc = Supra.renderSite(resolve()); if (anchor.startsWith('#')) vframe.addEventListener('load', () => { const el = vframe.contentDocument.getElementById(anchor.slice(1)); if (el) el.scrollIntoView(); }, { once: true }); return; }
       if (h.startsWith('#')) { const el = h === '#top' ? d.body : d.getElementById(h.slice(1)); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
       else toast('გამოქვეყნებულ საიტზე ეს ბმული გაიხსნება: ' + h.replace(/^https?:\/\//, '').replace(/^tel:/, 'ზარი ').slice(0, 40));
     });

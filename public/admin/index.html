@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ადმინ პანელი, ბილდერი</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,300..900&display=swap">
+<style>
+/* ბილდერის საერთო სტილი: შესვლა და „ჩემი საიტები" */
+:root{color-scheme:light;--bg:#fff;--ink:#1A1423;--ink-2:#4A4352;--muted:#6E6876;--line:#E7E4EC;--line-2:#D9D5DF;--soft:#F6F4F9;--red:#E8253F;--red-d:#CC1730;--red-s:#FDECEF;--sun:#FFC83D;--cob:#2438D6;--cob-s:rgba(36,56,214,.12);--f:'Noto Sans Georgian','Noto Sans',system-ui,sans-serif;--serif:'Noto Serif Georgian','Noto Serif',Georgia,serif;--ease:cubic-bezier(.2,.7,.2,1);--pad:max(4vw,20px)}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--f)}
+h1,h2,h3{margin:0;font-weight:800;font-stretch:72%;letter-spacing:-.015em;line-height:1.02;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit}
+svg{display:block;flex:none}
+:focus-visible{outline:3px solid var(--cob);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-stretch:72%;font-size:27px;letter-spacing:-.01em;line-height:1}
+.mark{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--red);color:#fff;font-size:20px;font-stretch:100%;transform:rotate(-7deg);transition:transform .35s var(--ease)}
+.logo:hover .mark{transform:rotate(0) scale(1.06)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:2px solid transparent;font:600 16px/1 var(--f);text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .18s var(--ease),background-color .18s,color .18s,box-shadow .18s,border-color .18s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:default;transform:none}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover:not(:disabled){background:var(--red-d);box-shadow:0 12px 24px -12px rgba(232,37,63,.75)}
+.btn-ink{background:var(--ink);color:#fff}
+.btn-line{border-color:var(--line-2);background:#fff;color:var(--ink)}
+.btn-line:hover:not(:disabled){border-color:var(--ink)}
+.btn-sm{min-height:42px;padding:0 14px;font-size:15px;border-radius:11px}
+.wide{width:100%}
+.lnk{border:0;background:none;padding:0;font-weight:600;font-size:inherit;color:var(--cob);cursor:pointer;text-decoration:none}
+.lnk:hover{text-decoration:underline}
+.fld{display:block;margin-bottom:14px}
+.fld>.lt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.fld small{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+.inp{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:400 16px/1.3 var(--f);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.inp:hover{border-color:var(--line-2)}
+.inp:focus{outline:none;border-color:var(--cob);box-shadow:0 0 0 3px var(--cob-s)}
+.inp[aria-invalid=true]{border-color:var(--red)}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:14.5px;line-height:1.5}
+.note.err{background:var(--red-s);color:#A1102A}
+.note.ok{background:#EAF0FF;color:#1B2B9E}
+.note.warn{background:#FFF4DE;color:#7A4A00}
+.toast{position:fixed;left:50%;bottom:22px;z-index:120;max-width:calc(100% - 32px);transform:translate(-50%,12px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:rgba(26,20,35,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.modal.open{opacity:1;visibility:visible}
+.mbox{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:#fff;border-radius:24px;padding:28px;transform:translateY(16px) scale(.98);transition:transform .35s var(--ease)}
+.modal.open .mbox{transform:none}
+.x{position:absolute;right:12px;top:12px;width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:12px;background:var(--soft);cursor:pointer}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* VOICE  საქმიანი და მოკლე: აგენტი ტელეფონიდან ორ წუთში ამატებს ბინას
+   IDEA   ორგანაიზერი, სადაც თითო ფურცელი ერთი ბინაა */
+body{background:var(--soft)}
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:14px;max-width:1100px;margin:0 auto;padding:10px var(--pad);min-height:64px}
+.back{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;text-decoration:none}
+.ttl{flex:1}
+.ttl small{display:block;font-size:13px;color:var(--muted)}
+.ttl b{font-size:19px;font-weight:800;font-stretch:80%}
+.tabs{display:flex;gap:4px;max-width:1100px;margin:0 auto;padding:0 var(--pad);overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:none;min-height:46px;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--red)}
+main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.bar .inp{flex:1 1 220px;min-height:46px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{min-height:38px;padding:0 12px;border:1.5px solid var(--line);border-radius:99px;background:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.stat b{display:block;font-size:30px;font-weight:800;font-stretch:72%;line-height:1}
+.stat span{font-size:13.5px;color:var(--muted)}
+.list{display:grid;gap:10px}
+.row{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
+.row img,.row .noimg{width:96px;height:72px;border-radius:10px;object-fit:cover;background:var(--soft)}
+.row h3{font-size:17px;font-weight:700;font-stretch:100%;letter-spacing:0;line-height:1.3}
+.row p{font-size:14px;color:var(--muted);margin-top:2px}
+.row .pr{font-weight:800;font-size:17px;margin-top:4px}
+.row .acts{display:flex;gap:6px;align-items:center}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--ink-2);margin-right:4px}
+.pill.sale{background:#EAF0FF;color:#1B2B9E}.pill.rent{background:#FFF4DE;color:#7A4A00}.pill.reserved{background:#FDECEF;color:#A1102A}.pill.sold,.pill.rented{background:var(--ink);color:#fff}.pill.hid{background:#eee;color:#555}
+.ib{display:grid;place-items:center;width:40px;height:40px;border:1.5px solid var(--line);border-radius:11px;background:#fff;cursor:pointer}
+.ib:hover{border-color:var(--ink)}
+.empty{text-align:center;padding:48px 20px;background:#fff;border:1.5px dashed var(--line-2);border-radius:20px}
+.empty h2{font-size:30px;margin-bottom:8px}
+.empty p{color:var(--muted);margin-bottom:18px}
+.fab{position:fixed;right:20px;bottom:20px;z-index:30;box-shadow:0 14px 30px -12px rgba(232,37,63,.8)}
+.state{display:grid;place-items:center;gap:12px;padding:80px 20px;color:var(--muted);text-align:center}
+/* ფორმა */
+.sheet .mbox{width:min(720px,100%);padding:0;display:flex;flex-direction:column;max-height:calc(100vh - 32px)}
+.sh-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.sh-head h2{flex:1;font-size:26px}
+.sh-body{padding:20px;overflow:auto}
+.sh-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--line);background:#fff}
+.sh-foot .btn{flex:1}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--soft);margin-bottom:14px}
+.seg button{flex:1;min-height:42px;border:0;border-radius:9px;background:none;font-weight:600;cursor:pointer}
+.seg button[aria-pressed=true]{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:6px}
+.ph{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:4/3;background:var(--soft)}
+.ph img{width:100%;height:100%;object-fit:cover}
+.ph .cv{position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;background:var(--red);color:#fff;padding:2px 7px;border-radius:99px}
+.ph .ov{position:absolute;inset:auto 0 0;display:flex;justify-content:space-between;padding:4px;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.ph .ov button{width:30px;height:30px;border:0;border-radius:8px;background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer}
+.addph{display:grid;place-items:center;gap:4px;aspect-ratio:4/3;border:2px dashed var(--line-2);border-radius:12px;background:#fff;font-weight:600;font-size:14px;color:var(--ink-2);cursor:pointer}
+.feats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.feats label{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:1.5px solid var(--line);border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;background:#fff}
+.feats input{accent-color:var(--red)}
+.feats label:has(input:checked){border-color:var(--ink);background:var(--soft)}
+.hint{font-size:13px;color:var(--muted);margin:-6px 0 14px}
+.sec-t{font-size:15px;font-weight:700;margin:6px 0 10px;color:var(--ink)}
+.togl{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;font-weight:600}
+.togl input{width:22px;height:22px;accent-color:var(--red)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px}
+.card h2{font-size:24px;margin-bottom:12px}
+.pub{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:16px;font-size:14.5px}
+.pub .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#1f9d55;margin-right:8px}
+.pub.off .dot{background:#c7c2cf}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:72px minmax(0,1fr)}.row img,.row .noimg{width:72px;height:60px}.row .acts{grid-column:1/-1;justify-content:flex-end}.g3{grid-template-columns:1fr 1fr}.sheet{padding:0;place-items:end}.sheet .mbox{border-radius:22px 22px 0 0;max-height:94vh}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="back" href="/app/" aria-label="ჩემი საიტები"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <div class="ttl"><small>ადმინ პანელი</small><b id="s-name">…</b></div>
+    <a class="btn btn-line btn-sm" id="view" href="#" target="_blank" rel="noopener" hidden>საიტის ნახვა</a>
+    <a class="btn btn-ink btn-sm" id="design" href="#">დიზაინი</a>
+  </div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="list" aria-selected="true">განცხადებები</button>
+    <button type="button" role="tab" data-tab="info" aria-selected="false">კონტაქტი და აგენტი</button>
+  </div>
+</header>
+<main id="main"><div class="state"><span class="spin"></span>იტვირთება…</div></main>
+<button class="btn btn-red fab" type="button" id="fab" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ბინის დამატება</button>
+
+<div class="modal sheet" id="sheet" aria-hidden="true">
+  <form class="mbox" id="form" role="dialog" aria-modal="true" aria-labelledby="f-t" novalidate>
+    <div class="sh-head"><h2 id="f-t">ახალი განცხადება</h2><button class="x" type="button" data-close aria-label="დახურვა" style="position:static"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sh-body" id="f-body"></div>
+    <div class="sh-foot"><button class="btn btn-line" type="button" data-close>გაუქმება</button><button class="btn btn-red" type="submit" id="f-save">შენახვა</button></div>
+  </form>
+</div>
+<input type="file" id="file" accept="image/*" multiple hidden>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="/js/firebase-config.js"></script>
+<script>
+/* მხოლოდ დემოსთვის: ფოტოების ადგილას დროებითი ნახატები.
+   ნამდვილ საიტზე აქ მომხმარებლის ატვირთული ფოტოები იქნება (R2-დან). */
+(function (root) {
+  'use strict';
+
+  const PAL = {
+    finjani: { wall: '#ffd23f', wall2: '#f5c21b', table: '#2438d6', table2: '#1a2aa8', plate: '#ffffff', cup: '#ffffff', accent: '#2438d6', sky: '#9fd3ff', wood: '#151a3d', cloth: '#2438d6' },
+    'dzveli-ubani': { wall: '#6e1c31', wall2: '#5a1427', table: '#2a0811', table2: '#1d050b', plate: '#f6e8de', cup: '#f6e8de', accent: '#ff5a6e', sky: '#f7c58f', wood: '#1d050b', cloth: '#4a1022' },
+    talgha: { wall: '#0a5fd8', wall2: '#0a4fb6', table: '#ffe1b3', table2: '#f3cd92', plate: '#ffffff', cup: '#ffffff', accent: '#ff6a3d', sky: '#ffc49b', wood: '#0a3a8f', cloth: '#0a5fd8' },
+    pesvi: { wall: '#2a2640', wall2: '#221f36', table: '#1d1a2b', table2: '#15131f', plate: '#f2e9dc', cup: '#f2e9dc', accent: '#e0a34a', sky: '#7d8fc4', wood: '#0f0d18', cloth: '#2a2640' },
+    tone: { wall: '#ffe3cc', wall2: '#ffd2ad', table: '#e8452c', table2: '#c93a24', plate: '#ffffff', cup: '#ffffff', accent: '#e8452c', sky: '#ffd9b8', wood: '#3a1d12', cloth: '#e8452c' },
+    gumeli: { wall: '#ffe8a3', wall2: '#ffdb73', table: '#d7261e', table2: '#b81f18', plate: '#ffffff', cup: '#ffffff', accent: '#d7261e', sky: '#ffe8a3', wood: '#1b1b1b', cloth: '#1b1b1b' },
+    marani: { wall: '#3a1528', wall2: '#4d1c35', table: '#1c0913', table2: '#12060c', plate: '#f7e7da', cup: '#f7e7da', accent: '#f05d3b', sky: '#f2b58a', wood: '#12060c', cloth: '#3a1528' },
+    ia: { wall: '#f9dfe1', wall2: '#f3c9cd', table: '#b3264a', table2: '#951e3d', plate: '#ffffff', cup: '#ffffff', accent: '#b3264a', sky: '#dfe8f5', wood: '#2d1520', cloth: '#b3264a' },
+    britva: { wall: '#e8edf5', wall2: '#d6deeb', table: '#14213d', table2: '#0e1830', plate: '#ffffff', cup: '#ffffff', accent: '#c1272d', sky: '#cfdaea', wood: '#14213d', cloth: '#14213d' },
+    motori: { wall: '#e9e9e9', wall2: '#d4d4d4', table: '#3a3d44', table2: '#2c2e33', plate: '#ffffff', cup: '#ffffff', accent: '#ff5a1f', sky: '#cfe3f5', wood: '#16181d', cloth: '#16181d' },
+    balansi: { wall: '#f3e8ff', wall2: '#e6d4fb', table: '#e7c9a5', table2: '#d4b089', plate: '#ffffff', cup: '#ffffff', accent: '#ff6b4a', sky: '#ffe1d1', wood: '#2a1b3d', cloth: '#ff6b4a' },
+    kadri: { wall: '#ececec', wall2: '#dedede', table: '#1c1c1c', table2: '#111111', plate: '#ffffff', cup: '#ffffff', accent: '#e63b2e', sky: '#b9d4f0', wood: '#111111', cloth: '#1c1c1c' },
+    'mtis-sakhli': { wall: '#efe3d3', wall2: '#e4d3bd', table: '#8c2f39', table2: '#73252e', plate: '#ffffff', cup: '#ffffff', accent: '#8c2f39', sky: '#a9c8ec', wood: '#2b2118', cloth: '#8c2f39' },
+    tapli: { wall: '#ffe7a8', wall2: '#ffd977', table: '#3b2412', table2: '#2b190b', plate: '#fffaf0', cup: '#ffffff', accent: '#e09b00', sky: '#bcd3ee', wood: '#3b2412', cloth: '#c0392b' },
+    kvadrati: { wall: '#eef2f6', wall2: '#dfe6ee', table: '#9fb0c4', table2: '#8798ad', plate: '#ffffff', cup: '#ffffff', accent: '#e4572e', sky: '#bcd6f0', wood: '#122033', cloth: '#122033' },
+    tikha: { wall: '#f2ebe4', wall2: '#e4d7ca', table: '#d9c6b4', table2: '#cbb59f', plate: '#ffffff', cup: '#ffffff', accent: '#c0392b', sky: '#f2ebe4', wood: '#2a2320', cloth: '#2f4a6b' }
+  };
+
+  const svg = (inner) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">${inner}</svg>`;
+  const room = (p, y) => `<rect width="800" height="600" fill="${p.wall}"/><rect y="${y}" width="800" height="${600 - y}" fill="${p.table}"/><rect y="${y}" width="800" height="7" fill="#fff" opacity=".16"/>`;
+  const shadow = (cx, cy, rx, ry, o = 0.2) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#000" opacity="${o}"/>`;
+
+  const product = (p, inner) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="500" width="800" height="100" fill="${p.wall2}"/><ellipse cx="400" cy="500" rx="210" ry="22" fill="#000" opacity=".12"/>${inner}`);
+  const portrait = (p, v) => ART.__portrait(p, v);
+  const pizzaArt = (p, v) => {
+      const pep = v !== 1 ? '' : [[330, 230], [450, 210], [520, 300], [300, 340], [420, 330], [480, 410], [350, 420], [560, 380], [390, 260]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="26" fill="#a52016"/><circle cx="${x - 7}" cy="${y - 7}" r="7" fill="#fff" opacity=".18"/>`).join('');
+      const cheese = [[360, 290, 34], [470, 260, 30], [400, 390, 36], [520, 350, 26], [300, 280, 22], [440, 450, 24], [330, 380, 22]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff0b8"/>`).join('');
+      const leaves = [[380, 220, 20], [500, 250, -30], [310, 400, 50]].map(([x, y, a]) => `<ellipse cx="${x}" cy="${y}" rx="18" ry="9" fill="#3f7d3a" transform="rotate(${a} ${x} ${y})"/>`).join('');
+      return svg(`<rect width="800" height="600" fill="${p.wall}"/>
+<circle cx="430" cy="330" r="270" fill="#000" opacity=".18"/><circle cx="420" cy="320" r="262" fill="#c78a4c"/><rect x="660" y="292" width="150" height="56" rx="28" fill="#c78a4c"/>
+<circle cx="420" cy="320" r="236" fill="#e2a24f"/><circle cx="420" cy="320" r="236" fill="none" stroke="#b9782f" stroke-width="10" stroke-dasharray="2 26" stroke-linecap="round"/>
+<circle cx="420" cy="320" r="204" fill="${v === 2 ? '#fff1cf' : '#d7321f'}"/>${v === 2 ? [[340, 250], [470, 230], [520, 340], [330, 380], [430, 420], [400, 300]].map(([x, y]) => `<path d="M${x - 22} ${y}a22 18 0 0 1 44 0z" fill="#9b6b43"/><rect x="${x - 7}" y="${y}" width="14" height="16" rx="5" fill="#c59a72"/>`).join('') : ''}${cheese}${pep}${leaves}
+<path d="M420 116v408M216 320h408M276 176l288 288M564 176L276 464" stroke="#9b5a22" stroke-opacity=".35" stroke-width="4"/>`);
+    };
+
+
+  const ART = {
+    cup: (p) => svg(`${room(p, 400)}${shadow(440, 482, 250, 40)}
+<ellipse cx="400" cy="462" rx="212" ry="46" fill="${p.plate}"/><ellipse cx="400" cy="458" rx="150" ry="28" fill="#000" opacity=".06"/>
+<path d="M545 322c80-6 92 92 2 104" fill="none" stroke="${p.cup}" stroke-width="24" stroke-linecap="round"/>
+<path d="M262 300h276l-20 116c-6 30-30 46-60 46H342c-30 0-54-16-60-46z" fill="${p.cup}"/>
+<path d="M400 300h138l-20 116c-6 30-30 46-60 46h-58z" fill="#000" opacity=".07"/>
+<path d="M272 344h256" stroke="${p.accent}" stroke-width="14"/>
+<ellipse cx="400" cy="300" rx="138" ry="26" fill="${p.cup}"/><ellipse cx="400" cy="302" rx="122" ry="19" fill="#5a3216"/>
+<ellipse cx="392" cy="300" rx="66" ry="9" fill="#c58a4f" opacity=".8"/>
+<path d="M366 252c-24-30 18-52-6-88M428 248c-24-30 18-52-6-88" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".6"/>
+<rect x="590" y="430" width="34" height="34" rx="6" fill="#fff"/><rect x="630" y="440" width="30" height="30" rx="6" fill="#fff" opacity=".85"/>`),
+
+    wine: (p) => {
+      const grapes = [[640, 446], [670, 446], [700, 446], [655, 472], [685, 472], [670, 498]]
+        .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="16" fill="#5b1a6b"/><circle cx="${x - 5}" cy="${y - 5}" r="4" fill="#fff" opacity=".35"/>`).join('');
+      return svg(`${room(p, 420)}${shadow(330, 506, 120, 18, 0.28)}${shadow(545, 504, 72, 12)}
+<path d="M300 110h44v92c46 26 58 70 58 104v170c0 14-10 24-24 24H266c-14 0-24-10-24-24V306c0-34 12-78 58-104z" fill="#1c070d"/>
+<path d="M258 306c0-30 12-60 42-84v272h-38c-2 0-4-2-4-4z" fill="#fff" opacity=".09"/>
+<rect x="252" y="330" width="140" height="96" rx="3" fill="${p.plate}"/><rect x="274" y="358" width="96" height="10" rx="5" fill="${p.accent}"/>
+<rect x="290" y="382" width="64" height="8" rx="4" fill="#1c070d" opacity=".5"/><rect x="298" y="96" width="48" height="26" rx="4" fill="${p.accent}"/>
+<path d="M476 300c6 64 30 90 64 96 34-6 58-32 64-96z" fill="#8a1029"/><ellipse cx="540" cy="300" rx="64" ry="10" fill="#b01c38"/>
+<path d="M470 240c0 110 30 150 70 156 40-6 70-46 70-156z" fill="#fff" opacity=".14"/>
+<path d="M470 240c0 110 30 150 70 156 40-6 70-46 70-156" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3"/>
+<rect x="536" y="396" width="8" height="94" fill="#fff" opacity=".5"/><ellipse cx="540" cy="492" rx="54" ry="9" fill="#fff" opacity=".5"/>${grapes}`);
+    },
+
+    khachapuri: (p) => svg(`${room(p, 330)}${shadow(420, 430, 330, 108)}
+<ellipse cx="400" cy="405" rx="322" ry="110" fill="${p.plate}"/><ellipse cx="400" cy="400" rx="280" ry="88" fill="#000" opacity=".05"/>
+<path d="M118 392C250 250 550 250 682 392C550 524 250 524 118 392z" fill="#d98a38"/>
+<path d="M118 392C250 524 550 524 682 392C560 488 240 488 118 392z" fill="#a95f22" opacity=".7"/>
+<path d="M150 380C270 284 530 284 650 380C540 330 260 330 150 380z" fill="#f0b867" opacity=".8"/>
+<path d="M205 390C300 322 500 322 595 390C500 448 300 448 205 390z" fill="#ffe08a"/>
+<path d="M330 392c0-30 30-48 70-48s76 18 76 46-34 44-74 44-72-14-72-42z" fill="#fff8e6"/>
+<circle cx="400" cy="388" r="27" fill="#ff9a12"/><circle cx="391" cy="379" r="8" fill="#fff" opacity=".6"/>
+<rect x="470" y="360" width="40" height="30" rx="6" fill="#fff4bd" transform="rotate(-12 490 375)"/>
+<circle cx="118" cy="392" r="20" fill="#b86a28"/><circle cx="682" cy="392" r="20" fill="#b86a28"/>`),
+
+    khinkali: (p) => {
+      const one = (x, y, s) => {
+        const pleats = [-3, -2, -1, 0, 1, 2, 3].map((k) => `<path d="M0 -118Q${k * 18} -60 ${k * 34} -6" stroke="#d6c19c" stroke-width="4" fill="none"/>`).join('');
+        return `<g transform="translate(${x} ${y}) scale(${s})">${shadow(10, 66, 120, 22, 0.18)}
+<path d="M-112 0c0-70 52-118 112-128 60 10 112 58 112 128 0 48-52 70-112 70S-112 48-112 0z" fill="#f5e9d3"/>
+<path d="M0 -128c60 10 112 58 112 128 0 48-52 70-112 70z" fill="#000" opacity=".07"/>${pleats}
+<path d="M-17 -126h34l-7 -36h-20z" fill="#e6d6b4"/></g>`;
+      };
+      const pepper = Array.from({ length: 26 }, (_, i) => `<circle cx="${130 + ((i * 97) % 540)}" cy="${470 + ((i * 53) % 70)}" r="3" fill="#2a1a10" opacity=".7"/>`).join('');
+      return svg(`${room(p, 360)}${shadow(410, 480, 330, 96)}<ellipse cx="400" cy="460" rx="320" ry="96" fill="${p.plate}"/>${pepper}
+${one(290, 400, 0.95)}${one(520, 395, 0.95)}${one(405, 450, 1.08)}`);
+    },
+
+    interior: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="452" width="800" height="148" fill="${p.table}"/>
+<path d="M470 410V200a110 110 0 0 1 220 0v210z" fill="${p.sky}"/><path d="M470 410V200a110 110 0 0 1 220 0v210z" fill="none" stroke="${p.wood}" stroke-width="10"/>
+<path d="M580 92v318M470 260h220" stroke="${p.wood}" stroke-width="6"/><rect x="456" y="408" width="248" height="14" fill="${p.wood}"/>
+<path d="M250 0v150" stroke="${p.wood}" stroke-width="4"/><path d="M186 204a64 54 0 0 1 128 0z" fill="${p.accent}"/>
+<path d="M200 204l-70 250h240l-70-250z" fill="#fff" opacity=".1"/>
+<rect x="140" y="380" width="220" height="16" rx="4" fill="${p.wood}"/><rect x="242" y="396" width="16" height="110" fill="${p.wood}"/><rect x="196" y="500" width="108" height="10" rx="5" fill="${p.wood}"/>
+<path d="M92 300c-18 0-20 30-16 80l6 40h52" fill="none" stroke="${p.wood}" stroke-width="8" stroke-linecap="round"/><path d="M78 420l-8 96M134 420l8 96" stroke="${p.wood}" stroke-width="8" stroke-linecap="round"/>
+<path d="M408 300c18 0 20 30 16 80l-6 40h-52" fill="none" stroke="${p.wood}" stroke-width="8" stroke-linecap="round"/><path d="M422 420l8 96M366 420l-8 96" stroke="${p.wood}" stroke-width="8" stroke-linecap="round"/>
+<path d="M226 380h48l-4 -26h-40z" fill="${p.plate}"/>
+<path d="M720 452l-14-70h68l-14 70z" fill="${p.accent}"/><ellipse cx="722" cy="356" rx="16" ry="40" fill="#2f7d4f" transform="rotate(-24 722 356)"/><ellipse cx="752" cy="350" rx="16" ry="44" fill="#3a9a60" transform="rotate(18 752 350)"/>`),
+
+    sea: (p) => {
+      const glints = [0, 1, 2, 3, 4].map((i) => `<rect x="${560 - 90 + i * 14}" y="${340 + i * 22}" width="${180 - i * 28}" height="6" rx="3" fill="#ffd9a8" opacity="${0.8 - i * 0.12}"/>`).join('');
+      return svg(`<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5aa9ff"/><stop offset="1" stop-color="${p.sky}"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#s)"/><circle cx="560" cy="318" r="72" fill="#ffe2a8"/>
+<rect y="320" width="800" height="160" fill="${p.wall}"/><rect y="320" width="800" height="160" fill="#000" opacity=".08"/>${glints}
+<path d="M0 470Q400 438 800 470V600H0z" fill="${p.table}"/><path d="M0 520Q400 500 800 530V600H0z" fill="${p.table2}"/>
+<path d="M262 330l26 236" stroke="${p.wood}" stroke-width="8" stroke-linecap="round"/>
+<path d="M120 336Q250 214 380 336Q315 318 250 334Q185 318 120 336z" fill="${p.accent}"/>
+<path d="M250 334Q262 252 280 230Q300 270 315 320Q285 318 250 334z" fill="#fff"/><path d="M120 336Q160 270 205 248Q190 290 185 322Q150 318 120 336z" fill="#fff"/>
+<path d="M470 560l40-74h70l-26 74M500 506h90" stroke="${p.wood}" stroke-width="7" fill="none" stroke-linecap="round"/>`);
+    },
+
+    drink: (p) => {
+      const bubbles = [[372, 430, 5], [420, 400, 4], [395, 360, 6], [440, 460, 4], [360, 330, 3]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity=".6"/>`).join('');
+      return svg(`${room(p, 470)}${shadow(410, 520, 110, 16, 0.25)}
+<rect x="404" y="110" width="14" height="270" rx="7" fill="${p.accent}" transform="rotate(14 411 245)"/>
+<path d="M336 250h128l-11 238c-1 10-8 16-18 16h-70c-10 0-17-6-18-16z" fill="#f4c430"/>
+<path d="M400 250h64l-11 238c-1 10-8 16-18 16h-35z" fill="#000" opacity=".06"/>
+<rect x="352" y="262" width="44" height="40" rx="6" fill="#fff" opacity=".55" transform="rotate(-10 374 282)"/><rect x="404" y="270" width="40" height="36" rx="6" fill="#fff" opacity=".45" transform="rotate(14 424 288)"/>${bubbles}
+<path d="M330 200h140l-14 292c-1 14-12 24-26 24h-60c-14 0-25-10-26-24z" fill="#fff" opacity=".16"/>
+<path d="M330 200h140l-14 292c-1 14-12 24-26 24h-60c-14 0-25-10-26-24z" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3"/>
+<circle cx="468" cy="214" r="48" fill="#ffe14d"/><circle cx="468" cy="214" r="38" fill="#fff6b0"/>
+<path d="M468 176v76M430 214h76M441 187l54 54M495 187l-54 54" stroke="#ffe14d" stroke-width="4"/>`);
+    },
+
+    cake: (p) => {
+      const layers = [1, 2, 3, 4, 5].map((k) => `<path d="M240 ${300 + k * 21}L520 ${330 + k * 21}" stroke="#fff3d6" stroke-width="7"/>`).join('');
+      return svg(`${room(p, 380)}${shadow(440, 470, 270, 52)}<ellipse cx="420" cy="450" rx="270" ry="64" fill="${p.plate}"/>
+<path d="M240 300L520 330L520 442L240 412z" fill="#e2a85c"/>${layers}
+<path d="M520 330L612 252L612 360L520 442z" fill="#c98c45"/>
+<path d="M240 300L520 330L612 252z" fill="#f6d7a3"/>
+${[[400, 300], [470, 296], [520, 280], [430, 312], [560, 276], [360, 306]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#d29a55"/>`).join('')}
+<path d="M650 470l90-92" stroke="#c9ccd6" stroke-width="10" stroke-linecap="round"/><path d="M728 364l24 24M740 352l24 24M716 376l24 24" stroke="#c9ccd6" stroke-width="7" stroke-linecap="round"/>`);
+    },
+
+    supra: (p) => {
+      const plate = (x, y, r, inner) => `${`<circle cx="${x + 10}" cy="${y + 14}" r="${r}" fill="#000" opacity=".25"/>`}<circle cx="${x}" cy="${y}" r="${r}" fill="${p.plate}"/><circle cx="${x}" cy="${y}" r="${r * 0.78}" fill="#000" opacity=".05"/>${inner}`;
+      const balls = [[-26, -18, '#3f8f45'], [22, -22, '#7b1d4a'], [-4, 20, '#3f8f45'], [34, 18, '#a33a2a']].map(([dx, dy, c]) => `<circle cx="${150 + dx}" cy="${150 + dy}" r="20" fill="${c}"/><circle cx="${150 + dx}" cy="${150 + dy - 6}" r="3" fill="#e01e37"/>`).join('');
+      const khin = [[-30, -10], [26, -20], [0, 28], [36, 26], [-34, 34]].map(([dx, dy]) => `<circle cx="${650 + dx}" cy="${150 + dy}" r="24" fill="#f5e9d3"/><circle cx="${650 + dx}" cy="${150 + dy}" r="6" fill="#e3d1ae"/>`).join('');
+      const salad = [[-30, -10, '#e5392b'], [20, -24, '#5aa646'], [8, 22, '#e5392b'], [-24, 28, '#5aa646'], [36, 14, '#e5392b']].map(([dx, dy, c]) => `<circle cx="${160 + dx}" cy="${470 + dy}" r="20" fill="${c}"/><circle cx="${160 + dx}" cy="${470 + dy}" r="12" fill="#fff" opacity=".25"/>`).join('');
+      const meat = [[-28, -12], [12, -26], [30, 10], [-8, 22], [-36, 24]].map(([dx, dy]) => `<rect x="${650 + dx - 16}" y="${470 + dy - 14}" width="32" height="28" rx="9" fill="#8a4a24"/>`).join('');
+      return svg(`<rect width="800" height="600" fill="${p.cloth}"/>
+${[0, 1, 2, 3, 4, 5, 6].map((i) => `<rect x="0" y="${i * 90 + 40}" width="800" height="2" fill="#fff" opacity=".05"/>`).join('')}
+${plate(400, 300, 140, `<path d="M290 300C340 236 460 236 510 300C460 364 340 364 290 300z" fill="#d98a38"/><path d="M320 300C365 262 435 262 480 300C435 338 365 338 320 300z" fill="#ffe08a"/><circle cx="400" cy="298" r="20" fill="#ff9a12"/>`)}
+${plate(150, 150, 84, balls)}${plate(650, 150, 84, khin)}${plate(160, 470, 84, salad)}${plate(650, 470, 88, `${meat}<circle cx="620" cy="440" r="14" fill="none" stroke="#fff" stroke-width="4"/>`)}
+<circle cx="300" cy="110" r="38" fill="#fff" opacity=".22"/><circle cx="300" cy="110" r="26" fill="#8a1029"/>
+<circle cx="510" cy="510" r="38" fill="#fff" opacity=".22"/><circle cx="510" cy="510" r="26" fill="#d9b35a"/>
+<path d="M340 520C370 488 450 488 470 520C450 552 370 552 340 520z" fill="#e3a65a" transform="rotate(-18 405 520)"/>`);
+    }
+,
+
+    /* ---- ახალი ბიზნესები ---- */
+
+    plate: (p) => {
+      const dots = [[452, 236, '#e9c46a'], [470, 252, p.accent], [440, 262, '#e9c46a'], [330, 300, p.accent], [318, 322, '#e9c46a'], [484, 330, '#f4e4c8'], [500, 346, '#e9c46a']]
+        .map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="7" fill="${c}"/>`).join('');
+      return svg(`<rect width="800" height="600" fill="${p.table}"/><rect width="800" height="600" fill="#000" opacity=".12"/>
+<circle cx="424" cy="322" r="236" fill="#000" opacity=".3"/><circle cx="400" cy="300" r="232" fill="${p.plate}"/><circle cx="400" cy="300" r="170" fill="none" stroke="#000" stroke-opacity=".06" stroke-width="3"/>
+<path d="M292 378c34-96 160-142 236-74" stroke="${p.accent}" stroke-width="30" stroke-linecap="round" fill="none"/>
+<path d="M314 366c34-76 132-110 192-62" stroke="#fff" stroke-opacity=".28" stroke-width="7" stroke-linecap="round" fill="none"/>
+<g transform="rotate(-14 404 292)"><rect x="342" y="250" width="124" height="78" rx="24" fill="#6e3a1c"/><rect x="350" y="252" width="108" height="20" rx="10" fill="#a8622f"/></g>
+<path d="M418 226c10-22 30-28 44-24-6 16-22 26-44 24z" fill="#e9c46a"/><path d="M402 232c-4-18 4-34 16-40 4 16-2 30-16 40z" fill="${p.accent}"/>${dots}
+<rect x="96" y="150" width="12" height="300" rx="6" fill="#d6d9e0"/><path d="M84 150v-60M96 150v-60M108 150v-60M120 150v-60" stroke="#d6d9e0" stroke-width="6" stroke-linecap="round"/><rect x="84" y="140" width="36" height="22" rx="8" fill="#d6d9e0"/>
+<path d="M694 90c22 30 22 120 4 150v210h-12V90z" fill="#d6d9e0"/>`);
+    },
+
+    bread: (p) => {
+      const crumbs = Array.from({ length: 22 }, (_, i) => `<circle cx="${140 + ((i * 131) % 520)}" cy="${470 + ((i * 37) % 60)}" r="${2 + (i % 3)}" fill="#fff" opacity=".55"/>`).join('');
+      return svg(`${room(p, 400)}${shadow(400, 486, 300, 46)}
+<path d="M118 470c0-30 30-54 66-54h432c36 0 66 24 66 54s-30 50-66 50H184c-36 0-66-20-66-50z" fill="#c98b4e"/><path d="M118 470c0 30 30 50 66 50h432c36 0 66-20 66-50" fill="none" stroke="#a96f37" stroke-width="10"/>
+<path d="M190 452c0-120 74-190 176-190s176 70 176 190z" fill="#c47a35"/><path d="M366 262c102 0 176 70 176 190H420c10-90-10-160-54-190z" fill="#000" opacity=".1"/>
+<path d="M262 330c56 22 152 22 208 0M240 380c74 26 178 26 252 0" stroke="#f1cf98" stroke-width="12" stroke-linecap="round" fill="none"/>
+<g transform="rotate(-22 600 330)"><rect x="440" y="300" width="330" height="74" rx="37" fill="#d79a52"/><rect x="440" y="300" width="330" height="30" rx="15" fill="#e8b878" opacity=".7"/>
+<path d="M500 312l26 44M560 312l26 44M620 312l26 44M680 312l26 44" stroke="#f6dcac" stroke-width="9" stroke-linecap="round"/></g>
+<ellipse cx="216" cy="452" rx="54" ry="38" fill="#b86d2b"/><path d="M190 442c16 8 36 8 52 0" stroke="#efc78e" stroke-width="7" stroke-linecap="round" fill="none"/>${crumbs}`);
+    },
+
+    torte: (p) => {
+      const berries = [[330, 238], [372, 228], [414, 232], [456, 228], [490, 238], [400, 244]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="16" fill="#b0102c"/><circle cx="${x - 5}" cy="${y - 5}" r="4" fill="#fff" opacity=".5"/>`).join('');
+      const drips = [300, 344, 388, 432, 476, 512].map((x, i) => `<path d="M${x - 14} 262h28v${30 + (i % 3) * 22}a14 14 0 0 1-28 0z" fill="${p.accent}"/>`).join('');
+      return svg(`${room(p, 470)}${shadow(400, 520, 210, 22, 0.25)}
+<rect x="380" y="430" width="40" height="80" fill="${p.wood}" opacity=".85"/><ellipse cx="400" cy="512" rx="110" ry="14" fill="${p.wood}"/><ellipse cx="400" cy="430" rx="230" ry="26" fill="${p.plate}"/><ellipse cx="400" cy="424" rx="230" ry="20" fill="#000" opacity=".05"/>
+<path d="M240 258h320v160c0 12-72 22-160 22s-160-10-160-22z" fill="#fff1e3"/><path d="M400 258h160v160c0 12-72 22-160 22z" fill="#000" opacity=".05"/>
+<path d="M240 340c80 16 240 16 320 0v18c-80 16-240 16-320 0z" fill="${p.accent}" opacity=".35"/>
+<ellipse cx="400" cy="258" rx="160" ry="30" fill="${p.accent}"/>${drips}<ellipse cx="400" cy="252" rx="140" ry="22" fill="#fff" opacity=".18"/>${berries}
+<rect x="394" y="176" width="12" height="54" rx="4" fill="#fff"/><path d="M400 150c10 12 10 22 0 28-10-6-10-16 0-28z" fill="#ffb02e"/>`);
+    },
+
+    pizza: (p) => pizzaArt(p, 0),
+    pizza2: (p) => pizzaArt(p, 1),
+    pizza3: (p) => pizzaArt(p, 2),
+
+    cellar: (p) => {
+      const row = (y, n) => Array.from({ length: n }, (_, i) => { const x = 236 + i * 38; return `<circle cx="${x}" cy="${y}" r="15" fill="${['#1a0610', '#3a0d1f', '#2a1e0c'][i % 3]}"/><circle cx="${x}" cy="${y}" r="6" fill="${p.accent}" opacity="${i % 2 ? 0.9 : 0.5}"/>`; }).join('');
+      const bricks = Array.from({ length: 9 }, (_, r) => Array.from({ length: 8 }, (_, k) => `<rect x="${(r % 2 ? -50 : 0) + k * 110}" y="${r * 42}" width="104" height="36" rx="3" fill="#fff" opacity="${0.03 + ((r * 7 + k * 3) % 5) * 0.012}"/>`).join('')).join('');
+      return svg(`<rect width="800" height="600" fill="${p.wall}"/>${bricks}
+<path d="M200 600V230a200 200 0 0 1 400 0v370z" fill="${p.table}"/><path d="M200 600V230a200 200 0 0 1 400 0v370" fill="none" stroke="${p.wall2}" stroke-width="22"/>
+<rect x="218" y="250" width="364" height="10" fill="${p.wall2}"/>${row(230, 10)}<rect x="218" y="320" width="364" height="10" fill="${p.wall2}"/>${row(300, 10)}<rect x="218" y="390" width="364" height="10" fill="${p.wall2}"/>${row(370, 10)}
+${shadow(400, 572, 170, 18, 0.35)}<path d="M276 600c-14-60-14-120 0-150h248c14 30 14 90 0 150z" fill="#6b3a1e"/><path d="M262 470h276M260 560h280" stroke="#2b160a" stroke-width="10"/><ellipse cx="400" cy="450" rx="124" ry="16" fill="#83492a"/>
+<rect x="384" y="398" width="32" height="52" rx="4" fill="#f7e7da"/><path d="M400 372c12 12 12 22 0 28-12-6-12-16 0-28z" fill="#ffb02e"/><circle cx="400" cy="384" r="40" fill="#ffb02e" opacity=".14"/>`);
+    },
+
+    salon: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="470" width="800" height="130" fill="${p.wall2}"/>
+<path d="M268 0v70" stroke="${p.wood}" stroke-width="4"/><path d="M228 108a40 38 0 0 1 80 0z" fill="${p.accent}"/>
+<circle cx="520" cy="232" r="150" fill="${p.accent}"/><circle cx="520" cy="232" r="132" fill="${p.sky}"/><path d="M430 170c40-50 120-70 170-40" stroke="#fff" stroke-width="16" stroke-linecap="round" opacity=".6" fill="none"/>
+${shadow(400, 566, 160, 16, 0.22)}<rect x="300" y="330" width="200" height="120" rx="40" fill="${p.wood}"/><rect x="290" y="420" width="220" height="56" rx="24" fill="${p.wood}"/><rect x="300" y="430" width="200" height="18" rx="9" fill="#fff" opacity=".1"/>
+<rect x="392" y="476" width="16" height="66" fill="#9aa0ac"/><ellipse cx="400" cy="552" rx="76" ry="12" fill="#9aa0ac"/>
+<rect x="620" y="390" width="120" height="16" rx="4" fill="${p.wood}"/><rect x="632" y="406" width="8" height="140" fill="${p.wood}"/><rect x="720" y="406" width="8" height="140" fill="${p.wood}"/>
+<rect x="636" y="330" width="26" height="60" rx="8" fill="${p.accent}"/><rect x="672" y="346" width="22" height="44" rx="6" fill="#fff"/><rect x="702" y="340" width="24" height="50" rx="8" fill="${p.wood}" opacity=".6"/>
+<path d="M120 470l-12-86h72l-12 86z" fill="${p.accent}"/><path d="M144 384c-30-60-10-130 10-150M144 384c20-50 60-90 80-90M144 384c-40-30-70-40-90-36" stroke="${p.wood}" stroke-width="6" fill="none" stroke-linecap="round"/>`),
+
+    barber: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="480" width="800" height="120" fill="${p.wall2}"/>
+<defs><clipPath id="pole"><rect x="606" y="120" width="56" height="250" rx="28"/></clipPath></defs>
+<rect x="596" y="96" width="76" height="26" rx="10" fill="${p.wood}"/><rect x="596" y="368" width="76" height="26" rx="10" fill="${p.wood}"/>
+<g clip-path="url(#pole)"><rect x="606" y="120" width="56" height="250" fill="#fff"/>${[0, 1, 2, 3, 4, 5, 6].map((k) => `<path d="M560 ${100 + k * 64}l160 -90v28l-160 90z" fill="${k % 2 ? p.table : p.accent}"/>`).join('')}</g>
+<rect x="160" y="70" width="300" height="230" rx="14" fill="${p.wood}"/><rect x="176" y="86" width="268" height="198" rx="8" fill="${p.sky}"/><path d="M200 250l90-130M260 270l110-160" stroke="#fff" stroke-width="12" opacity=".45" stroke-linecap="round"/>
+${shadow(310, 560, 170, 16, 0.25)}<rect x="252" y="250" width="116" height="40" rx="18" fill="${p.wood}"/><rect x="230" y="286" width="160" height="130" rx="26" fill="${p.accent}"/><rect x="214" y="400" width="192" height="62" rx="24" fill="${p.accent}"/>
+<rect x="186" y="360" width="34" height="80" rx="12" fill="${p.wood}"/><rect x="400" y="360" width="34" height="80" rx="12" fill="${p.wood}"/><rect x="300" y="462" width="20" height="74" fill="#9aa0ac"/><ellipse cx="310" cy="544" rx="86" ry="13" fill="#9aa0ac"/>
+<rect x="244" y="296" width="132" height="12" rx="6" fill="#fff" opacity=".15"/>`),
+
+    tools: (p) => svg(`<rect width="800" height="600" fill="${p.table}"/>
+<g transform="rotate(-28 300 300)"><circle cx="190" cy="250" r="44" fill="none" stroke="#e8e9ee" stroke-width="18"/><circle cx="190" cy="360" r="44" fill="none" stroke="#e8e9ee" stroke-width="18"/>
+<path d="M226 266L520 316 226 300zM226 344L520 290 226 326z" fill="#e8e9ee"/><circle cx="262" cy="304" r="9" fill="${p.wood}"/></g>
+<g transform="rotate(14 560 380)"><rect x="420" y="350" width="300" height="46" rx="10" fill="${p.wall2}"/>${Array.from({ length: 22 }, (_, i) => `<rect x="${432 + i * 12.5}" y="396" width="6" height="58" rx="3" fill="${p.wall2}"/>`).join('')}</g>
+<circle cx="610" cy="150" r="64" fill="${p.wood}"/><circle cx="610" cy="150" r="48" fill="#fff" opacity=".15"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${610 + Math.cos(i / 1.9) * 36}" cy="${150 + Math.sin(i / 1.9) * 36}" r="5" fill="#fff" opacity=".6"/>`).join('')}<rect x="664" y="138" width="110" height="26" rx="12" fill="${p.wood}"/>
+<rect x="120" y="440" width="58" height="110" rx="14" fill="#fff"/><rect x="132" y="420" width="34" height="26" rx="6" fill="${p.wood}"/><rect x="200" y="466" width="50" height="84" rx="12" fill="${p.wall}"/><rect x="212" y="448" width="26" height="22" rx="6" fill="#fff"/>`),
+
+    room: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="480" width="800" height="120" fill="#b9875a"/><rect y="480" width="800" height="8" fill="#000" opacity=".12"/>
+<rect x="470" y="70" width="250" height="250" rx="6" fill="${p.wood}"/><rect x="484" y="84" width="222" height="222" fill="${p.sky}"/>
+<path d="M484 306l70-120 50 70 40-50 62 100z" fill="#fff"/><path d="M484 306l70-120 22 38-30 30 28 4-46 48z" fill="#000" opacity=".06"/><path d="M484 306l70-120 50 70 40-50 62 100z" fill="none"/><path d="M554 186l-14 24 14-6 14 8z" fill="#fff"/>
+<path d="M595 84v222M484 195h222" stroke="${p.wood}" stroke-width="8"/>
+${shadow(330, 560, 300, 26, 0.2)}<rect x="60" y="230" width="380" height="160" rx="20" fill="${p.wood}"/><rect x="40" y="370" width="520" height="130" rx="18" fill="#fff"/>
+<rect x="40" y="400" width="520" height="100" rx="18" fill="${p.accent}"/><path d="M40 430h520" stroke="#fff" stroke-opacity=".2" stroke-width="6"/>${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => `<path d="M${80 + k * 62} 410l20 20-20 20" stroke="#fff" stroke-opacity=".25" stroke-width="5" fill="none"/>`).join('')}
+<rect x="80" y="320" width="150" height="66" rx="24" fill="#fff"/><rect x="250" y="320" width="150" height="66" rx="24" fill="#fff"/><rect x="80" y="352" width="150" height="10" fill="#000" opacity=".05"/>
+<rect x="600" y="400" width="110" height="100" rx="8" fill="${p.wood}"/><rect x="646" y="320" width="16" height="80" fill="${p.wood}"/><path d="M612 330l18-70h48l18 70z" fill="#fff4d6"/><circle cx="654" cy="300" r="70" fill="#ffe7a8" opacity=".2"/>`),
+
+    mountain: (p) => svg(`<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.sky}"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#sk)"/>
+<path d="M-20 380L180 120 300 260 420 70 620 330 700 230 840 380z" fill="#7d8aa8"/><path d="M180 120l40 52-24-6-16 24-18-20-22 8zM420 70l52 70-30-10-22 30-22-28-34 12zM700 230l30 40-20-4-12 16-14-14z" fill="#fff"/>
+<path d="M420 70l200 260-200-60z" fill="#000" opacity=".1"/>
+<path d="M-20 440Q200 330 420 400T840 380V600H-20z" fill="#c9a24a"/><path d="M-20 500Q300 430 600 480T840 470V600H-20z" fill="#b58a35"/>
+<rect x="520" y="322" width="44" height="40" fill="#efe6d6"/><path d="M516 324l26-26 26 26z" fill="#6b4a32"/><rect x="566" y="300" width="20" height="62" fill="#efe6d6"/><path d="M563 302l13-28 13 28z" fill="#6b4a32"/><rect x="574" y="282" width="4" height="10" fill="#6b4a32"/>
+<rect x="110" y="430" width="140" height="90" fill="#fff"/><path d="M96 436l84-62 84 62z" fill="${p.wood}"/><rect x="134" y="456" width="30" height="30" fill="${p.sky}"/><rect x="190" y="456" width="30" height="30" fill="${p.sky}"/><rect x="164" y="486" width="30" height="34" fill="${p.wood}"/>
+<path d="M120 520h120" stroke="${p.wood}" stroke-width="6"/>`),
+
+    garage: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="470" width="800" height="130" fill="${p.wall2}"/>${[0, 1, 2, 3, 4, 5].map((k) => `<rect x="${k * 140 - 20}" y="510" width="100" height="10" fill="${p.accent}" opacity=".9"/>`).join('')}
+<rect x="40" y="60" width="200" height="140" rx="6" fill="#fff" opacity=".6"/>${Array.from({ length: 30 }, (_, i) => `<circle cx="${60 + (i % 6) * 32}" cy="${80 + Math.floor(i / 6) * 26}" r="3" fill="${p.wood}" opacity=".3"/>`).join('')}
+<path d="M80 110l40 40M70 120l10-10" stroke="${p.wood}" stroke-width="10" stroke-linecap="round"/><rect x="150" y="96" width="14" height="70" rx="5" fill="${p.accent}"/><rect x="190" y="90" width="12" height="80" rx="4" fill="${p.wood}"/>
+<rect x="150" y="300" width="22" height="200" fill="${p.wood}"/><rect x="630" y="300" width="22" height="200" fill="${p.wood}"/><rect x="140" y="380" width="520" height="14" fill="${p.wood}"/>
+${shadow(400, 386, 270, 10, 0.25)}<path d="M200 360c0-40 20-56 60-60l60-50c20-16 40-20 70-20h110c34 0 56 12 80 36l40 34c40 4 60 20 60 56v20H200z" fill="${p.accent}"/>
+<path d="M340 260l40-24h80l-4 64H316zM472 236h44c20 0 34 10 50 30l14 34h-112z" fill="${p.sky}"/><path d="M200 340h480" stroke="#000" stroke-opacity=".12" stroke-width="6"/>
+<circle cx="290" cy="380" r="42" fill="${p.wood}"/><circle cx="290" cy="380" r="18" fill="#c9ccd4"/><circle cx="570" cy="380" r="42" fill="${p.wood}"/><circle cx="570" cy="380" r="18" fill="#c9ccd4"/>
+<g fill="${p.wood}"><ellipse cx="720" cy="560" rx="50" ry="16"/><ellipse cx="720" cy="530" rx="50" ry="16"/><ellipse cx="720" cy="500" rx="50" ry="16"/></g><ellipse cx="720" cy="494" rx="22" ry="7" fill="#c9ccd4"/>`),
+
+    gym: (p) => svg(`${room(p, 440)}<rect x="560" y="0" width="200" height="440" fill="#fff" opacity=".35"/>
+${shadow(240, 520, 120, 16)}<path d="M180 520c-20-80 0-150 60-150s80 70 60 150z" fill="${p.wood}"/><path d="M206 386c-6-50 14-74 34-74s40 24 34 74" fill="none" stroke="${p.wood}" stroke-width="20"/><ellipse cx="240" cy="440" rx="30" ry="10" fill="#fff" opacity=".12"/>
+${shadow(470, 520, 140, 12)}<rect x="380" y="486" width="180" height="16" rx="8" fill="#9aa0ac"/><rect x="360" y="456" width="36" height="76" rx="10" fill="${p.accent}"/><rect x="544" y="456" width="36" height="76" rx="10" fill="${p.accent}"/><rect x="336" y="468" width="26" height="52" rx="8" fill="${p.accent}"/><rect x="578" y="468" width="26" height="52" rx="8" fill="${p.accent}"/>
+<circle cx="680" cy="470" r="62" fill="${p.cloth}"/><circle cx="680" cy="470" r="46" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="6"/><circle cx="680" cy="470" r="28" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="6"/><rect x="560" y="502" width="120" height="30" fill="${p.cloth}"/>
+<rect x="104" y="410" width="34" height="110" rx="12" fill="#fff"/><rect x="110" y="392" width="22" height="22" rx="4" fill="${p.accent}"/>`),
+
+    studio: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="460" width="800" height="140" fill="${p.table}"/>${[0, 1, 2, 3, 4, 5, 6, 7, 8].map((k) => `<path d="M${k * 100} 460l${-60 + k * 10} 140" stroke="#000" stroke-opacity=".06" stroke-width="3"/>`).join('')}
+<path d="M250 440V180a150 150 0 0 1 300 0v260z" fill="${p.sky}"/><path d="M250 440V180a150 150 0 0 1 300 0v260" fill="none" stroke="#fff" stroke-width="14"/><path d="M400 30v410M250 270h300" stroke="#fff" stroke-width="8"/>
+<circle cx="470" cy="150" r="40" fill="#fff" opacity=".7"/>
+<path d="M200 560l90-90h300l40 90z" fill="${p.accent}"/><path d="M200 560l90-90h300l40 90" fill="none" stroke="#000" stroke-opacity=".08" stroke-width="4"/>
+<rect x="640" y="500" width="70" height="44" rx="6" fill="${p.wood}"/><rect x="656" y="470" width="70" height="40" rx="6" fill="${p.wood}" opacity=".8"/>
+<path d="M120 460l-14-80h64l-14 80z" fill="${p.wood}"/><path d="M138 380c-10-60 10-110 40-130M138 380c-30-40-60-50-80-40M138 380c30-30 70-30 90-20" stroke="${p.accent}" stroke-width="7" fill="none" stroke-linecap="round"/>`),
+
+    camera: (p) => svg(`<rect width="800" height="600" fill="${p.table}"/>
+<g transform="rotate(-8 230 420)"><rect x="110" y="330" width="220" height="170" rx="6" fill="#fff"/><rect x="126" y="346" width="188" height="120" fill="${p.sky}"/><path d="M126 466l60-70 40 40 30-30 58 60z" fill="#fff" opacity=".7"/></g>
+<g transform="rotate(10 610 430)"><rect x="520" y="350" width="190" height="150" rx="6" fill="#fff"/><rect x="534" y="364" width="162" height="104" fill="${p.accent}"/><circle cx="640" cy="400" r="20" fill="#ffd27a"/></g>
+${shadow(410, 330, 220, 30, 0.35)}<rect x="210" y="180" width="400" height="230" rx="30" fill="${p.wood}"/><rect x="250" y="150" width="120" height="44" rx="12" fill="${p.wood}"/><rect x="210" y="230" width="400" height="22" fill="#fff" opacity=".07"/>
+<circle cx="410" cy="300" r="96" fill="#2a2a2e"/><circle cx="410" cy="300" r="76" fill="#121216"/><circle cx="410" cy="300" r="46" fill="#26324a"/><circle cx="390" cy="280" r="14" fill="#fff" opacity=".5"/><circle cx="410" cy="300" r="96" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="6"/>
+<rect x="540" y="200" width="46" height="26" rx="6" fill="${p.accent}"/><circle cx="262" cy="214" r="12" fill="#fff" opacity=".6"/>`),
+
+    city: (p) => {
+      const house = (x, w, h, c, bal) => `<rect x="${x}" y="${470 - h}" width="${w}" height="${h}" fill="${c}"/><path d="M${x - 8} ${472 - h}l${w / 2 + 8} -34 ${w / 2 + 8} 34z" fill="${p.wood}"/>${Array.from({ length: Math.floor(w / 46) }, (_, k) => `<rect x="${x + 14 + k * 46}" y="${492 - h}" width="22" height="30" fill="${p.wood}" opacity=".8"/>`).join('')}${bal ? `<rect x="${x + 6}" y="${520 - h + 20}" width="${w - 12}" height="34" fill="none" stroke="${p.wood}" stroke-width="5"/>${Array.from({ length: Math.floor((w - 12) / 14) }, (_, k) => `<path d="M${x + 12 + k * 14} ${540 - h} v34" stroke="${p.wood}" stroke-width="3"/>`).join('')}` : ''}`;
+      return svg(`<rect width="800" height="600" fill="${p.sky}"/><circle cx="640" cy="120" r="56" fill="#fff" opacity=".7"/>
+<path d="M0 330Q200 250 400 300T800 280V600H0z" fill="#c2b29c" opacity=".5"/>
+${house(30, 150, 240, '#f2d6b8', true)}${house(190, 120, 290, p.accent, false)}${house(320, 170, 230, '#e9e2d6', true)}${house(500, 130, 300, '#d9a37a', true)}${house(640, 150, 220, '#f6efe4', false)}
+<rect y="470" width="800" height="130" fill="${p.table}"/><path d="M0 520h800" stroke="#fff" stroke-opacity=".2" stroke-width="6"/><path d="M80 560h120M300 548h160M560 566h140" stroke="#fff" stroke-opacity=".25" stroke-width="5" stroke-linecap="round"/>`);
+    },
+
+    person1: (p) => portrait(p, 0),
+    person2: (p) => portrait(p, 1),
+    person3: (p) => portrait(p, 2),
+    person4: (p) => portrait(p, 3),
+
+    __portrait: (p, v) => {
+      const skin = ['#e8b48a', '#c98b5f', '#f1c7a3', '#b97a51'][v % 4];
+      const shirt = [p.accent, p.wood, p.table, p.accent][v % 4];
+      const hair = ['#2b1d16', '#5a3420', '#1a1a1a', '#8a5a2b'][v % 4];
+      const hairs = [
+        `<path d="M318 236c0-70 40-110 82-110s82 40 82 110c-10-40-40-58-82-58s-72 18-82 58z" fill="${hair}"/>`,
+        `<path d="M300 380c-10-150 20-250 100-250s110 100 100 250l-30-10c6-90-10-150-70-150s-76 60-70 150z" fill="${hair}"/>`,
+        `<circle cx="400" cy="112" r="36" fill="${hair}"/><path d="M318 230c0-66 40-100 82-100s82 34 82 100c-14-36-44-52-82-52s-68 16-82 52z" fill="${hair}"/>`,
+        `<path d="M322 220c0-60 36-92 78-92s78 32 78 92c-14-30-40-42-78-42s-64 12-78 42z" fill="${hair}"/><path d="M350 318c12 34 30 46 50 46s38-12 50-46c-14 12-30 16-50 16s-36-4-50-16z" fill="#3a2416"/>`
+      ][v % 4];
+      return svg(`<rect width="800" height="600" fill="${[p.wall, p.wall2, p.wall, p.wall2][v % 4]}"/><circle cx="${[620, 180, 640, 160][v % 4]}" cy="${[140, 160, 470, 460][v % 4]}" r="90" fill="#fff" opacity=".18"/>
+<path d="M200 600c0-110 90-180 200-180s200 70 200 180z" fill="${shirt}"/><path d="M360 430h80v30c0 22-18 36-40 36s-40-14-40-36z" fill="${skin}"/>
+<ellipse cx="400" cy="260" rx="82" ry="104" fill="${skin}"/><path d="M400 164c46 0 82 46 82 96 0 58-36 104-82 104z" fill="#000" opacity=".05"/>${hairs}`);
+    },
+
+    honey: (p) => {
+      const jar = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">${shadow(0, 150, 110, 16, 0.22)}
+<rect x="-100" y="-120" width="200" height="270" rx="40" fill="#e09b00"/><rect x="-100" y="-120" width="200" height="270" rx="40" fill="#fff" opacity=".12"/><rect x="-72" y="-100" width="26" height="200" rx="13" fill="#fff" opacity=".35"/>
+<path d="M0 -120h100v230a40 40 0 0 1-40 40H0z" fill="#000" opacity=".1"/><rect x="-70" y="-20" width="140" height="90" rx="10" fill="#fffaf0"/><rect x="-46" y="8" width="92" height="12" rx="6" fill="${p.cloth}"/><rect x="-34" y="32" width="68" height="8" rx="4" fill="${p.wood}" opacity=".5"/>
+<path d="M-112 -128c20-30 204-30 224 0l-12 26h-200z" fill="${p.cloth}"/><path d="M-100 -104h200" stroke="${p.wood}" stroke-width="6"/></g>`;
+      const comb = Array.from({ length: 10 }, (_, i) => { const cx = 120 + (i % 5) * 34 + (Math.floor(i / 5) % 2) * 17, cy = 470 + Math.floor(i / 5) * 30; return `<path d="M${cx} ${cy - 18}l16 9v18l-16 9-16-9v-18z" fill="#f3b524" stroke="#c98700" stroke-width="3"/>`; }).join('');
+      return svg(`${room(p, 430)}${jar(470, 300, 1)}${jar(640, 350, 0.62)}
+<g transform="rotate(-30 230 380)"><rect x="140" y="370" width="230" height="16" rx="8" fill="#a8743f"/>${[0, 1, 2, 3].map((k) => `<ellipse cx="${360 + k * 14}" cy="378" rx="9" ry="22" fill="#c48b4f"/>`).join('')}</g>${comb}
+<path d="M520 180c0 30-10 40-10 60" stroke="#e09b00" stroke-width="10" stroke-linecap="round" fill="none"/>`);
+    },
+
+    comb: (p) => {
+      const cells = [];
+      for (let r = 0; r < 10; r++) for (let k = 0; k < 13; k++) {
+        const cx = k * 66 + (r % 2) * 33 - 20, cy = r * 58 + 10;
+        const full = (r * 5 + k * 3) % 7 > 1;
+        cells.push(`<path d="M${cx} ${cy - 36}l31 18v36l-31 18-31-18v-36z" fill="${full ? '#f0a90a' : '#b87400'}" stroke="#a86a00" stroke-width="5"/>${full ? `<path d="M${cx - 14} ${cy - 12}l12-7" stroke="#fff" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/>` : ''}`);
+      }
+      return svg(`<rect width="800" height="600" fill="#a86a00"/>${cells.join('')}<path d="M300 0v180a18 18 0 0 0 36 0V0zM520 0v260a20 20 0 0 0 40 0V0z" fill="#f6c02e" opacity=".9"/>`);
+    },
+
+    meadow: (p) => {
+      const hive = (x, y, c) => `<g transform="translate(${x} ${y})">${shadow(0, 92, 70, 10, 0.2)}<rect x="-60" y="-10" width="120" height="100" fill="${c}"/><rect x="-60" y="24" width="120" height="6" fill="#000" opacity=".12"/><rect x="-60" y="58" width="120" height="6" fill="#000" opacity=".12"/><path d="M-74 -10l74-36 74 36z" fill="${p.wood}"/><rect x="-16" y="80" width="32" height="6" fill="${p.wood}"/></g>`;
+      const flowers = Array.from({ length: 40 }, (_, i) => `<circle cx="${(i * 97) % 800}" cy="${420 + ((i * 53) % 170)}" r="${4 + (i % 3)}" fill="${['#fff', '#ffd23f', p.cloth, '#f6a5c0'][i % 4]}"/>`).join('');
+      return svg(`<rect width="800" height="600" fill="${p.sky}"/><circle cx="160" cy="120" r="60" fill="#fff" opacity=".7"/>
+<path d="M-20 330L160 170 280 280 420 140 600 300 700 220 840 330z" fill="#8e9bb8"/><path d="M160 170l34 30-20-4-14 18-14-16-20 6zM420 140l40 40-24-6-16 22-18-20-26 8z" fill="#fff"/>
+<path d="M-20 380Q200 300 420 350T840 330V600H-20z" fill="#c9a24a"/><path d="M-20 430Q300 380 620 420T840 410V600H-20z" fill="#b58a35"/>${flowers}
+${hive(250, 430, '#fff')}${hive(420, 450, p.cloth)}${hive(590, 430, '#f3d27a')}`);
+    },
+
+    vase: (p) => product(p, `<path d="M340 150h120c-6 40-4 60 18 96 30 50 50 100 40 160-8 50-50 80-118 80s-110-30-118-80c-10-60 10-110 40-160 22-36 24-56 18-96z" fill="${p.accent}"/>
+<path d="M400 150h60c-6 40-4 60 18 96 30 50 50 100 40 160-8 50-50 80-118 80z" fill="#000" opacity=".12"/><ellipse cx="400" cy="150" rx="62" ry="12" fill="#000" opacity=".25"/><path d="M300 340c60 18 140 18 200 0" stroke="#fff" stroke-opacity=".35" stroke-width="8" fill="none"/>`),
+    bowl: (p) => product(p, `<path d="M220 300h360c0 110-80 190-180 190s-180-80-180-190z" fill="${p.cloth}"/><path d="M400 300h180c0 110-80 190-180 190z" fill="#000" opacity=".12"/>
+<ellipse cx="400" cy="300" rx="180" ry="34" fill="#fff"/><ellipse cx="400" cy="304" rx="160" ry="24" fill="${p.wall2}"/><path d="M240 360c100 30 220 30 320 0" stroke="#fff" stroke-opacity=".5" stroke-width="10" stroke-dasharray="4 18" stroke-linecap="round" fill="none"/>`),
+    mug: (p) => product(p, `<path d="M470 280c90-10 100 140 0 140" fill="none" stroke="${p.wood}" stroke-width="30"/><rect x="290" y="230" width="200" height="250" rx="30" fill="${p.wood}"/><rect x="390" y="230" width="100" height="250" rx="30" fill="#000" opacity=".15"/>
+<ellipse cx="390" cy="232" rx="100" ry="18" fill="#000" opacity=".35"/><path d="M290 300c60 20 140 20 200 0" stroke="${p.accent}" stroke-width="14" fill="none"/>`),
+    jug: (p) => product(p, `<path d="M350 170h110l-6 30c60 40 90 100 80 180-6 70-50 110-134 110s-128-40-134-110c-10-80 20-140 80-180z" fill="#e9dfd2"/><path d="M405 170h55l-6 30c60 40 90 100 80 180-6 70-50 110-134 110z" fill="#000" opacity=".08"/>
+<path d="M350 170l-36-20 40 4z" fill="#e9dfd2"/><path d="M500 260c70-10 80 110 10 130" fill="none" stroke="#e9dfd2" stroke-width="24"/><path d="M290 380c70 24 150 24 220 0" stroke="${p.accent}" stroke-width="16" fill="none"/>`),
+    plates: (p) => product(p, `<ellipse cx="400" cy="440" rx="230" ry="44" fill="${p.wall2}"/><ellipse cx="400" cy="420" rx="230" ry="44" fill="#fff"/><ellipse cx="400" cy="400" rx="230" ry="44" fill="${p.accent}"/><ellipse cx="400" cy="380" rx="230" ry="44" fill="#fff"/><ellipse cx="400" cy="380" rx="150" ry="26" fill="${p.wall}"/>
+<ellipse cx="400" cy="380" rx="196" ry="36" fill="none" stroke="${p.accent}" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round"/>`)
+
+,
+    building: (p) => {
+      const win = (x, y, lit) => `<rect x="${x}" y="${y}" width="34" height="40" rx="3" fill="${lit ? '#ffe3a3' : p.sky}"/><rect x="${x - 4}" y="${y + 40}" width="42" height="6" fill="#fff" opacity=".6"/>`;
+      let w = '';
+      for (let r = 0; r < 7; r++) for (let k = 0; k < 4; k++) w += win(250 + k * 76, 110 + r * 62, (r * 3 + k * 5) % 7 === 0);
+      let w2 = '';
+      for (let r = 0; r < 4; r++) for (let k = 0; k < 2; k++) w2 += win(590 + k * 70, 300 + r * 62, (r + k) % 3 === 0);
+      return svg(`<rect width="800" height="600" fill="${p.sky}"/><circle cx="130" cy="120" r="54" fill="#fff" opacity=".7"/>
+<rect x="230" y="80" width="320" height="480" fill="${p.wall}"/><rect x="230" y="80" width="320" height="16" fill="${p.wood}"/><rect x="390" y="80" width="160" height="480" fill="#000" opacity=".05"/>${w}
+<rect x="570" y="270" width="170" height="290" fill="${p.wall2}"/>${w2}<rect x="570" y="270" width="170" height="12" fill="${p.wood}"/>
+<rect x="360" y="500" width="60" height="60" fill="${p.wood}"/><rect x="340" y="490" width="100" height="10" fill="${p.accent}"/>
+<rect y="560" width="800" height="40" fill="${p.table}"/><circle cx="120" cy="520" r="44" fill="${p.accent}" opacity=".85"/><rect x="116" y="520" width="8" height="44" fill="${p.wood}"/><circle cx="690" cy="530" r="34" fill="${p.accent}" opacity=".7"/><rect x="686" y="530" width="8" height="34" fill="${p.wood}"/>`);
+    },
+
+    livingroom: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="470" width="800" height="130" fill="#c9a27a"/><rect y="470" width="800" height="8" fill="#000" opacity=".1"/>
+<rect x="430" y="60" width="300" height="300" fill="${p.wood}"/><rect x="442" y="72" width="276" height="276" fill="${p.sky}"/>
+<rect x="452" y="200" width="40" height="148" fill="#fff" opacity=".6"/><rect x="498" y="160" width="50" height="188" fill="#fff" opacity=".45"/><rect x="556" y="220" width="44" height="128" fill="#fff" opacity=".6"/><rect x="606" y="180" width="54" height="168" fill="#fff" opacity=".45"/><rect x="666" y="240" width="44" height="108" fill="#fff" opacity=".6"/>
+<path d="M580 72v276M442 210h276" stroke="${p.wood}" stroke-width="6"/>
+${shadow(300, 520, 260, 22, 0.2)}<rect x="70" y="320" width="440" height="120" rx="30" fill="${p.accent}"/><rect x="50" y="390" width="480" height="110" rx="26" fill="${p.accent}"/><rect x="90" y="400" width="200" height="40" rx="14" fill="#fff" opacity=".15"/><rect x="300" y="400" width="200" height="40" rx="14" fill="#fff" opacity=".15"/>
+<rect x="70" y="500" width="16" height="30" fill="${p.wood}"/><rect x="494" y="500" width="16" height="30" fill="${p.wood}"/>
+<rect x="120" y="340" width="90" height="60" rx="16" fill="#fff"/><rect x="380" y="340" width="90" height="60" rx="16" fill="${p.wall2}"/>
+<ellipse cx="300" cy="555" rx="170" ry="20" fill="${p.wall2}" opacity=".9"/>
+<rect x="600" y="430" width="140" height="14" rx="6" fill="${p.wood}"/><rect x="612" y="444" width="10" height="90" fill="${p.wood}"/><rect x="718" y="444" width="10" height="90" fill="${p.wood}"/><path d="M640 430c0-40 20-60 30-60s30 20 30 60z" fill="${p.accent}" opacity=".8"/>
+<path d="M260 0v170" stroke="${p.wood}" stroke-width="4"/><path d="M220 210a40 40 0 0 1 80 0z" fill="${p.wood}"/>`),
+
+    kitchen: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/>${Array.from({ length: 30 }, (_, i) => `<rect x="${(i % 10) * 80}" y="${200 + Math.floor(i / 10) * 40}" width="78" height="38" fill="#fff" opacity=".35"/>`).join('')}
+<rect x="60" y="60" width="300" height="130" rx="6" fill="${p.accent}"/><rect x="370" y="60" width="300" height="130" rx="6" fill="${p.accent}"/><path d="M210 60v130M520 60v130" stroke="#000" stroke-opacity=".15" stroke-width="4"/>
+<rect x="190" y="120" width="40" height="8" rx="4" fill="#fff"/><rect x="500" y="120" width="40" height="8" rx="4" fill="#fff"/>
+<rect y="320" width="800" height="30" fill="${p.wood}"/><rect y="350" width="800" height="250" fill="${p.accent}"/><rect y="350" width="800" height="250" fill="#000" opacity=".12"/>
+${[80, 280, 480, 680].map((x) => `<rect x="${x}" y="380" width="160" height="190" rx="4" fill="#fff" opacity=".1"/><rect x="${x + 60}" y="400" width="40" height="8" rx="4" fill="#fff"/>`).join('')}
+<rect x="300" y="280" width="140" height="40" rx="6" fill="#2a2a2e"/><circle cx="340" cy="300" r="12" fill="#555"/><circle cx="400" cy="300" r="12" fill="#555"/>
+<path d="M560 320v-50h30" stroke="#c9ccd4" stroke-width="8" fill="none"/><rect x="520" y="300" width="100" height="22" rx="4" fill="#c9ccd4"/>
+<rect x="110" y="250" width="40" height="70" rx="8" fill="#fff"/><rect x="160" y="270" width="30" height="50" rx="6" fill="${p.wood}"/><path d="M690 320c-10-60 10-90 20-90s30 30 20 90z" fill="${p.wood}" opacity=".6"/>`),
+
+    house: (p) => svg(`<rect width="800" height="600" fill="${p.sky}"/><circle cx="640" cy="110" r="56" fill="#fff" opacity=".75"/>
+<path d="M-20 420Q300 360 840 410V600H-20z" fill="#c9a24a"/><path d="M-20 480Q400 440 840 470V600H-20z" fill="#b58a35"/>
+${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" fill="#fff"/><path d="M170 260L400 120 630 260z" fill="${p.accent}"/><path d="M400 120l230 140H400z" fill="#000" opacity=".1"/>
+<rect x="250" y="300" width="80" height="70" fill="${p.sky}" stroke="${p.wood}" stroke-width="6"/><rect x="470" y="300" width="80" height="70" fill="${p.sky}" stroke="${p.wood}" stroke-width="6"/><rect x="365" y="340" width="70" height="120" fill="${p.wood}"/><circle cx="420" cy="400" r="4" fill="#ffe3a3"/>
+<rect x="520" y="150" width="36" height="70" fill="${p.wood}"/><rect x="200" y="456" width="400" height="10" fill="${p.wood}" opacity=".3"/>
+<path d="M330 600l40-136h60l40 136z" fill="#e8dcc8" opacity=".8"/>
+<circle cx="110" cy="400" r="60" fill="${p.accent}" opacity=".55"/><rect x="104" y="400" width="12" height="70" fill="${p.wood}"/><circle cx="700" cy="410" r="48" fill="${p.accent}" opacity=".45"/><rect x="695" y="410" width="10" height="60" fill="${p.wood}"/>`)
+  };
+
+  const cache = {};
+  function uri(name, slug) {
+    const key = name + '|' + slug;
+    if (!cache[key]) {
+      const draw = ART[name];
+      if (!draw) return '';
+      cache[key] = 'data:image/svg+xml,' + encodeURIComponent(draw(PAL[slug] || PAL.finjani));
+    }
+    return cache[key];
+  }
+
+  // site-ის ასლში "demo:..." ბმულებს ნახატებით ცვლის
+  function apply(site) {
+    const copy = JSON.parse(JSON.stringify(site));
+    const walk = (o) => {
+      if (Array.isArray(o)) return o.forEach(walk);
+      if (o && typeof o === 'object') {
+        for (const k of Object.keys(o)) {
+          if (k === 'src' && typeof o[k] === 'string' && o[k].startsWith('demo:')) o[k] = uri(o[k].slice(5), copy.slug);
+          else walk(o[k]);
+        }
+      }
+    };
+    walk(copy);
+    return copy;
+  }
+
+  const api = { apply, uri, names: Object.keys(ART).filter((n) => !n.startsWith('__')) };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.DemoArt = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+/* ბილდერის backend: Firebase Auth (შესვლა) + Firestore (საიტები).
+   პარამეტრები public/js/firebase-config.js ფაილშია (window.FIREBASE_CONFIG).
+   თუ პარამეტრები არ არის, Backend.configured() აბრუნებს false-ს და გვერდები სატესტო რეჟიმში მუშაობს. */
+(function () {
+  'use strict';
+  if (window.__MOCK_BACKEND) { window.Backend = window.__MOCK_BACKEND; return; } // მხოლოდ ტესტებისთვის
+
+  const V = '11.0.2';
+  const CDN = (m) => `https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
+  const cfg = () => window.FIREBASE_CONFIG;
+  let boot = null;
+
+  function init() {
+    if (boot) return boot;
+    boot = (async () => {
+      if (!cfg() || !cfg().apiKey) return null;
+      const [app, A, F] = await Promise.all([import(CDN('app')), import(CDN('auth')), import(CDN('firestore'))]);
+      const a = app.initializeApp(cfg());
+      const auth = A.getAuth(a);
+      auth.languageCode = 'ka';
+      return { auth, A, db: F.getFirestore(a), F };
+    })();
+    return boot;
+  }
+  const need = async () => { const f = await init(); if (!f) throw Object.assign(new Error('not configured'), { code: 'bilderi/not-configured' }); return f; };
+  const uid = (f) => { const u = f.auth.currentUser; if (!u) throw Object.assign(new Error('signed out'), { code: 'bilderi/signed-out' }); return u.uid; };
+  const ms = (t) => (t && t.toMillis ? t.toMillis() : 0);
+  async function removePublished(f, slug) {
+    const F = f.F;
+    const imgs = await F.getDocs(F.collection(f.db, 'published', slug, 'images'));
+    await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
+    await F.deleteDoc(F.doc(f.db, 'published', slug));
+  }
+
+  const MSG = {
+    'auth/invalid-email': 'ელფოსტა არასწორადაა ჩაწერილი.',
+    'auth/missing-email': 'ჩაწერე ელფოსტა.',
+    'auth/missing-password': 'ჩაწერე პაროლი.',
+    'auth/invalid-credential': 'ელფოსტა ან პაროლი არასწორია.',
+    'auth/wrong-password': 'ელფოსტა ან პაროლი არასწორია.',
+    'auth/user-not-found': 'ამ ელფოსტით ანგარიში ვერ მოიძებნა.',
+    'auth/email-already-in-use': 'ამ ელფოსტით ანგარიში უკვე არსებობს. სცადე შესვლა.',
+    'auth/weak-password': 'პაროლი მინიმუმ 6 სიმბოლო უნდა იყოს.',
+    'auth/too-many-requests': 'ძალიან ბევრი მცდელობა იყო. ცოტა ხანში სცადე თავიდან.',
+    'auth/network-request-failed': 'ინტერნეტთან კავშირი ვერ მოხერხდა. შეამოწმე კავშირი და სცადე თავიდან.',
+    'auth/popup-blocked': 'ბრაუზერმა Google-ის ფანჯარა დაბლოკა. ნება დართე ამომხტარ ფანჯრებს და სცადე თავიდან.',
+    'auth/unauthorized-domain': 'ეს მისამართი Firebase-ში დაშვებულ დომენებში არ არის დამატებული.',
+    'auth/operation-not-allowed': 'შესვლის ეს გზა Firebase-ში ჯერ ჩართული არ არის.',
+    'auth/account-exists-with-different-credential': 'ეს ელფოსტა სხვა გზით არის დარეგისტრირებული. სცადე ელფოსტით და პაროლით შესვლა.',
+    'permission-denied': 'ამ საიტზე წვდომა არ გაქვს.',
+    'not-found': 'საიტი ვერ მოიძებნა. შეიძლება წაშლილია.',
+    'unavailable': 'სერვერთან კავშირი ვერ მოხერხდა. სცადე თავიდან.',
+    'bilderi/not-configured': 'შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია.',
+    'bilderi/signed-out': 'ჯერ შედი ანგარიშზე.',
+    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.',
+    'bilderi/slug-taken': 'ეს მისამართი უკვე დაკავებულია. Google-ის ჩანართში სხვა მისამართი აირჩიე.'
+  };
+
+  const B = {
+    configured: () => !!(cfg() && cfg().apiKey),
+    message(e) {
+      const c = (e && e.code) || '';
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return '';
+      return MSG[c] || MSG[c.replace(/^firestore\//, '')] || 'რაღაც შეცდომა მოხდა. სცადე თავიდან.';
+    },
+
+    async user() { const f = await init(); if (!f) return null; await f.auth.authStateReady(); return f.auth.currentUser; },
+    async google() { const f = await need(); const p = new f.A.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' }); return (await f.A.signInWithPopup(f.auth, p)).user; },
+    async signIn(email, pass) { const f = await need(); return (await f.A.signInWithEmailAndPassword(f.auth, email, pass)).user; },
+    async signUp(name, email, pass) {
+      const f = await need();
+      const c = await f.A.createUserWithEmailAndPassword(f.auth, email, pass);
+      if (name) await f.A.updateProfile(c.user, { displayName: name });
+      try { await f.A.sendEmailVerification(c.user); } catch (e) { /* არ არის აუცილებელი */ }
+      return c.user;
+    },
+    async reset(email) { const f = await need(); return f.A.sendPasswordResetEmail(f.auth, email); },
+    async signOut() { const f = await init(); if (f) await f.A.signOut(f.auth); },
+
+    async listSites() {
+      const f = await need(), F = f.F;
+      const snap = await F.getDocs(F.query(F.collection(f.db, 'sites'), F.where('owner', '==', uid(f))));
+      return snap.docs.map((d) => {
+        const x = d.data();
+        let data = {};
+        try { data = JSON.parse(x.data || '{}'); } catch (e) { /* დაზიანებული ჩანაწერი */ }
+        return { id: d.id, name: x.name, slug: x.slug, live: x.publishedSlug || null, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
+      }).sort((a, b) => b.updated - a.updated);
+    },
+    async createSite(site) {
+      const f = await need(), F = f.F;
+      const ref = await F.addDoc(F.collection(f.db, 'sites'), { owner: uid(f), name: site.name || '', slug: site.slug || '', data: JSON.stringify(site), published: null, createdAt: F.serverTimestamp(), updatedAt: F.serverTimestamp() });
+      return ref.id;
+    },
+    async loadSite(id) {
+      const f = await need(), F = f.F;
+      uid(f);
+      const snap = await F.getDoc(F.doc(f.db, 'sites', id));
+      if (!snap.exists()) throw Object.assign(new Error('missing'), { code: 'not-found' });
+      const x = snap.data();
+      const imgs = {};
+      (await F.getDocs(F.collection(f.db, 'sites', id, 'images'))).forEach((d) => { imgs[d.id] = d.data().data; });
+      return { site: JSON.parse(x.data), imgs, published: x.published || null };
+    },
+    async saveSite(id, site, published) {
+      const f = await need(), F = f.F;
+      await F.updateDoc(F.doc(f.db, 'sites', id), { name: site.name || '', slug: site.slug || '', data: JSON.stringify(site), published: published || null, updatedAt: F.serverTimestamp() });
+    },
+    async saveImage(id, imgId, dataUrl) {
+      const f = await need(), F = f.F;
+      if (dataUrl.length > 1000000) throw Object.assign(new Error('too big'), { code: 'bilderi/too-big' });
+      await F.setDoc(F.doc(f.db, 'sites', id, 'images', imgId), { owner: uid(f), data: dataUrl });
+    },
+    async slugStatus(slug, siteId) {
+      const f = await need(), F = f.F, u = uid(f);
+      const s = await F.getDoc(F.doc(f.db, 'published', slug));
+      if (!s.exists()) return 'free';
+      const x = s.data();
+      return x.owner === u && x.siteId === siteId ? 'mine' : 'taken';
+    },
+    async getPublished(slug) {
+      const f = await need(), F = f.F;
+      const s = await F.getDoc(F.doc(f.db, 'published', slug));
+      return s.exists() ? JSON.parse(s.data().data || 'null') : null;
+    },
+    async publish(siteId, slug, payload, imgs) {
+      const f = await need(), F = f.F, u = uid(f);
+      const ref = F.doc(f.db, 'published', slug);
+      const cur = await F.getDoc(ref);
+      if (cur.exists() && (cur.data().owner !== u || cur.data().siteId !== siteId)) throw Object.assign(new Error('taken'), { code: 'bilderi/slug-taken' });
+      const siteRef = F.doc(f.db, 'sites', siteId);
+      const sdoc = await F.getDoc(siteRef);
+      const old = sdoc.exists() ? sdoc.data().publishedSlug : null;
+      const used = [...new Set((JSON.stringify(payload).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)))].filter((id) => imgs[id]);
+      const have = cur.exists() ? cur.data().imgs || [] : [];
+      await F.setDoc(ref, { owner: u, siteId, data: JSON.stringify(payload), imgs: used, updatedAt: F.serverTimestamp() });
+      for (const id of used) if (!have.includes(id)) await F.setDoc(F.doc(f.db, 'published', slug, 'images', id), { owner: u, data: imgs[id] });
+      if (old && old !== slug) { try { await removePublished(f, old); } catch (e) { /* ძველი მისამართი უკვე წაშლილია */ } }
+      await F.updateDoc(siteRef, { publishedSlug: slug });
+    },
+    async deleteSite(id) {
+      const f = await need(), F = f.F;
+      uid(f);
+      const sd = await F.getDoc(F.doc(f.db, 'sites', id));
+      const live = sd.exists() ? sd.data().publishedSlug : null;
+      if (live) { try { await removePublished(f, live); } catch (e) { /* უკვე წაშლილია */ } }
+      const imgs = await F.getDocs(F.collection(f.db, 'sites', id, 'images'));
+      await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
+      await F.deleteDoc(F.doc(f.db, 'sites', id));
+    }
+  };
+  window.Backend = B;
+})();
+
+</script>
+<script>
+{
+  const SITE_ORIGIN = 'https://bilderi.pages.dev';
+  const ID = new URLSearchParams(location.search).get('site');
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const DEALS = { sale: 'იყიდება', rent: 'ქირავდება', daily: 'დღიურად' };
+  const STATES = { '': 'აქტიური', reserved: 'დაჯავშნილია', sold: 'გაყიდულია', rented: 'გაქირავებულია' };
+  const TYPES = ['ბინა', 'კერძო სახლი', 'აგარაკი', 'კომერციული ფართი', 'მიწის ნაკვეთი', 'ოფისი'];
+  const CONDS = ['ახალი რემონტი', 'ძველი რემონტი', 'მიმდინარე რემონტი', 'თეთრი კარკასი', 'შავი კარკასი', 'მწვანე კარკასი', 'დიზაინერული რემონტი'];
+  const FEATS = ['აივანი', 'ლიფტი', 'პარკინგი', 'ცენტრალური გათბობა', 'კონდიციონერი', 'ავეჯით', 'ტექნიკით', 'ბუნებრივი აირი', 'ინტერნეტი', 'სარდაფი', 'ეზო', 'ბუხარი', 'ტერასა', 'ხედით'];
+  const I = {
+    edit: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    left: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    right: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>',
+    x: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    plus: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+  };
+  let site = null, IMGS = {}, published = null, uploaded = new Set(), tab = 'list', q = '', fDeal = '', editing = null, draft = null, toastT = 0;
+  const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200); };
+  const money = (n, cur) => { const s = String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return cur === '₾' ? s + ' ₾' : '$' + s; };
+  const srcOf = (src) => (!src ? '' : src.startsWith('img:') ? IMGS[src.slice(4)] || '' : src.startsWith('demo:') ? (window.DemoArt ? DemoArt.uri(src.slice(5), site.artKey || 'kvadrati') : '') : src);
+  const liveUrl = () => SITE_ORIGIN + '/s/' + site.slug + '/';
+
+  /* ---------- ფოტოს შეკუმშვა (როგორც რედაქტორში) ---------- */
+  const compress = (file) => new Promise((res, rej) => {
+    if (!/^image\//.test(file.type)) return rej(new Error('type'));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, 1600 / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      let qq = 0.82, out = cv.toDataURL('image/jpeg', qq);
+      while (out.length > 900000 && qq > 0.45) { qq -= 0.12; out = cv.toDataURL('image/jpeg', qq); }
+      res(out);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('read')); };
+    im.src = url;
+  });
+
+  /* ---------- შენახვა და გამოქვეყნება ---------- */
+  async function persist(msg) {
+    const used = new Set((JSON.stringify(site).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)));
+    for (const id of used) if (!uploaded.has(id) && IMGS[id]) { await Backend.saveImage(ID, id, IMGS[id]); uploaded.add(id); }
+    let live = false;
+    if (published) {
+      // საიტი უკვე გამოქვეყნებულია: ცვლილება მაშინვე საიტზეც ჩანს
+      const prev = await Backend.getPublished(site.slug).catch(() => null);
+      const payload = clone(site);
+      payload.brand = payload.brand || {};
+      if (prev && prev.brand && prev.brand.favicon) payload.brand.favicon = prev.brand.favicon;
+      if (prev && prev.meta && prev.meta.image && !(payload.meta && payload.meta.image)) { payload.meta = payload.meta || {}; payload.meta.image = prev.meta.image; }
+      await Backend.publish(ID, site.slug, payload, IMGS);
+      published = JSON.stringify(site);
+      live = true;
+    }
+    await Backend.saveSite(ID, site, published);
+    toast(msg + (live ? '. საიტზეც განახლდა.' : '. საიტზე გამოჩნდება გამოქვეყნების შემდეგ.'));
+  }
+
+  /* ---------- სია ---------- */
+  function vList() {
+    const L = site.listings || (site.listings = []);
+    const act = L.filter((l) => !l.state && !l.hidden).length;
+    const shown = L.filter((l) => (!fDeal || (fDeal === 'done' ? ['sold', 'rented'].includes(l.state) : (l.deal || 'sale') === fDeal && !['sold', 'rented'].includes(l.state)))
+      && (!q || [l.title, l.district, l.address, l.ref].join(' ').toLowerCase().includes(q.toLowerCase())));
+    const pub = `<div class="pub${published ? '' : ' off'}"><span><span class="dot"></span>${published ? 'საიტი გამოქვეყნებულია. ცვლილებები საიტზე მაშინვე ჩანს.' : 'საიტი ჯერ არ გამოქვეყნებულა. გამოაქვეყნე დიზაინის რედაქტორიდან.'}</span>${published ? `<a class="lnk" href="${esc(liveUrl())}" target="_blank" rel="noopener">${esc(liveUrl().replace('https://', ''))}</a>` : `<a class="btn btn-red btn-sm" href="/editor/?site=${encodeURIComponent(ID)}">გამოქვეყნება</a>`}</div>`;
+    const stats = `<div class="stats"><div class="stat"><b>${act}</b><span>აქტიური</span></div><div class="stat"><b>${L.filter((l) => l.deal === 'rent' && !l.state).length}</b><span>ქირავდება</span></div><div class="stat"><b>${L.filter((l) => l.state === 'reserved').length}</b><span>დაჯავშნილი</span></div><div class="stat"><b>${L.filter((l) => ['sold', 'rented'].includes(l.state)).length}</b><span>დასრულებული</span></div></div>`;
+    if (!L.length) return pub + `<div class="empty"><h2>პირველი ბინა დაამატე</h2><p>ფოტოები, ფასი და ძირითადი ინფორმაცია. ორი წუთის საქმეა და საიტზე მაშინვე გამოჩნდება.</p><button class="btn btn-red" type="button" data-new>${I.plus}ბინის დამატება</button></div>`;
+    return pub + stats + `<div class="bar"><input class="inp" type="search" id="q" placeholder="ძებნა: სათაური, უბანი, ID" value="${esc(q)}"><div class="chips">${[['', 'ყველა'], ['sale', 'იყიდება'], ['rent', 'ქირავდება'], ['done', 'დასრულებული']].map(([v, l]) => `<button type="button" data-fd="${v}" aria-pressed="${fDeal === v}">${l}</button>`).join('')}</div></div>
+<div class="list">${shown.map((l) => { const ph = (l.photos || [])[0], src = ph && srcOf(ph.src); return `<article class="row">${src ? `<img src="${esc(src)}" alt="">` : '<div class="noimg"></div>'}<div><h3>${esc(l.title || 'უსათაურო')}</h3><p><span class="pill ${esc(l.deal || 'sale')}">${DEALS[l.deal] || DEALS.sale}</span>${l.state ? `<span class="pill ${esc(l.state)}">${STATES[l.state]}</span>` : ''}${l.hidden ? '<span class="pill hid">დამალულია</span>' : ''}${esc([l.district, l.rooms && l.rooms + ' ოთახი', l.area && l.area + ' მ²'].filter(Boolean).join(', '))}</p><div class="pr">${money(l.price, l.currency)}${l.deal === 'rent' ? ' / თვე' : ''} <span style="font-weight:500;font-size:13px;color:var(--muted)">#${esc(l.ref || l.id)}</span></div></div>
+<div class="acts"><select class="inp" data-state="${esc(l.id)}" aria-label="სტატუსი" style="min-height:40px;width:auto;padding:6px 10px;font-size:14px">${Object.entries(STATES).map(([v, t]) => `<option value="${v}"${(l.state || '') === v ? ' selected' : ''}>${t}</option>`).join('')}</select><button class="ib" type="button" data-edit="${esc(l.id)}" aria-label="რედაქტირება">${I.edit}</button><button class="ib" type="button" data-del="${esc(l.id)}" aria-label="წაშლა">${I.del}</button></div></article>`; }).join('') || '<p style="color:var(--muted);padding:20px 4px">ასეთი განცხადება ვერ მოიძებნა.</p>'}</div>`;
+  }
+
+  /* ---------- კონტაქტი და აგენტი ---------- */
+  function vInfo() {
+    const c = site.contact || {}, a = site.agent || {}, aimg = a.image && srcOf(a.image.src);
+    return `<form id="info"><div class="card"><h2>აგენტი</h2><p class="hint" style="margin:0 0 14px">ეს ბარათი ყველა ბინის გვერდზე ჩანს, ღილაკებით „მოწერა" და „დარეკვა".</p>
+<div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">${aimg ? `<img src="${esc(aimg)}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover">` : '<div style="width:72px;height:72px;border-radius:50%;background:var(--soft)"></div>'}<button class="btn btn-line btn-sm" type="button" id="ag-ph">ფოტოს ${aimg ? 'შეცვლა' : 'ატვირთვა'}</button></div>
+<div class="g2"><label class="fld"><span class="lt">სახელი</span><input class="inp" name="a.name" value="${esc(a.name)}"></label><label class="fld"><span class="lt">როლი</span><input class="inp" name="a.role" value="${esc(a.role)}" placeholder="უძრავი ქონების აგენტი"></label>
+<label class="fld"><span class="lt">ტელეფონი</span><input class="inp" name="a.phone" value="${esc(a.phone)}" inputmode="tel"></label><label class="fld"><span class="lt">WhatsApp</span><input class="inp" name="a.whatsapp" value="${esc(a.whatsapp)}" inputmode="tel" placeholder="995555123456"></label></div></div>
+<div class="card"><h2>ოფისი</h2><div class="g2"><label class="fld"><span class="lt">ტელეფონი</span><input class="inp" name="c.phone" value="${esc(c.phone)}" inputmode="tel"></label><label class="fld"><span class="lt">WhatsApp</span><input class="inp" name="c.whatsapp" value="${esc(c.whatsapp)}" inputmode="tel"></label></div>
+<label class="fld"><span class="lt">მისამართი</span><input class="inp" name="c.address" value="${esc(c.address)}"></label><div class="g2"><label class="fld"><span class="lt">Instagram</span><input class="inp" name="c.instagram" value="${esc(c.instagram)}"></label><label class="fld"><span class="lt">Facebook</span><input class="inp" name="c.facebook" value="${esc(c.facebook)}"></label></div></div>
+<button class="btn btn-red wide" type="submit">შენახვა</button></form>`;
+  }
+
+  function render() {
+    $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+    $('#main').innerHTML = tab === 'list' ? vList() : vInfo();
+    $('#fab').hidden = tab !== 'list' || !(site.listings || []).length;
+    const qi = $('#q'); if (qi) qi.addEventListener('input', () => { q = qi.value; const p = qi.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); });
+  }
+
+  /* ---------- ბინის ფორმა ---------- */
+  const val = (l, k) => esc(l[k] ?? '');
+  function vForm() {
+    const l = draft;
+    const sel = (name, list, cur, ph) => `<select class="inp" name="${name}">${ph ? `<option value="">${ph}</option>` : ''}${list.map((v) => `<option${v === cur ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select>`;
+    return `<div class="sec-t">ფოტოები</div><div class="photos">${(l.photos || []).map((ph, k) => `<div class="ph"><img src="${esc(srcOf(ph.src))}" alt="">${k === 0 ? '<span class="cv">მთავარი</span>' : ''}<div class="ov"><button type="button" data-pm="${k}" data-d="-1" aria-label="მარცხნივ"${k === 0 ? ' disabled' : ''}>${I.left}</button><button type="button" data-pd="${k}" aria-label="წაშლა">${I.x}</button><button type="button" data-pm="${k}" data-d="1" aria-label="მარჯვნივ">${I.right}</button></div></div>`).join('')}<button class="addph" type="button" id="addph">${I.plus}ფოტოები</button></div><p class="hint" style="margin:0 0 16px">პირველი ფოტო ბარათზე ჩანს. რამდენიმე ერთად შეგიძლია აირჩიო.</p>
+<div class="seg" role="group" aria-label="გარიგება">${Object.entries(DEALS).map(([v, t]) => `<button type="button" data-deal="${v}" aria-pressed="${(l.deal || 'sale') === v}">${t}</button>`).join('')}</div>
+<label class="fld"><span class="lt">სათაური</span><input class="inp" name="title" value="${val(l, 'title')}" placeholder="მაგ. 3 ოთახიანი ბინა ვაკის პარკთან" required maxlength="90"></label>
+<div class="g2"><label class="fld"><span class="lt">ფასი</span><input class="inp" name="price" value="${val(l, 'price')}" inputmode="numeric" placeholder="125000" required></label><label class="fld"><span class="lt">ვალუტა</span>${sel('currency', ['$', '₾'], l.currency || '$')}</label></div>
+<div class="g3"><label class="fld"><span class="lt">ფართი, მ²</span><input class="inp" name="area" value="${val(l, 'area')}" inputmode="decimal"></label><label class="fld"><span class="lt">ოთახები</span><input class="inp" name="rooms" value="${val(l, 'rooms')}" inputmode="numeric"></label><label class="fld"><span class="lt">საძინებელი</span><input class="inp" name="bedrooms" value="${val(l, 'bedrooms')}" inputmode="numeric"></label>
+<label class="fld"><span class="lt">სართული</span><input class="inp" name="floor" value="${val(l, 'floor')}" inputmode="numeric"></label><label class="fld"><span class="lt">სართულები სულ</span><input class="inp" name="floors" value="${val(l, 'floors')}" inputmode="numeric"></label><label class="fld"><span class="lt">ტიპი</span>${sel('type', TYPES, l.type || 'ბინა')}</label></div>
+<div class="g2"><label class="fld"><span class="lt">უბანი</span><input class="inp" name="district" value="${val(l, 'district')}" placeholder="მაგ. ვაკე" list="dl-d"></label><label class="fld"><span class="lt">მისამართი</span><input class="inp" name="address" value="${val(l, 'address')}" placeholder="ქუჩა და ნომერი"></label></div>
+<datalist id="dl-d">${[...new Set((site.listings || []).map((x) => x.district).filter(Boolean))].map((d) => `<option value="${esc(d)}">`).join('')}</datalist>
+<label class="fld"><span class="lt">მდგომარეობა</span>${sel('condition', CONDS, l.condition, 'აირჩიე')}</label>
+<div class="sec-t">რა არის</div><div class="feats">${[...new Set([...FEATS, ...(l.features || [])])].map((f) => `<label><input type="checkbox" name="feat" value="${esc(f)}"${(l.features || []).includes(f) ? ' checked' : ''}>${esc(f)}</label>`).join('')}</div>
+<label class="fld"><span class="lt">აღწერა</span><textarea class="inp" name="desc" rows="5" placeholder="რით არის კარგი ეს ბინა, ხედი, მეზობლობა, ტრანსპორტი...">${esc(l.desc || '')}</textarea></label>
+<label class="togl">რჩეული (სიაში პირველი ჩანს)<input type="checkbox" name="featured"${l.featured ? ' checked' : ''}></label>
+<label class="togl">დამალვა საიტიდან<input type="checkbox" name="hidden"${l.hidden ? ' checked' : ''}></label>`;
+  }
+  const readForm = () => {
+    const f = $('#form'), g = (n) => (f.elements[n] ? f.elements[n].value.trim() : '');
+    const num = (n) => { const v = g(n).replace(/[\s,]/g, ''); return v === '' ? '' : Number(v); };
+    Object.assign(draft, { title: g('title'), price: num('price'), currency: g('currency') || '$', area: num('area'), rooms: num('rooms'), bedrooms: num('bedrooms'), floor: num('floor'), floors: num('floors'), type: g('type'), district: g('district'), address: g('address'), condition: g('condition'), desc: f.elements.desc.value.trim(),
+      features: $$('input[name=feat]:checked', f).map((x) => x.value), featured: f.elements.featured.checked, hidden: f.elements.hidden.checked });
+  };
+  const drawForm = () => { const st = $('#f-body').scrollTop; $('#f-body').innerHTML = vForm(); $('#f-body').scrollTop = st; };
+  let lastFocus = null;
+  function openForm(id) {
+    editing = id;
+    const L = site.listings || [];
+    const cur = id ? L.find((x) => x.id === id) : null;
+    draft = cur ? clone(cur) : { deal: 'sale', currency: '$', type: 'ბინა', photos: [], features: [] };
+    $('#f-t').textContent = cur ? 'განცხადების შეცვლა' : 'ახალი განცხადება';
+    drawForm();
+    lastFocus = document.activeElement;
+    $('#sheet').classList.add('open'); $('#sheet').setAttribute('aria-hidden', 'false');
+    setTimeout(() => { const t = $('#form').elements.title; if (t && !cur) t.focus(); }, 60);
+  }
+  const closeForm = () => { $('#sheet').classList.remove('open'); $('#sheet').setAttribute('aria-hidden', 'true'); if (lastFocus && lastFocus.focus) lastFocus.focus(); };
+
+  let fileTarget = 'listing';
+  $('#file').addEventListener('change', async () => {
+    const files = Array.from($('#file').files || []);
+    let n = 0;
+    for (const f of files) {
+      try {
+        const data = await compress(f);
+        const id = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        IMGS[id] = data; n++;
+        if (fileTarget === 'agent') { site.agent = site.agent || {}; site.agent.image = { src: 'img:' + id, alt: site.agent.name || '' }; }
+        else { readForm(); draft.photos = draft.photos || []; draft.photos.push({ src: 'img:' + id, alt: draft.title || '' }); }
+      } catch (e) { toast('ეს ფაილი ფოტოდ ვერ წავიკითხე. სცადე JPG ან PNG.'); }
+    }
+    if (!n) return;
+    if (fileTarget === 'agent') { try { await persist('ფოტო შეინახა'); } catch (e) { toast(Backend.message(e)); } render(); }
+    else { drawForm(); toast(n > 1 ? `დაემატა ${n} ფოტო` : 'ფოტო დაემატა'); }
+  });
+
+  /* ---------- მოქმედებები ---------- */
+  document.addEventListener('click', async (e) => {
+    const t = e.target;
+    if (t.closest('[data-close]') || t === $('#sheet')) return closeForm();
+    const tb = t.closest('[data-tab]'); if (tb) { tab = tb.dataset.tab; return render(); }
+    if (t.closest('[data-new]') || t.closest('#fab')) return openForm(null);
+    const fd = t.closest('[data-fd]'); if (fd) { fDeal = fd.dataset.fd; return render(); }
+    const ed = t.closest('[data-edit]'); if (ed) return openForm(ed.dataset.edit);
+    const dl = t.closest('[data-del]');
+    if (dl) {
+      const l = site.listings.find((x) => x.id === dl.dataset.del);
+      if (!confirm(`„${l.title}" წაიშლება საიტიდან. გავაგრძელოთ?`)) return;
+      site.listings = site.listings.filter((x) => x !== l); render();
+      try { await persist('განცხადება წაიშალა'); } catch (err) { toast(Backend.message(err)); }
+      return;
+    }
+    if (t.closest('#addph')) { fileTarget = 'listing'; $('#file').multiple = true; $('#file').value = ''; return $('#file').click(); }
+    if (t.closest('#ag-ph')) { fileTarget = 'agent'; $('#file').multiple = false; $('#file').value = ''; return $('#file').click(); }
+    const dbtn = t.closest('[data-deal]'); if (dbtn) { readForm(); draft.deal = dbtn.dataset.deal; return drawForm(); }
+    const pm = t.closest('[data-pm]');
+    if (pm) { readForm(); const k = +pm.dataset.pm, j = k + +pm.dataset.d, a = draft.photos; if (j >= 0 && j < a.length) { [a[k], a[j]] = [a[j], a[k]]; drawForm(); } return; }
+    const pd = t.closest('[data-pd]'); if (pd) { readForm(); draft.photos.splice(+pd.dataset.pd, 1); return drawForm(); }
+  });
+  document.addEventListener('change', async (e) => {
+    const s = e.target.closest('[data-state]');
+    if (!s) return;
+    const l = site.listings.find((x) => x.id === s.dataset.state);
+    if (s.value) l.state = s.value; else delete l.state;
+    render();
+    try { await persist('სტატუსი შეიცვალა'); } catch (err) { toast(Backend.message(err)); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#sheet').classList.contains('open')) closeForm(); });
+
+  $('#form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    readForm();
+    const f = $('#form');
+    if (!draft.title) { f.elements.title.setAttribute('aria-invalid', 'true'); f.elements.title.focus(); return toast('ჩაწერე სათაური.'); }
+    if (draft.price === '' || isNaN(draft.price)) { f.elements.price.setAttribute('aria-invalid', 'true'); f.elements.price.focus(); return toast('ჩაწერე ფასი ციფრებით.'); }
+    for (const k of Object.keys(draft)) if (draft[k] === '' || draft[k] === false || (Array.isArray(draft[k]) && !draft[k].length && k !== 'photos')) delete draft[k];
+    const L = site.listings || (site.listings = []);
+    if (editing) { const i = L.findIndex((x) => x.id === editing); L[i] = draft; }
+    else {
+      const max = L.reduce((m, x) => Math.max(m, Number(x.ref) || 1000), 1000);
+      draft.ref = String(max + 1);
+      draft.id = 'l' + Date.now().toString(36);
+      L.unshift(draft);
+    }
+    const b = $('#f-save'); b.disabled = true; b.textContent = 'ინახება…';
+    try { await persist(editing ? 'განცხადება შეიცვალა' : 'განცხადება დაემატა'); closeForm(); render(); }
+    catch (err) { toast(Backend.message(err)); }
+    b.disabled = false; b.textContent = 'შენახვა';
+  });
+  document.addEventListener('submit', async (e) => {
+    if (e.target.id !== 'info') return;
+    e.preventDefault();
+    const f = e.target; site.agent = site.agent || {}; site.contact = site.contact || {};
+    for (const el of f.elements) { if (!el.name) continue; const [o, k] = el.name.split('.'); (o === 'a' ? site.agent : site.contact)[k] = el.value.trim(); }
+    try { await persist('შენახულია'); } catch (err) { toast(Backend.message(err)); }
+  });
+
+  /* ---------- ჩატვირთვა ---------- */
+  (async () => {
+    if (!ID) { $('#main').innerHTML = '<div class="state"><p>საიტი არ არის არჩეული.</p><a class="btn btn-line" href="/app/">ჩემი საიტები</a></div>'; return; }
+    if (!Backend.configured()) { $('#main').innerHTML = '<div class="state"><p>შესვლა ჯერ ჩართული არ არის.</p></div>'; return; }
+    let u = null;
+    try { u = await Backend.user(); } catch (e) { /* ქვემოთ */ }
+    if (!u) { location.href = '/login/?next=' + encodeURIComponent('/admin/?site=' + ID); return; }
+    try {
+      const r = await Backend.loadSite(ID);
+      site = r.site; IMGS = r.imgs || {}; published = r.published || null;
+      Object.keys(IMGS).forEach((k) => uploaded.add(k));
+    } catch (e) { $('#main').innerHTML = `<div class="state"><p>${esc(Backend.message(e))}</p><a class="btn btn-line" href="/app/">ჩემი საიტები</a></div>`; return; }
+    $('#s-name').textContent = site.name || 'საიტი';
+    document.title = (site.name || 'საიტი') + ', ადმინ პანელი';
+    $('#design').href = '/editor/?site=' + encodeURIComponent(ID);
+    if (published) { $('#view').hidden = false; $('#view').href = liveUrl(); }
+    if (!site.listings && !(site.sections || []).some((s) => s.type === 'listings')) tab = 'info';
+    render();
+  })();
+}
+</script>
+</body>
+</html>

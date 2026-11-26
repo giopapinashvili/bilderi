@@ -1,0 +1,222 @@
+{
+  "template": "supra",
+  "slug": "gumeli",
+  "name": "ღუმელი",
+  "kind": "პიცერია და მიტანა",
+  "category": "food",
+  "meta": {
+    "title": "ღუმელი, ნეაპოლიტანური პიცა და მიტანა",
+    "description": "პიცა შეშის ღუმელიდან. მიტანა თბილისში 40 წუთში, ყოველდღე 01:00-მდე."
+  },
+  "theme": {
+    "style": "poster",
+    "font": "modern",
+    "corners": "sharp",
+    "colors": {
+      "bg": "#ffffff",
+      "ink": "#1b1b1b",
+      "surface": "#ffe8a3",
+      "accent": "#d7261e",
+      "accentInk": "#ffffff"
+    }
+  },
+  "contact": {
+    "phone": "+995 322 44 55 66",
+    "whatsapp": "995555445566",
+    "address": "აღმაშენებლის გამზ. 112, თბილისი",
+    "instagram": "gumeli.pizza"
+  },
+  "hours": [
+    {
+      "days": "ყოველდღე",
+      "time": "12:00–01:00"
+    }
+  ],
+  "navButton": {
+    "label": "შეკვეთა",
+    "link": "@phone",
+    "bar": true
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "variant": "poster",
+      "tone": "accent",
+      "tagline": "ნეაპოლიტანური პიცა შეშის ღუმელიდან. 90 წამი 450 გრადუსზე და 40 წუთში შენს კართანაა.",
+      "note": "მიტანა ყოველდღე 01:00-მდე",
+      "image": {
+        "src": "demo:pizza",
+        "alt": "პიცა მარგარიტა"
+      },
+      "buttons": [
+        {
+          "label": "შეკვეთა Wolt-ზე",
+          "link": "https://wolt.com/"
+        },
+        {
+          "label": "დარეკვა",
+          "link": "@phone"
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "id": "menu",
+      "tone": "base",
+      "layout": "photos",
+      "title": "მენიუ",
+      "note": "ყველა პიცა 32 სანტიმეტრია. ცომი 48 საათი დგება.",
+      "categories": [
+        {
+          "name": "პიცა",
+          "items": [
+            {
+              "name": "მარგარიტა",
+              "price": 22,
+              "desc": "პომიდორი, მოცარელა, რეჰანი",
+              "image": {
+                "src": "demo:pizza",
+                "alt": "მარგარიტა"
+              }
+            },
+            {
+              "name": "პეპერონი",
+              "price": 27,
+              "tag": "ცხარე",
+              "desc": "პომიდორი, მოცარელა, ცხარე პეპერონი",
+              "image": {
+                "src": "demo:pizza2",
+                "alt": "პეპერონი"
+              }
+            },
+            {
+              "name": "სოკოს თეთრი",
+              "price": 26,
+              "desc": "ნაღები, სულგუნი, შემწვარი სოკო",
+              "image": {
+                "src": "demo:pizza3",
+                "alt": "თეთრი პიცა სოკოთი"
+              }
+            }
+          ]
+        },
+        {
+          "name": "დანარჩენი",
+          "items": [
+            {
+              "name": "აჭარული ღუმელიდან",
+              "price": 18,
+              "desc": "იმერული ყველი, კვერცხი, კარაქი",
+              "image": {
+                "src": "demo:khachapuri",
+                "alt": "აჭარული ხაჭაპური"
+              }
+            },
+            {
+              "name": "სახლის ლიმონათი",
+              "price": 6,
+              "desc": "ტარხუნა, მსხალი ან ლიმონი",
+              "image": {
+                "src": "demo:drink",
+                "alt": "ლიმონათი"
+              }
+            },
+            {
+              "name": "ტირამისუ",
+              "price": 12,
+              "image": {
+                "src": "demo:cake",
+                "alt": "ტირამისუ"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "steps",
+      "tone": "surface",
+      "title": "როგორ შევუკვეთოთ",
+      "items": [
+        {
+          "title": "აირჩიე პიცა",
+          "text": "მენიუ ზემოთაა. ნახევარ-ნახევარიც შეიძლება."
+        },
+        {
+          "title": "შეუკვეთე, როგორც გირჩევნია",
+          "text": "Wolt, Glovo ან პირდაპირ დაგვირეკე, ასე 10%-ით იაფია."
+        },
+        {
+          "title": "მიიღე 40 წუთში",
+          "text": "თბილისის ცენტრში. შორეულ უბნებში ცოტა მეტი."
+        }
+      ],
+      "buttons": [
+        {
+          "label": "Wolt",
+          "link": "https://wolt.com/"
+        },
+        {
+          "label": "Glovo",
+          "link": "https://glovoapp.com/",
+          "style": "outline"
+        },
+        {
+          "label": "დარეკვა",
+          "link": "@phone",
+          "style": "outline"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "kind": "features",
+      "layout": "icons",
+      "tone": "base",
+      "title": "რატომ ღუმელი",
+      "inNav": false,
+      "items": [
+        {
+          "icon": "fire",
+          "title": "შეშის ღუმელი",
+          "text": "450 გრადუსი, ამიტომ კიდე ფუმფულაა და ძირი თხელი."
+        },
+        {
+          "icon": "clock",
+          "title": "40 წუთში",
+          "text": "თუ დავაგვიანეთ, შემდეგი ლიმონათი ჩვენზეა."
+        },
+        {
+          "icon": "truck",
+          "title": "უფასო მიტანა",
+          "text": "30 ₾-ზე მეტ შეკვეთაზე."
+        },
+        {
+          "icon": "card",
+          "title": "ბარათით ან ნაღდით",
+          "text": "კურიერს ტერმინალი აქვს."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "tone": "inverse",
+      "inNav": false,
+      "title": "წვეულებას გეგმავ?",
+      "text": "ათ პიცაზე მეტის შეკვეთისას 15% ფასდაკლებაა. ერთი დღით ადრე მოგვწერე.",
+      "buttons": [
+        {
+          "label": "მოგვწერე",
+          "link": "@whatsapp"
+        }
+      ]
+    },
+    {
+      "type": "visit",
+      "id": "visit",
+      "tone": "surface",
+      "title": "ადგილზეც მოდი",
+      "note": "დარბაზში 30 ადგილია. ღუმელს დახლიდან უყურებ."
+    }
+  ]
+}

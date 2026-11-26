@@ -1,6 +1,8 @@
 /* ბილდერის Worker.
    /s/{slug}/        → გამოქვეყნებული საიტი (Firestore-იდან, შაბლონით აწყობილი)
    /s/{slug}/i/{id}  → გამოქვეყნებული საიტის ფოტო
+   /s/{slug}/p/{id}/ → ერთი განცხადების / ბარათის გვერდი
+   /s/{slug}/admin   → საიტის მფლობელის ადმინ პანელი
    დანარჩენი ყველაფერი → public/ საქაღალდის ფაილები */
 import Supra from './templates/supra.js';
 import DemoArt from './demo-art.js';
@@ -20,6 +22,9 @@ export default {
     try {
       if (img) return await image(slug, img[1]);
       if (rest === '/') return await page(slug, url.origin);
+      const pg = rest.match(/^\/p\/([\w-]{1,40})\/?$/);
+      if (pg) return rest.endsWith('/') ? await page(slug, url.origin, pg[1]) : Response.redirect(`${url.origin}/s/${slug}/p/${pg[1]}/`, 301);
+      if (rest === '/admin' || rest === '/admin/') return await admin(slug, url.origin);
     } catch (e) {
       return html(errorPage('საიტი ახლა ვერ ჩაიტვირთა', 'სერვერთან კავშირი ვერ მოხერხდა. სცადე ცოტა ხანში.'), 502);
     }
@@ -52,11 +57,19 @@ export function prepare(site, origin, slug) {
   return site;
 }
 
-async function page(slug, origin) {
+async function page(slug, origin, item) {
   const f = await getDoc('published/' + slug);
   if (!f || !f.data) return html(freePage(slug), 404);
   const site = prepare(JSON.parse(f.data.stringValue), origin, slug);
-  return html(Supra.renderSite(site), 200, 'public, max-age=30');
+  if (item && !(site.listings || []).some((l) => l.id === item && !l.hidden)) return html(Supra.renderSite(site, { page: item }), 404);
+  return html(Supra.renderSite(site, item ? { page: item } : undefined), 200, 'public, max-age=30');
+}
+
+async function admin(slug, origin) {
+  const f = await getDoc('published/' + slug);
+  const id = f && f.siteId && f.siteId.stringValue;
+  if (!id) return html(freePage(slug), 404);
+  return Response.redirect(`${origin}/admin/?site=${encodeURIComponent(id)}`, 302);
 }
 
 async function image(slug, id) {

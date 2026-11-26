@@ -118,6 +118,11 @@
       const x = s.data();
       return x.owner === u && x.siteId === siteId ? 'mine' : 'taken';
     },
+    async getPublished(slug) {
+      const f = await need(), F = f.F;
+      const s = await F.getDoc(F.doc(f.db, 'published', slug));
+      return s.exists() ? JSON.parse(s.data().data || 'null') : null;
+    },
     async publish(siteId, slug, payload, imgs) {
       const f = await need(), F = f.F, u = uid(f);
       const ref = F.doc(f.db, 'published', slug);
