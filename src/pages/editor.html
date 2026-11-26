@@ -432,6 +432,8 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     faq: sv('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>'),
     steps: sv('<path d="M4 18h5v-5h5V8h6"/><circle cx="4" cy="18" r="1"/>'),
     events: sv('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+    rooms: sv('<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>'),
+    booking: sv('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2 2 4-4"/>'),
     shop: sv('<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>'),
     listings: sv('<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>')
   };
@@ -449,6 +451,8 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
   ];
   const TYPES = [
     { h: 'ძირითადი' },
+    { type: 'rooms', name: 'ოთახები', desc: 'სასტუმროს ოთახები ცალკე გვერდებით' },
+    { type: 'booking', name: 'დაჯავშნის ფორმა', desc: 'მაგიდა ან ოთახი, თარიღით, WhatsApp-ით' },
     { type: 'shop', name: 'კატალოგი და კალათა', desc: 'პროდუქტები, კატეგორიები, შეკვეთა WhatsApp-ით' },
     { type: 'listings', name: 'განცხადებები', desc: 'ბინები ფილტრებით და ცალკე გვერდებით' },
     { type: 'menu', name: 'მენიუ', desc: 'კატეგორიები, კერძები და ფასები' },
@@ -841,7 +845,7 @@ a{cursor:default}
 ${open ? `<div class="items">${items.map((it, j) => {
         const ip = `${cp}.items.${j}`, more = openItems.has(ip);
         return `<div class="it${more ? ' open' : ''}"><div class="i-top"><input class="inp" data-bind="${ip}.name" value="${esc(it.name)}" placeholder="კერძის სახელი" aria-label="კერძი"><span class="price"><input class="inp" data-bind="${ip}.price" data-type="num" inputmode="decimal" value="${esc(it.price ?? '')}" aria-label="ფასი"><em>₾</em></span><button class="ib sm" type="button" data-act="item" data-path="${ip}" aria-expanded="${more}" aria-label="დეტალები">${IC.more}</button></div>
-${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="${esc(it.desc || '')}" placeholder="აღწერა, მაგ. რძით ან შვრიის რძით">${site.sections[i].layout === 'photos' ? miniImg(ip + '.image') : ''}<div class="i-row"><input class="inp" data-bind="${ip}.tag" value="${esc(it.tag || '')}" placeholder="იარლიყი, მაგ. ახალი"><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="-1"${j === 0 ? ' disabled' : ''} aria-label="ზემოთ">${IC.up}</button><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="1"${j === items.length - 1 ? ' disabled' : ''} aria-label="ქვემოთ">${IC.down}</button><button class="ib sm danger" type="button" data-act="del" data-path="${ip}" aria-label="კერძის წაშლა">${IC.del}</button></div></div>` : ''}</div>`;
+${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="${esc(it.desc || '')}" placeholder="აღწერა, მაგ. რძით ან შვრიის რძით">${site.sections[i].layout === 'photos' || site.sections[i].layout === 'app' ? miniImg(ip + '.image') : ''}<div class="i-row"><input class="inp" data-bind="${ip}.tag" value="${esc(it.tag || '')}" placeholder="იარლიყი, მაგ. ახალი"><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="-1"${j === 0 ? ' disabled' : ''} aria-label="ზემოთ">${IC.up}</button><button class="ib sm" type="button" data-act="move" data-path="${ip}" data-x="1"${j === items.length - 1 ? ' disabled' : ''} aria-label="ქვემოთ">${IC.down}</button><button class="ib sm danger" type="button" data-act="del" data-path="${ip}" aria-label="კერძის წაშლა">${IC.del}</button></div></div>` : ''}</div>`;
       }).join('')}<button class="add-btn sm" type="button" data-act="push" data-path="${cp}.items" data-x="item">${IC.plus}კერძის დამატება</button></div>` : ''}</div>`;
     }).join('') + `<button class="add-btn" type="button" data-act="push" data-path="${P}.categories" data-x="cat">${IC.plus}კატეგორიის დამატება</button>`;
   }
@@ -910,9 +914,10 @@ ${more ? `<div class="i-more">${spec.more.map((k) => fieldEd(ip, k)).join('')}<d
       h += grp('ღილაკები', btnsEd(`${P}.buttons`));
       if (s.variant !== 'photo') h += grp('ფონი', tonesEd(i));
     } else if (s.type === 'menu') {
-      h += grp('განლაგება', seg(`${P}.layout`, [['list', 'სია წერტილებით', pic('<i style="width:40px;height:4px"></i><i style="width:12px;height:4px"></i>')], ['photos', 'ბარათები ფოტოებით', pic('<i style="width:20px;height:20px;opacity:.6"></i><i style="width:20px;height:20px;opacity:.6"></i>')]]));
+      h += grp('განლაგება', seg(`${P}.layout`, [['app', 'QR მენიუ: ჩანართები და ძებნა', pic('<i style="width:14px;height:6px"></i><i style="width:14px;height:6px"></i><i style="width:14px;height:6px"></i>')], ['list', 'სია წერტილებით', pic('<i style="width:40px;height:4px"></i><i style="width:12px;height:4px"></i>')], ['photos', 'ბარათები ფოტოებით', pic('<i style="width:20px;height:20px;opacity:.6"></i><i style="width:20px;height:20px;opacity:.6"></i>')]]));
       h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
-      h += grp('კატეგორიები და კერძები', menuEd(i) + (s.layout === 'photos' ? '<p class="hint">ფოტოს დასამატებლად კერძის გვერდით სამ წერტილს დააჭირე.</p>' : ''));
+      h += grp('შეკვეთა', togl('შეკვეთა მენიუდან („+" ღილაკი და კალათა)', `${P}.order`, false) + '<p class="hint">კლიენტი კერძებს კალათაში აგროვებს და შეკვეთას WhatsApp-ით გიგზავნის. მიტანის ფასი ადმინ პანელში იცვლება.</p>');
+      h += grp('კატეგორიები და კერძები', menuEd(i) + (s.layout === 'photos' || s.layout === 'app' ? '<p class="hint">ფოტოს დასამატებლად კერძის გვერდით სამ წერტილს დააჭირე.</p>' : ''));
       h += grp('ღილაკები', btnsEd(`${P}.buttons`));
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     } else if (s.type === 'about') {
@@ -945,6 +950,16 @@ ${more ? `<div class="i-more">${spec.more.map((k) => fieldEd(ip, k)).join('')}<d
         h += grp('შეკვეთის ღილაკი', togl('ყველა ბარათზე ღილაკი', `${P}.order`, false) + (s.order ? fld('ღილაკის ტექსტი', `${P}.orderLabel`, { ph: 'შეკვეთა' }) + fld('WhatsApp-ის მზა ტექსტი', `${P}.orderText`, { ph: 'გამარჯობა! მაინტერესებს:', hint: 'კლიენტს WhatsApp გაეხსნება ამ ტექსტით და ბარათის სახელით.' }) : '<p class="hint">ჩართე და კლიენტი WhatsApp-ით ერთი დაჭერით მოგწერს.</p>'));
       }
       h += grp('ღილაკები ქვემოთ', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'rooms') {
+      const n = (site.rooms || []).length;
+      h += grp('ოთახები', `<p class="hint" style="margin-top:0">${n ? `საიტზე ${n} ოთახია.` : 'ოთახები ჯერ არ არის.'} ოთახებს, ფოტოებს და ფასებს ადმინ პანელიდან ამატებ.</p>${REMOTE ? `<a class="btn btn-red wide" href="/admin/?site=${encodeURIComponent(SITE_ID)}">ადმინ პანელის გახსნა</a>` : '<p class="hint">ადმინ პანელი შესვლის შემდეგ გაიხსნება, „ჩემი საიტებიდან".</p>'}`);
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'booking') {
+      h += grp('რას აჯავშნინებ', seg(`${P}.mode`, [['table', 'მაგიდა: თარიღი, დრო, სტუმრები', pic('<i style="width:30px;height:20px;opacity:.6"></i>')], ['room', 'ოთახი: შესვლა, გასვლა, ოთახი', pic('<i style="width:34px;height:14px;opacity:.6"></i>')]]));
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 3 }) + fld('ტექსტი ღილაკის ქვემოთ', `${P}.formNote`, { ph: 'მაგ. დაგიდასტურებთ 15 წუთში' }));
+      h += grp('სად მოდის', '<p class="hint" style="margin-top:0">მოთხოვნა WhatsApp-ზე მოგივა, ინფოს ჩანართში მითითებულ ნომერზე. ოთახის რეჟიმში ფასი თავისით ითვლება.</p>');
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     } else if (s.type === 'shop') {
       const n = (site.products || []).length;
@@ -1120,6 +1135,8 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     about: () => ({ type: 'about', tone: 'surface', title: 'ჩვენ შესახებ', paragraphs: ['მოგვიყევით თქვენს ისტორიაზე: როდის გაიხსენით, რით გამოირჩევით და რატომ უნდა გესტუმრონ.'] }),
     gallery: () => ({ type: 'gallery', tone: 'base', title: 'ფოტოები', images: [] }),
     visit: () => ({ type: 'visit', tone: 'base', title: 'გვესტუმრეთ' }),
+    rooms: () => { site.rooms = site.rooms || []; return { type: 'rooms', tone: 'base', title: 'ოთახები' }; },
+    booking: () => ({ type: 'booking', mode: site.rooms ? 'room' : 'table', tone: 'surface', title: site.rooms ? 'დაჯავშნე პირდაპირ' : 'მაგიდის დაჯავშნა', navLabel: 'დაჯავშნა' }),
     shop: () => { site.products = site.products || []; site.shop = site.shop || { fee: 5, freeFrom: 100 }; return { type: 'shop', tone: 'base', title: 'კატალოგი' }; },
     listings: () => { site.listings = site.listings || []; return { type: 'listings', tone: 'base', title: 'განცხადებები', navLabel: 'ბინები' }; },
     services: () => ({ type: 'cards', kind: 'services', layout: 'list', tone: 'surface', title: 'სერვისები და ფასები', order: true, orderLabel: 'ჩაწერა', orderText: 'გამარჯობა! მინდა ჩავეწერო:', items: [{ title: 'პირველი სერვისი', meta: '45 წთ', price: 40 }, { title: 'მეორე სერვისი', meta: '1 სთ', price: 60, unit: '-დან' }] }),

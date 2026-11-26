@@ -22,10 +22,10 @@
   const STYLES = ['poster', 'elegant', 'warm', 'clean'];
   const DEFAULT_COLORS = { bg: '#ffffff', ink: '#16181d', surface: '#f1f2f4', accent: '#c8102e', accentInk: '#ffffff' };
   const TONES = ['base', 'surface', 'accent', 'inverse', 'custom'];
-  const LABELS = { shop: 'კატალოგი', listings: 'განცხადებები', hero: 'მთავარი ბლოკი', menu: 'მენიუ', about: 'ჩვენ შესახებ', gallery: 'ფოტოები', visit: 'მისამართი', cta: 'ბანერი', cards: 'ბარათები', reviews: 'შეფასებები', faq: 'ხშირი კითხვები', steps: 'ნაბიჯები', events: 'განრიგი' };
+  const LABELS = { rooms: 'ოთახები', booking: 'დაჯავშნა', shop: 'კატალოგი', listings: 'განცხადებები', hero: 'მთავარი ბლოკი', menu: 'მენიუ', about: 'ჩვენ შესახებ', gallery: 'ფოტოები', visit: 'მისამართი', cta: 'ბანერი', cards: 'ბარათები', reviews: 'შეფასებები', faq: 'ხშირი კითხვები', steps: 'ნაბიჯები', events: 'განრიგი' };
   const KINDS = { services: 'სერვისები', products: 'პროდუქტები', rooms: 'ოთახები', features: 'უპირატესობები', team: 'გუნდი', plans: 'პაკეტები' };
   const NAV_DEFAULT = { menu: 'მენიუ', about: 'ჩვენ შესახებ', gallery: 'ფოტოები', visit: 'მისამართი' };
-  const NAV_ON = { shop: true, listings: true, menu: true, about: true, gallery: true, visit: true, cards: true, events: true };
+  const NAV_ON = { rooms: true, booking: true, shop: true, listings: true, menu: true, about: true, gallery: true, visit: true, cards: true, events: true };
   const label = (s) => (s && s.type === 'cards' && KINDS[s.kind]) || LABELS[s && s.type] || '';
   const inNav = (s) => (s.inNav ?? !!NAV_ON[s.type]);
 
@@ -64,6 +64,7 @@
     dumbbell: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
     area: '<path d="M4 4h16v16H4z"/><path d="M4 10V4h6M20 14v6h-6"/>',
     stairs: '<path d="M4 20h4v-4h4v-4h4V8h4V4"/>',
+    bath: '<path d="M4 12h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM6 12V6a2 2 0 0 1 4 0"/>',
     bag: '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>',
     music: '<path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'
   };
@@ -185,6 +186,15 @@ ${pic ? img(s.image, 'center-img', P(i) + '.image', true) : ''}</div></section>`
 
     S.menu = (s, i) => {
       const photos = s.layout === 'photos';
+      if (s.layout === 'app') {
+        const cats2 = s.categories || [];
+        const tabs = cats2.map((cat, k) => `<a href="#mc-${i}-${k}">${esc(cat.name)}</a>`).join('');
+        const body2 = cats2.map((cat, k) => `<div class="mcat2" id="mc-${i}-${k}"><h3${E(`${P(i)}.categories.${k}.name`)}>${esc(cat.name)}</h3><ul class="mlist">${(cat.items || []).map((it, j) => {
+          const ip = `${P(i)}.categories.${k}.items.${j}`;
+          return `<li class="mi" data-name="${esc(String(it.name || '').toLowerCase())}">${has(it.image) ? `<img class="mi-img" src="${imgSrc(it.image.src)}" alt="${esc(it.image.alt || it.name)}" loading="lazy" decoding="async"${I(ip + '.image')}>` : edit ? img(it.image, 'mi-img', ip + '.image') : ''}<div class="mi-b"><div class="mi-top"><b${E(ip + '.name')}>${esc(it.name)}</b>${it.tag ? `<span class="tag"${E(ip + '.tag')}>${esc(it.tag)}</span>` : ''}</div>${it.desc ? `<p${E(ip + '.desc')}>${esc(it.desc)}</p>` : ''}${filled(it.price) ? `<span class="mi-pr"><span${N(ip + '.price')}>${num(it.price)}</span>&nbsp;₾</span>` : ''}</div>${s.order && !edit && filled(it.price) ? `<button class="mi-add" type="button" data-add="${esc(menuId(i, k, j, it))}" aria-label="${esc(it.name)}: დამატება">+</button>` : ''}</li>`;
+        }).join('')}</ul></div>`).join('');
+        return `${open(s, i, 'band menu-app')}<div class="wrap">${head(s, i, 'მენიუ')}<div class="mapp"><div class="mbar2"><nav class="mtabs" data-mtabs aria-label="მენიუს კატეგორიები">${tabs}</nav>${edit ? '' : '<input class="mq" type="search" data-mq placeholder="კერძის ძებნა" aria-label="კერძის ძებნა">'}</div>${body2}</div>${btns(s.buttons, P(i) + '.buttons')}</div></section>`;
+      }
       const cats = (s.categories || []).map((cat, k) => {
         const cp = `${P(i)}.categories.${k}`;
         if (photos) {
@@ -350,6 +360,8 @@ ${districts.length > 1 ? `<label class="lf-sel"><span>უბანი</span><sel
     // ---------- მაღაზია ----------
     const PR = (site.products || []).filter((x) => x && x.hidden !== true);
     const shop = site.shop || {};
+    const menuId = (i2, k, j, it) => it.id || `m${i2}-${k}-${j}`;
+    const CART_N = PR.length + (site.sections || []).filter((s2) => s2 && s2.type === 'menu' && s2.order && s2.enabled !== false).length;
     const pPrice = (x, cls) => `<span class="${cls || 'price'}">${gel(x.price)}${filled(x.oldPrice) && Number(x.oldPrice) > Number(x.price) ? ` <s>${gel(x.oldPrice)}</s>` : ''}</span>`;
     const sale = (x) => (filled(x.oldPrice) && Number(x.oldPrice) > Number(x.price) ? Math.round((1 - Number(x.price) / Number(x.oldPrice)) * 100) : 0);
     const pCard = (x) => {
@@ -369,6 +381,25 @@ ${cats.length > 1 ? `<div class="lf-seg" role="group" aria-label="კატე�
       return `${open(s, i, 'band shop')}<div class="wrap">${head(s, i, 'კატალოგი')}${bar}<div class="cards pgrid" data-plist>${list.map(pCard).join('') || (edit ? '<p class="lf-empty" style="display:block">პროდუქტები ჯერ არ არის. დაამატე ადმინ პანელიდან.</p>' : '')}</div><p class="lf-empty" data-empty>ვერაფერი მოიძებნა. სცადე სხვა სიტყვა.</p>${btns(s.buttons, P(i) + '.buttons')}</div></section>`;
     };
 
+    // ---------- სასტუმრო და დაჯავშნა ----------
+    const RM = (site.rooms || []).filter((x) => x && x.hidden !== true);
+    const rSpecs = (x) => [filled(x.guests) && `<li>${icon('people')}${esc(x.guests)} სტუმარი</li>`, filled(x.size) && `<li>${icon('area')}${esc(x.size)} მ²</li>`, x.bed && `<li>${icon('bed')}${esc(x.bed)}</li>`].filter(Boolean).join('');
+    const rCard = (x) => { const ph = (x.photos || [])[0]; return `<article class="card lcard tilt">${edit ? '' : `<a class="lc-link" href="${base}p/${esc(x.id)}/" aria-label="${esc(x.title)}"></a>`}<div class="lc-pic">${has(ph) ? `<img class="c-img" src="${imgSrc(ph.src)}" alt="${esc(ph.alt || x.title)}" loading="lazy" decoding="async">` : '<div class="c-img img-empty"><span>ფოტო</span></div>'}${x.badge ? `<span class="badge">${esc(x.badge)}</span>` : ''}</div><div class="c-body"><div class="lc-price">${gel(x.price)}<small> / ღამე</small></div><h3>${esc(x.title)}</h3>${x.short ? `<p>${esc(x.short)}</p>` : ''}<ul class="lc-specs">${rSpecs(x)}</ul></div></article>`; };
+    S.rooms = (s, i) => `${open(s, i, 'band')}<div class="wrap">${head(s, i, 'ოთახები')}<div class="cards lgrid">${RM.map(rCard).join('') || (edit ? '<p class="lf-empty" style="display:block">ოთახები ჯერ არ არის. დაამატე ადმინ პანელიდან.</p>' : '')}</div>${btns(s.buttons, P(i) + '.buttons')}</div></section>`;
+    const wnum0 = String(c.whatsapp || c.phone || '').replace(/\D/g, '');
+    const bookForm = (s, i, roomId) => {
+      const room = s.mode === 'room' || roomId;
+      const opt = (n) => Array.from({ length: n }, (_, k) => `<option${k === 1 ? ' selected' : ''}>${k + 1}</option>`).join('');
+      const times = []; for (let h = 12; h <= 23; h++) for (const m of ['00', '30']) times.push(`${h}:${m}`);
+      return `<form class="bk-f card" data-book="${room ? 'room' : 'table'}" data-w="${wnum0}" data-t="${esc(c.phone || '')}" onsubmit="return false">
+${room ? `<label><span>შესვლა</span><input type="date" name="in" required></label><label><span>გასვლა</span><input type="date" name="out" required></label><label><span>სტუმრები</span><select name="guests">${opt(8)}</select></label>
+<label class="w"><span>ოთახი</span><select name="room"><option value="">ნებისმიერი</option>${RM.map((x) => `<option data-price="${Number(x.price) || 0}"${x.id === roomId ? ' selected' : ''}>${esc(x.title)}</option>`).join('')}</select></label>`
+    : `<label><span>თარიღი</span><input type="date" name="date" required></label><label><span>დრო</span><select name="time">${times.map((t2) => `<option${t2 === '19:00' ? ' selected' : ''}>${t2}</option>`).join('')}</select></label><label><span>სტუმრები</span><select name="guests">${opt(12)}<option>13+</option></select></label>`}
+<label><span>სახელი</span><input name="name" autocomplete="name"></label><label><span>ტელეფონი</span><input name="phone" inputmode="tel" autocomplete="tel"></label><label class="w"><span>კომენტარი</span><input name="note" placeholder="${room ? 'მაგ. ჩამოვალთ საღამოს' : 'მაგ. დაბადების დღე, ფანჯარასთან'}"></label>
+${room ? '<p class="bk-est w" data-est aria-live="polite"></p>' : ''}<button class="btn w" type="button" data-book-send>${room ? 'დაჯავშნის მოთხოვნა WhatsApp-ით' : 'მაგიდის დაჯავშნა WhatsApp-ით'}</button><p class="bk-note w">${esc(s.formNote ?? (room ? 'ფასს და თავისუფალ ოთახს დაგიდასტურებთ ნახევარ საათში.' : 'დაგიდასტურებთ 15 წუთში.'))}</p></form>`;
+    };
+    S.booking = (s, i) => `${open(s, i, 'band')}<div class="wrap bk"><div class="bk-t">${s.title ?? 'დაჯავშნა' ? `<h2${E(P(i) + '.title')}>${esc(s.title ?? 'დაჯავშნა')}</h2>` : ''}${s.note ? `<p${E(P(i) + '.note')}>${esc(s.note)}</p>` : ''}${btns(s.buttons, P(i) + '.buttons')}</div>${edit ? `<div class="bk-f card" style="pointer-events:none">${bookForm(s, i).replace(/<form[^>]*>|<\/form>/g, '')}</div>` : bookForm(s, i)}</div></section>`;
+
     const all = (site.sections || []).map((s, i) => ({ s, i })).filter(({ s }) => s && s.enabled !== false && S[s.type]);
 
     const b = site.brand || {};
@@ -380,7 +411,7 @@ ${cats.length > 1 ? `<div class="lf-seg" role="group" aria-label="კატე�
     const showNb = nb.show !== false && (nb.link || c.phone);
     const nbHref = href(nb.link || '@phone');
     const nav = `<header class="nav tone-base"><div class="wrap nav-in"><a class="brand" href="${base || '#top'}">${logo}${showName ? `<span${E('name')}>${esc(site.name)}</span>` : ''}</a>
-<nav aria-label="გვერდის ნაწილები">${navLinks}</nav>${PR.length && !edit ? `<button class="cart-btn" type="button" data-cart-open aria-label="კალათა">${icon('bag')}<span data-cart-n hidden>0</span></button>` : ''}${showNb ? `<a class="btn btn-sm" href="${nbHref}"${edit ? ' data-btn="navButton"' : ''}><span${E('navButton.label')}>${esc(nb.label ?? 'დარეკვა')}</span></a>` : ''}</div></header>`;
+<nav aria-label="გვერდის ნაწილები">${navLinks}</nav>${CART_N && !edit ? `<button class="cart-btn" type="button" data-cart-open aria-label="კალათა">${icon('bag')}<span data-cart-n hidden>0</span></button>` : ''}${showNb ? `<a class="btn btn-sm" href="${nbHref}"${edit ? ' data-btn="navButton"' : ''}><span${E('navButton.label')}>${esc(nb.label ?? 'დარეკვა')}</span></a>` : ''}</div></header>`;
     const bar = showNb && nb.bar ? `<div class="mbar tone-base"><a class="btn" href="${nbHref}">${esc(nb.label ?? 'დარეკვა')}</a></div>` : '';
 
     const f = site.footer || {};
@@ -393,7 +424,7 @@ ${cats.length > 1 ? `<div class="lf-seg" role="group" aria-label="კატე�
     const st = STYLES.includes(t.style) ? t.style : 'poster';
     const col = (n) => color(k[n], DEFAULT_COLORS[n]);
     const lh = Math.min(96, Math.max(20, Number(b.logoHeight) || 36));
-    const css = `:root{--bg:${col('bg')};--ink:${col('ink')};--surface:${col('surface')};--accent:${col('accent')};--accent-ink:${col('accentInk')};--r:${CORNERS[t.corners] || CORNERS.soft};--display:${fo.display};--dw:${fo.weight};--ds:${fo.stretch};--dt:${fo.track};--logo-h:${lh}px}\n` + BASE_CSS + SECTIONS_CSS + (site.listings || site.products ? LIST_CSS : '') + SKIN_CSS;
+    const css = `:root{--bg:${col('bg')};--ink:${col('ink')};--surface:${col('surface')};--accent:${col('accent')};--accent-ink:${col('accentInk')};--r:${CORNERS[t.corners] || CORNERS.soft};--display:${fo.display};--dw:${fo.weight};--ds:${fo.stretch};--dt:${fo.track};--logo-h:${lh}px}\n` + BASE_CSS + SECTIONS_CSS + (site.listings || site.products || site.rooms || (site.sections || []).some((x) => x && (x.type === 'booking' || (x.type === 'menu' && (x.layout === 'app' || x.order)))) ? LIST_CSS : '') + SKIN_CSS;
 
     const meta = site.meta || {};
     const title = meta.title || site.name || '';
@@ -465,19 +496,39 @@ ${related.length ? `<div class="lp-sim"><h2>შეიძლება მოგ�
       headX = `<title>${esc(X.title)}, ${esc(site.name)}</title><meta name="description" content="${esc(String(X.short || X.desc || X.title).slice(0, 160))}">
 <meta property="og:title" content="${esc(X.title)}"><meta property="og:description" content="${esc(gel(X.price))}">${cover && !cover.startsWith('data:') ? `<meta property="og:image" content="${cover}">` : ''}
 ${b.favicon && imgSrc(b.favicon) ? `<link rel="icon" href="${imgSrc(b.favicon)}">` : ''}`;
+    } else if (pageId && RM.find((x) => x.id === pageId)) {
+      const X = RM.find((x) => x.id === pageId);
+      const photos = (X.photos || []).filter(has);
+      const others = RM.filter((x) => x.id !== X.id).slice(0, 3);
+      const rs = (site.sections || []).find((x) => x.type === 'rooms');
+      main = `<section class="band lpage tone-base"><div class="wrap">
+<a class="back" href="${base}#${esc(rs ? rs.id || 'rooms' : 'top')}">← ყველა ოთახი</a>
+<div class="lp-head"><div><h1>${esc(X.title)}</h1>${X.short ? `<p class="lc-addr">${esc(X.short)}</p>` : ''}</div><div class="lp-price">${gel(X.price)}<small>ღამე, ${esc(X.priceNote || 'საუზმით')}</small></div></div>
+${photos.length ? `<div class="lp-gal${photos.length === 1 ? ' one' : ''}"><figure class="lp-main"><img src="${imgSrc(photos[0].src)}" alt="${esc(photos[0].alt || X.title)}" fetchpriority="high" data-main></figure>${photos.length > 1 ? `<div class="lp-thumbs">${photos.slice(0, 8).map((ph, k) => `<button type="button" data-src="${imgSrc(ph.src)}" aria-label="ფოტო ${k + 1}"${k === 0 ? ' aria-current="true"' : ''}><img src="${imgSrc(ph.src)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>` : ''}
+<div class="lp-grid"><div class="lp-body"><ul class="lc-specs rm-specs">${rSpecs(X)}</ul>
+${X.desc ? `<h2>ოთახის შესახებ</h2>${String(X.desc).split(/\n+/).filter(Boolean).map((t2) => `<p>${esc(t2)}</p>`).join('')}` : ''}
+${(X.amenities || []).length ? `<h2>რა არის ოთახში</h2><ul class="lp-feats">${X.amenities.map((f) => `<li>${icon('check')}${esc(f)}</li>`).join('')}</ul>` : ''}</div>
+<aside class="lp-side"><h2 class="bk-h">დაჯავშნა</h2>${bookForm({ mode: 'room' }, 0, X.id)}</aside></div>
+${others.length ? `<div class="lp-sim"><h2>სხვა ოთახები</h2><div class="cards lgrid">${others.map(rCard).join('')}</div></div>` : ''}
+</div></section>`;
+      const cover = photos[0] ? imgSrc(photos[0].src) : '';
+      headX = `<title>${esc(X.title)}, ${esc(site.name)}</title><meta name="description" content="${esc(String(X.short || X.desc || X.title).slice(0, 160))}"><meta property="og:title" content="${esc(X.title)}">${cover && !cover.startsWith('data:') ? `<meta property="og:image" content="${cover}">` : ''}${b.favicon && imgSrc(b.favicon) ? `<link rel="icon" href="${imgSrc(b.favicon)}">` : ''}`;
     } else if (pageId) {
       main = `<section class="band tone-base"><div class="wrap"><h1 style="font-size:clamp(40px,6vw,72px)">განცხადება ვერ მოიძებნა</h1><p>შეიძლება უკვე წაიშალა.</p><div class="actions"><a class="btn" href="${base}">ყველა განცხადება</a></div></div></section>`;
     }
     const notice = site.notice ? `<div class="notice tone-accent"${E('notice')}>${esc(site.notice)}</div>` : '';
     const wnum = String(c.whatsapp || c.phone || '').replace(/\D/g, '');
-    const cartUi = PR.length && !edit ? `<button class="btn cart-fab" type="button" data-cart-open hidden>${icon('bag')}კალათა <span data-cart-n>0</span></button>
+    const MENU_ITEMS = [];
+    (site.sections || []).forEach((s2, i2) => { if (s2 && s2.type === 'menu' && s2.order && s2.enabled !== false) (s2.categories || []).forEach((cat, k) => (cat.items || []).forEach((it, j) => { if (filled(it.price)) MENU_ITEMS.push({ id: menuId(i2, k, j, it), t: it.name, p: Number(it.price) || 0, img: has(it.image) ? imgSrc(it.image.src).replace(/&amp;/g, '&') : '' }); })); });
+    const CART = PR.map((x) => ({ id: x.id, t: x.title, p: Number(x.price) || 0, img: (x.photos || [])[0] && has(x.photos[0]) ? imgSrc(x.photos[0].src).replace(/&amp;/g, '&') : '' })).concat(MENU_ITEMS);
+    const cartUi = CART.length && !edit ? `<button class="btn cart-fab" type="button" data-cart-open hidden>${icon('bag')}კალათა <span data-cart-n>0</span></button>
 <div class="cart" data-cart aria-hidden="true"><div class="ct-box tone-base" role="dialog" aria-modal="true" aria-label="კალათა"><div class="ct-head"><h2>კალათა</h2><button class="ct-x" type="button" data-cart-close aria-label="დახურვა">×</button></div>
 <div class="ct-list" data-cart-list></div>${shop.freeFrom ? '<p class="ct-free" data-free></p>' : ''}
 <form class="ct-form" onsubmit="return false"><label>სახელი<input name="name" autocomplete="name"></label><label>ტელეფონი<input name="phone" inputmode="tel" autocomplete="tel"></label><label class="w">მისამართი<input name="addr" autocomplete="street-address" placeholder="ქალაქი, ქუჩა, სადარბაზო"></label><label class="w">კომენტარი<input name="note" placeholder="მაგ. დარეკეთ მოსვლამდე"></label></form>
 <dl class="ct-sum"><div><dt>პროდუქტები</dt><dd data-sub></dd></div><div><dt>მიტანა</dt><dd data-fee></dd></div><div class="tot"><dt>ჯამი</dt><dd data-tot></dd></div></dl>
 <button class="btn ct-send" type="button" data-send>შეკვეთის გაგზავნა WhatsApp-ით</button><p class="ct-note">შეკვეთა WhatsApp-ში გაიგზავნება და დაგიკავშირდებით დასადასტურებლად. გადახდა მიტანისას ან გადარიცხვით.</p></div></div>
 <div class="ct-toast" data-toast role="status">კალათაში დაემატა</div>
-<script type="application/json" id="shop-data">${JSON.stringify({ k: site.slug || site.name || 'shop', w: wnum, t: c.phone || '', f: Number(shop.fee) || 0, free: Number(shop.freeFrom) || 0, p: PR.map((x) => ({ id: x.id, t: x.title, p: Number(x.price) || 0, img: (x.photos || [])[0] && has(x.photos[0]) ? imgSrc(x.photos[0].src).replace(/&amp;/g, '&') : '' })) }).replace(/</g, '\\u003c')}<\/script>` : '';
+<script type="application/json" id="shop-data">${JSON.stringify({ k: site.slug || site.name || 'shop', w: wnum, t: c.phone || '', f: Number(shop.fee) || 0, free: Number(shop.freeFrom) || 0, p: CART }).replace(/</g, '\\u003c')}<\/script>` : '';
     const body = `${notice}<div class="site st-${st}${t.font === 'classic' ? ' f-classic' : ''}${bar ? ' has-bar' : ''}">${nav}<main>${main}</main>${footer}${bar}${cartUi}</div>`;
     return { css, body, head: headX };
   }
@@ -806,6 +857,40 @@ body{font-size:16px}
 .calc-note{margin:0;font-size:13.5px;color:var(--m)}
 .lp-sim{margin-top:clamp(48px,6vw,88px)}
 .lp-sim h2{font-size:clamp(28px,3vw,40px);margin-bottom:24px}
+.menu-app .mapp{max-width:880px}
+.mbar2{position:sticky;top:70px;z-index:5;display:grid;gap:10px;padding:10px 0;background:var(--b)}
+.mtabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.mtabs a{flex:none;padding:9px 14px;border-radius:99px;border:1px solid var(--l);font-size:15px;font-weight:600;text-decoration:none;color:var(--t)}
+.mtabs a.on{background:var(--bb);border-color:var(--bb);color:var(--bi)}
+.mq{min-height:44px;padding:0 14px;border:1px solid var(--l);border-radius:calc(var(--r) * .7 + 2px);background:var(--b);color:var(--t);font:inherit;font-size:15px}
+.mcat2{scroll-margin-top:190px;margin-top:28px}
+.mcat2>h3{font-size:clamp(24px,2.6vw,32px);margin-bottom:6px}
+.mlist{list-style:none;margin:0;padding:0}
+.mi{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--l)}
+.mi[hidden],.mcat2[hidden]{display:none}
+.mi-img{flex:none;width:84px;height:84px;border-radius:calc(var(--r) * .8 + 2px);object-fit:cover}
+.mi .img-empty{min-height:0;width:84px;height:84px;font-size:11px}
+.mi-b{flex:1}
+.mi-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.mi-top b{font-size:17.5px;line-height:1.3}
+.mi-b p{margin:3px 0 0;font-size:14.5px;color:var(--m);line-height:1.45}
+.mi-pr{display:block;margin-top:6px;font-weight:800;font-variant-numeric:tabular-nums}
+.mi-add{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--bb);color:var(--bi);font-size:26px;line-height:1;cursor:pointer;transition:transform .15s}
+.mi-add:active{transform:scale(.9)}
+.bk{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:32px clamp(32px,6vw,96px);align-items:start}
+.bk-t p{color:var(--m);margin:18px 0 0;max-width:40ch}
+.bk-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:22px}
+.bk-f label{display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--m)}
+.bk-f .w{grid-column:1/-1}
+.bk-f input,.bk-f select{min-height:46px;padding:0 12px;border:1px solid var(--l);border-radius:calc(var(--r) * .7);background:var(--b);color:var(--t);font:inherit;font-size:15px}
+.bk-f input[aria-invalid=true]{border-color:var(--hi);box-shadow:0 0 0 3px color-mix(in srgb,var(--hi) 25%,transparent)}
+.bk-est{margin:0;font-weight:700;color:var(--hi)}
+.bk-est:empty{display:none}
+.bk-note{margin:0;font-size:13px;color:var(--m)}
+.lp-side .bk-f{grid-template-columns:1fr 1fr}
+.lp-side .bk-f label:nth-child(3){grid-column:1/-1}
+.bk-h{font-size:26px;margin:0 0 12px}
+.rm-specs{border-top:0;padding-top:0;margin:0 0 8px;font-size:16px}
 .notice{padding:10px max(5vw,20px);text-align:center;font-size:14.5px;font-weight:600;background:var(--accent);color:var(--accent-ink)}
 .pgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
 .pcard .c-img,.pcard .img-empty{aspect-ratio:1/1}
@@ -870,6 +955,7 @@ body{font-size:16px}
 .pp-perks li{display:flex;gap:12px;align-items:flex-start;font-size:15px}
 .pp-perks svg{width:22px;height:22px;color:var(--hi)}
 .pp-more{margin-top:clamp(36px,5vw,64px)}
+@media(max-width:760px){.bk{grid-template-columns:minmax(0,1fr)}.bk-f{grid-template-columns:1fr 1fr}.bk-f label:nth-child(3){grid-column:1/-1}.mbar2{top:104px}.mi-img,.mi .img-empty{width:72px;height:72px}}
 @media(max-width:860px){.pp{grid-template-columns:minmax(0,1fr)}.nav .cart-btn{margin-left:auto}}
 @media(max-width:860px){.lp-grid{grid-template-columns:minmax(0,1fr)}.lp-side{position:static;order:-1}.lp-gal{grid-template-columns:minmax(0,1fr)}.lp-thumbs{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:600px){.lp-specs{grid-template-columns:minmax(0,1fr)}.calc-in{grid-template-columns:minmax(0,1fr)}.lp-price{justify-items:start}.lf-sel{flex:1 1 40%}.lf-sel select{width:100%;min-width:0}.lf-n{margin:0;width:100%}}
@@ -940,6 +1026,8 @@ body{font-size:16px}
 
   const SHOP_JS = `(function(){var d=document,data;try{data=JSON.parse(d.getElementById('shop-data').textContent)}catch(e){return}var K='bilderi-cart:'+data.k,cart=[];try{cart=JSON.parse(localStorage.getItem(K)||'[]')}catch(e){}var P={};data.p.forEach(function(x){P[x.id]=x});cart=cart.filter(function(i){return P[i.id]&&i.q>0});function save(){try{localStorage.setItem(K,JSON.stringify(cart))}catch(e){}}function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}function fmt(n){n=Math.round(n*100)/100;var s=(n%1?n.toFixed(2):String(n)).replace(/\\B(?=(\\d{3})+(?!\\d))/g,'\\u00a0');return s+'\\u00a0₾'}function totals(){var sub=0,n=0;cart.forEach(function(i){sub+=P[i.id].p*i.q;n+=i.q});var fee=n&&data.f&&!(data.free&&sub>=data.free)?data.f:0;return{sub:sub,n:n,fee:fee,tot:sub+fee}}var dr=d.querySelector('[data-cart]');function draw(){var t=totals();d.querySelectorAll('[data-cart-n]').forEach(function(e){e.textContent=t.n;e.hidden=!t.n});d.querySelectorAll('.cart-fab').forEach(function(e){e.hidden=!t.n});var list=dr.querySelector('[data-cart-list]');list.innerHTML=cart.length?cart.map(function(i,k){var p=P[i.id];return '<div class="ct-row">'+(p.img?'<img src="'+p.img+'" alt="">':'<span class="ct-ph"></span>')+'<div><b>'+esc(p.t)+'</b>'+(i.v?'<small>'+esc(i.v)+'</small>':'')+'<small>'+fmt(p.p)+'</small></div><div class="ct-q"><button type="button" data-q="'+k+'" data-d="-1" aria-label="ნაკლები">−</button><span>'+i.q+'</span><button type="button" data-q="'+k+'" data-d="1" aria-label="მეტი">+</button></div></div>'}).join(''):'<p class="ct-empty">კალათა ცარიელია. დაამატე პროდუქტი და შეკვეთა აქედან გაგზავნე.</p>';dr.querySelector('[data-sub]').textContent=fmt(t.sub);dr.querySelector('[data-fee]').textContent=t.fee?fmt(t.fee):'უფასო';dr.querySelector('[data-tot]').textContent=fmt(t.tot);dr.querySelector('[data-send]').disabled=!cart.length;var fr=dr.querySelector('[data-free]');if(fr&&data.free){var left=data.free-t.sub;fr.textContent=left>0&&t.n?'კიდევ '+fmt(left)+' და მიტანა უფასოა':'მიტანა უფასოა '+fmt(data.free)+'-დან'}}function add(id,v,q){var it=null;cart.forEach(function(i){if(i.id===id&&(i.v||'')===(v||''))it=i});if(it)it.q+=q;else cart.push({id:id,v:v||'',q:q});save();draw()}function open(){dr.classList.add('open');dr.setAttribute('aria-hidden','false');var c=dr.querySelector('[data-cart-close]');if(c)c.focus()}function close(){dr.classList.remove('open');dr.setAttribute('aria-hidden','true')}var tst=d.querySelector('[data-toast]'),tt=0;d.addEventListener('click',function(e){var b=e.target.closest('[data-add]');if(b){e.preventDefault();if(b.dataset.pick&&!b.closest('[data-prod]')){var ln=b.closest('article').querySelector('.lc-link');if(ln){location.href=ln.href;return}}var box=b.closest('[data-prod]'),v='',q=1;if(box){var sel=box.querySelector('[data-opt][aria-pressed=true]');v=sel?sel.dataset.opt:'';var qi=box.querySelector('[data-qty]');q=Math.max(1,+(qi&&qi.value)||1)}add(b.dataset.add,v,q);if(b.hasAttribute('data-buy'))open();else if(tst){tst.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){tst.classList.remove('on')},1800)}return}if(e.target.closest('[data-cart-open]')){e.preventDefault();return open()}if(e.target.closest('[data-cart-close]')||e.target===dr)return close();var q=e.target.closest('[data-q]');if(q){var k=+q.dataset.q;cart[k].q+=+q.dataset.d;if(cart[k].q<1)cart.splice(k,1);save();draw();return}var o=e.target.closest('[data-opt]');if(o){o.parentNode.querySelectorAll('[data-opt]').forEach(function(x){x.setAttribute('aria-pressed',String(x===o))});return}var st=e.target.closest('[data-step]');if(st){var inp=st.parentNode.querySelector('[data-qty]');inp.value=Math.max(1,(+inp.value||1)+(+st.dataset.step));return}var s=e.target.closest('[data-send]');if(s&&cart.length){var f=dr.querySelector('form'),g=function(n){return(f.elements[n].value||'').trim()},t=totals();var lines=cart.map(function(i,k){var p=P[i.id];return(k+1)+'. '+p.t+(i.v?' ('+i.v+')':'')+' × '+i.q+' = '+fmt(p.p*i.q)});var msg='გამარჯობა! შეკვეთა საიტიდან:\\n'+lines.join('\\n')+'\\n\\nპროდუქტები: '+fmt(t.sub)+'\\nმიტანა: '+(t.fee?fmt(t.fee):'უფასო')+'\\nჯამი: '+fmt(t.tot)+(g('name')?'\\n\\nსახელი: '+g('name'):'')+(g('phone')?'\\nტელეფონი: '+g('phone'):'')+(g('addr')?'\\nმისამართი: '+g('addr'):'')+(g('note')?'\\nკომენტარი: '+g('note'):'');window.open(data.w?'https://wa.me/'+data.w+'?text='+encodeURIComponent(msg):'tel:'+data.t,'_blank');return}});d.addEventListener('keydown',function(e){if(e.key==='Escape'&&dr.classList.contains('open'))close()});d.querySelectorAll('[data-sf]').forEach(function(f){var sec=f.closest('section'),box=sec.querySelector('[data-plist]'),cards=[].slice.call(box.children),st={cat:'',q:'',sort:''},cnt=f.querySelector('[data-count]'),emp=sec.querySelector('[data-empty]');function run(){var n=0;cards.forEach(function(c){var ok=(!st.cat||c.dataset.cat===st.cat)&&(!st.q||c.dataset.name.indexOf(st.q)>-1);c.hidden=!ok;if(ok)n++});var s=cards.slice();if(st.sort)s.sort(function(a,b){return(st.sort==='asc'?1:-1)*(+a.dataset.price-+b.dataset.price)});s.forEach(function(c){box.appendChild(c)});if(cnt)cnt.textContent=n+' პროდუქტი';if(emp)emp.style.display=n?'none':'block'}f.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(!b)return;st.cat=b.dataset.v;f.querySelectorAll('button[data-f]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});run()});f.addEventListener('input',function(e){if(e.target.dataset.f==='q'){st.q=e.target.value.trim().toLowerCase();run()}});f.addEventListener('change',function(e){if(e.target.dataset.f==='sort'){st.sort=e.target.value;run()}})});draw()})();`;
 
+  const EXTRA_JS = `(function(){var d=document,N=String.fromCharCode(10);d.querySelectorAll('[data-mq]').forEach(function(q){var box=q.closest('.mapp');q.addEventListener('input',function(){var v=q.value.trim().toLowerCase();box.querySelectorAll('.mi').forEach(function(li){li.hidden=!!v&&li.dataset.name.indexOf(v)<0});box.querySelectorAll('.mcat2').forEach(function(c){c.hidden=!c.querySelector('.mi:not([hidden])')})})});var tabs=d.querySelector('[data-mtabs]');if(tabs&&'IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){tabs.querySelectorAll('a').forEach(function(a){var on=a.getAttribute('href')==='#'+e.target.id;a.classList.toggle('on',on);if(on)tabs.scrollTo({left:a.offsetLeft-tabs.clientWidth/2+a.clientWidth/2,behavior:'smooth'})})}})},{rootMargin:'-35% 0px -60% 0px'});d.querySelectorAll('.mcat2').forEach(function(c){io.observe(c)})}var today=new Date().toISOString().slice(0,10);d.querySelectorAll('[data-book]').forEach(function(f){var mode=f.dataset.book,el=function(n){return f.elements[n]};f.querySelectorAll('input[type=date]').forEach(function(i){i.min=today});function est(){if(mode!=='room')return;var a=el('in').value,b=el('out').value,o=el('room').selectedOptions[0],p=o&&o.dataset.price?+o.dataset.price:0,out=f.querySelector('[data-est]');if(!out)return;if(a&&b){var n=Math.round((new Date(b)-new Date(a))/864e5);out.textContent=n>0?(n+' ღამე'+(p?', დაახლოებით '+(n*p)+' ₾':'')):'გასვლა შესვლის შემდეგ უნდა იყოს'}else out.textContent=''}f.addEventListener('change',est);est();f.querySelector('[data-book-send]').addEventListener('click',function(){var v=function(n){return el(n)?String(el(n).value).trim():''};var need=mode==='room'?['in','out']:['date'];for(var i=0;i<need.length;i++){if(!v(need[i])){el(need[i]).setAttribute('aria-invalid','true');el(need[i]).focus();return}el(need[i]).removeAttribute('aria-invalid')}var m=mode==='room'?['გამარჯობა! მინდა ოთახის დაჯავშნა.','შესვლა: '+v('in'),'გასვლა: '+v('out'),'სტუმრები: '+v('guests'),v('room')?'ოთახი: '+v('room'):'']:['გამარჯობა! მინდა მაგიდის დაჯავშნა.','თარიღი: '+v('date'),'დრო: '+v('time'),'სტუმრები: '+v('guests')];var e2=f.querySelector('[data-est]');if(e2&&e2.textContent)m.push(e2.textContent);if(v('name'))m.push('სახელი: '+v('name'));if(v('phone'))m.push('ტელეფონი: '+v('phone'));if(v('note'))m.push('კომენტარი: '+v('note'));window.open(f.dataset.w?'https://wa.me/'+f.dataset.w+'?text='+encodeURIComponent(m.filter(Boolean).join(N)):'tel:'+f.dataset.t,'_blank')})})})();`;
+
   function renderParts(site, opts) { return make(site, opts); }
 
   function renderSite(site, opts) {
@@ -950,7 +1038,7 @@ ${p.head}
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${esc(FONT_CSS)}">
 <style>${p.css}</style></head>
-<body id="top">${p.body}<script>${TILT_JS}${site && (site.listings || site.products) ? LIST_JS : ''}${site && site.products && site.products.length ? SHOP_JS : ''}<\/script></body></html>`;
+<body id="top">${p.body}<script>${TILT_JS}${site && (site.listings || site.products || site.rooms) ? LIST_JS : ''}${site && ((site.products && site.products.length) || (site.sections || []).some((x) => x && x.type === 'menu' && x.order)) ? SHOP_JS : ''}${EXTRA_JS}<\/script></body></html>`;
   }
 
   const api = { renderSite, renderParts, FONT_CSS, LABELS, KINDS, NAV_DEFAULT, NAV_ON, TONES, STYLES, ICONS: Object.keys(IC), icon, label, inNav, fonts: Object.keys(FONTS), corners: Object.keys(CORNERS), autoInk, TILT_JS, DEALS, STATES, money, version: 4 };

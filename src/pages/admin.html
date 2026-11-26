@@ -201,9 +201,36 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
 <button class="btn btn-red wide" type="submit">შენახვა</button></form>`;
   }
 
+ /* ================= სასტუმრო ================= */
+  let ROOMS = false;
+  const RAM = ['Wi-Fi', 'საუზმე', 'კონდიციონერი', 'გათბობა', 'ტელევიზორი', 'ჩაიდანი და ყავა', 'საკუთარი აბაზანა', 'ფენი', 'სეიფი', 'აივანი', 'ტერასა', 'ხედი მთებზე', 'მინი-სამზარეულო', 'მაცივარი'];
+  function vRoomList() {
+    const L = site.rooms || (site.rooms = []);
+    const pub = `<div class="pub${published ? '' : ' off'}"><span><span class="dot"></span>${published ? 'საიტი გამოქვეყნებულია. ცვლილებები საიტზე მაშინვე ჩანს.' : 'საიტი ჯერ არ გამოქვეყნებულა. გამოაქვეყნე დიზაინის რედაქტორიდან.'}</span>${published ? `<a class="lnk" href="${esc(liveUrl())}" target="_blank" rel="noopener">${esc(liveUrl().replace('https://', ''))}</a>` : `<a class="btn btn-red btn-sm" href="/editor/?site=${encodeURIComponent(ID)}">გამოქვეყნება</a>`}</div><div class="note ok" style="margin-bottom:16px">დაჯავშნის მოთხოვნები WhatsApp-ზე მოგივა, თარიღებით და ფასის გათვლით.</div>`;
+    if (!L.length) return pub + `<div class="empty"><h2>პირველი ოთახი დაამატე</h2><p>ფოტოები, სახელი და ფასი ღამეში. საიტზე მაშინვე გამოჩნდება.</p><button class="btn btn-red" type="button" data-new>${I.plus}ოთახის დამატება</button></div>`;
+    return pub + `<div class="list">${L.map((x) => { const ph = (x.photos || [])[0], src = ph && srcOf(ph.src); return `<article class="row">${src ? `<img src="${esc(src)}" alt="">` : '<div class="noimg"></div>'}<div><h3>${esc(x.title || 'უსახელო')}</h3><p>${x.hidden ? '<span class="pill hid">დამალულია</span>' : ''}${esc([x.guests && x.guests + ' სტუმარი', x.size && x.size + ' მ²', x.bed].filter(Boolean).join(', '))}</p><div class="pr">${gel(x.price)} / ღამე</div></div><div class="acts"><button class="ib" type="button" data-edit="${esc(x.id)}" aria-label="რედაქტირება">${I.edit}</button><button class="ib" type="button" data-del="${esc(x.id)}" aria-label="წაშლა">${I.del}</button></div></article>`; }).join('')}</div>`;
+  }
+  function vRoomForm() {
+    const x = draft;
+    return `<div class="sec-t">ფოტოები</div><div class="photos">${(x.photos || []).map((ph, k) => `<div class="ph"><img src="${esc(srcOf(ph.src))}" alt="">${k === 0 ? '<span class="cv">მთავარი</span>' : ''}<div class="ov"><button type="button" data-pm="${k}" data-d="-1" aria-label="მარცხნივ"${k === 0 ? ' disabled' : ''}>${I.left}</button><button type="button" data-pd="${k}" aria-label="წაშლა">${I.x}</button><button type="button" data-pm="${k}" data-d="1" aria-label="მარჯვნივ">${I.right}</button></div></div>`).join('')}<button class="addph" type="button" id="addph">${I.plus}ფოტოები</button></div><p class="hint" style="margin:0 0 16px">პირველი ფოტო ბარათზე ჩანს.</p>
+<label class="fld"><span class="lt">სახელი</span><input class="inp" name="title" value="${val(x, 'title')}" placeholder="მაგ. ორადგილიანი, მთის ხედით" required maxlength="80"></label>
+<div class="g3"><label class="fld"><span class="lt">ფასი ღამეში, ₾</span><input class="inp" name="price" value="${val(x, 'price')}" inputmode="decimal" required></label><label class="fld"><span class="lt">სტუმრები</span><input class="inp" name="guests" value="${val(x, 'guests')}" inputmode="numeric"></label><label class="fld"><span class="lt">ფართი, მ²</span><input class="inp" name="size" value="${val(x, 'size')}" inputmode="numeric"></label></div>
+<div class="g2"><label class="fld"><span class="lt">საწოლი</span><input class="inp" name="bed" value="${val(x, 'bed')}" placeholder="მაგ. ფართო საწოლი"></label><label class="fld"><span class="lt">ფასში შედის</span><input class="inp" name="priceNote" value="${val(x, 'priceNote')}" placeholder="საუზმით"></label></div>
+<label class="fld"><span class="lt">მოკლე აღწერა</span><input class="inp" name="short" value="${val(x, 'short')}" placeholder="მაგ. აივანი ველის ხედით"></label>
+<div class="sec-t">რა არის ოთახში</div><div class="feats">${[...new Set([...RAM, ...(x.amenities || [])])].map((f) => `<label><input type="checkbox" name="feat" value="${esc(f)}"${(x.amenities || []).includes(f) ? ' checked' : ''}>${esc(f)}</label>`).join('')}</div>
+<label class="fld"><span class="lt">აღწერა</span><textarea class="inp" name="desc" rows="4">${esc(x.desc || '')}</textarea></label>
+<label class="fld"><span class="lt">იარლიყი</span><input class="inp" name="badge" value="${val(x, 'badge')}" placeholder="მაგ. ყველაზე ხშირად"></label>
+<label class="togl">დამალვა საიტიდან<input type="checkbox" name="hidden"${x.hidden ? ' checked' : ''}></label>`;
+  }
+  const readRoomForm = () => {
+    const f = $('#form'), g = (n) => (f.elements[n] ? f.elements[n].value.trim() : '');
+    const num = (n) => { const v = g(n).replace(/\s/g, '').replace(',', '.'); return v === '' ? '' : Number(v); };
+    Object.assign(draft, { title: g('title'), price: num('price'), guests: num('guests'), size: num('size'), bed: g('bed'), priceNote: g('priceNote'), short: g('short'), desc: f.elements.desc.value.trim(), badge: g('badge'), amenities: $$('input[name=feat]:checked', f).map((y) => y.value), hidden: f.elements.hidden.checked });
+  };
+
   /* ================= მაღაზია ================= */
   let SHOP = false;
-  const TABS = () => (SHOP ? [['list', 'პროდუქტები'], ['shop', 'მიტანა და გადახდა'], ['info', 'კონტაქტი']] : [['list', 'განცხადებები'], ['info', 'კონტაქტი და აგენტი']]);
+  const TABS = () => (ROOMS ? [['list', 'ოთახები'], ['info', 'კონტაქტი']] : SHOP ? [['list', 'პროდუქტები'], ['shop', 'მიტანა და გადახდა'], ['info', 'კონტაქტი']] : [['list', 'განცხადებები'], ['info', 'კონტაქტი და აგენტი']]);
   const gel = (n) => { const v = Math.round((Number(n) || 0) * 100) / 100; return (v % 1 ? v.toFixed(2) : String(v)) + ' ₾'; };
   function vShopList() {
     const L = site.products || (site.products = []);
@@ -260,9 +287,9 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
   function render() {
     $('#tabs').innerHTML = TABS().map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${l}</button>`).join('');
     $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
-    $('#main').innerHTML = SHOP ? (tab === 'list' ? vShopList() : tab === 'shop' ? vShopSettings() : vShopInfo()) : (tab === 'list' ? vList() : vInfo());
-    $('#fab').hidden = tab !== 'list' || !(SHOP ? site.products || [] : site.listings || []).length;
-    $('#fab-t').textContent = SHOP ? 'პროდუქტის დამატება' : 'ბინის დამატება';
+    $('#main').innerHTML = ROOMS ? (tab === 'list' ? vRoomList() : vShopInfo()) : SHOP ? (tab === 'list' ? vShopList() : tab === 'shop' ? vShopSettings() : vShopInfo()) : (tab === 'list' ? vList() : vInfo());
+    $('#fab').hidden = tab !== 'list' || !(ROOMS ? site.rooms || [] : SHOP ? site.products || [] : site.listings || []).length;
+    $('#fab-t').textContent = ROOMS ? 'ოთახის დამატება' : SHOP ? 'პროდუქტის დამატება' : 'ბინის დამატება';
     const qi = $('#q'); if (qi) qi.addEventListener('input', () => { q = qi.value; const p = qi.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); });
   }
 
@@ -291,15 +318,15 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
     Object.assign(draft, { title: g('title'), price: num('price'), currency: g('currency') || '$', area: num('area'), rooms: num('rooms'), bedrooms: num('bedrooms'), floor: num('floor'), floors: num('floors'), type: g('type'), district: g('district'), address: g('address'), condition: g('condition'), desc: f.elements.desc.value.trim(),
       features: $$('input[name=feat]:checked', f).map((x) => x.value), featured: f.elements.featured.checked, hidden: f.elements.hidden.checked });
   };
-  const drawForm = () => { const st = $('#f-body').scrollTop; $('#f-body').innerHTML = SHOP ? vShopForm() : vForm(); $('#f-body').scrollTop = st; };
-  const readAny = () => (SHOP ? readShopForm() : readForm());
+  const drawForm = () => { const st = $('#f-body').scrollTop; $('#f-body').innerHTML = ROOMS ? vRoomForm() : SHOP ? vShopForm() : vForm(); $('#f-body').scrollTop = st; };
+  const readAny = () => (ROOMS ? readRoomForm() : SHOP ? readShopForm() : readForm());
   let lastFocus = null;
   function openForm(id) {
     editing = id;
-    const L = (SHOP ? site.products : site.listings) || [];
+    const L = (ROOMS ? site.rooms : SHOP ? site.products : site.listings) || [];
     const cur = id ? L.find((x) => x.id === id) : null;
-    draft = cur ? clone(cur) : SHOP ? { photos: [] } : { deal: 'sale', currency: '$', type: 'ბინა', photos: [], features: [] };
-    $('#f-t').textContent = SHOP ? (cur ? 'პროდუქტის შეცვლა' : 'ახალი პროდუქტი') : cur ? 'განცხადების შეცვლა' : 'ახალი განცხადება';
+    draft = cur ? clone(cur) : ROOMS || SHOP ? { photos: [] } : { deal: 'sale', currency: '$', type: 'ბინა', photos: [], features: [] };
+    $('#f-t').textContent = ROOMS ? (cur ? 'ოთახის შეცვლა' : 'ახალი ოთახი') : SHOP ? (cur ? 'პროდუქტის შეცვლა' : 'ახალი პროდუქტი') : cur ? 'განცხადების შეცვლა' : 'ახალი განცხადება';
     drawForm();
     lastFocus = document.activeElement;
     $('#sheet').classList.add('open'); $('#sheet').setAttribute('aria-hidden', 'false');
@@ -335,11 +362,11 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
     const ed = t.closest('[data-edit]'); if (ed) return openForm(ed.dataset.edit);
     const dl = t.closest('[data-del]');
     if (dl) {
-      const key = SHOP ? 'products' : 'listings';
+      const key = ROOMS ? 'rooms' : SHOP ? 'products' : 'listings';
       const l = site[key].find((x) => x.id === dl.dataset.del);
       if (!confirm(`„${l.title}" წაიშლება საიტიდან. გავაგრძელოთ?`)) return;
       site[key] = site[key].filter((x) => x !== l); render();
-      try { await persist(SHOP ? 'პროდუქტი წაიშალა' : 'განცხადება წაიშალა'); } catch (err) { toast(Backend.message(err)); }
+      try { await persist(ROOMS ? 'ოთახი წაიშალა' : SHOP ? 'პროდუქტი წაიშალა' : 'განცხადება წაიშალა'); } catch (err) { toast(Backend.message(err)); }
       return;
     }
     if (t.closest('#addph')) { fileTarget = 'listing'; $('#file').multiple = true; $('#file').value = ''; return $('#file').click(); }
@@ -365,14 +392,15 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
     e.preventDefault();
     readAny();
     const f = $('#form');
-    if (SHOP) {
+    if (SHOP || ROOMS) {
       if (!draft.title) { f.elements.title.setAttribute('aria-invalid', 'true'); f.elements.title.focus(); return toast('ჩაწერე სახელი.'); }
       if (draft.price === '' || isNaN(draft.price)) { f.elements.price.setAttribute('aria-invalid', 'true'); f.elements.price.focus(); return toast('ჩაწერე ფასი ციფრებით.'); }
       for (const k of Object.keys(draft)) if (draft[k] === '' || draft[k] === false || (Array.isArray(draft[k]) && !draft[k].length && k !== 'photos')) delete draft[k];
-      const L = site.products || (site.products = []);
-      if (editing) L[L.findIndex((x) => x.id === editing)] = draft; else { draft.id = 'p' + Date.now().toString(36); L.unshift(draft); }
+      const key = ROOMS ? 'rooms' : 'products';
+      const L = site[key] || (site[key] = []);
+      if (editing) L[L.findIndex((x) => x.id === editing)] = draft; else { draft.id = (ROOMS ? 'r' : 'p') + Date.now().toString(36); if (ROOMS) L.push(draft); else L.unshift(draft); }
       const b = $('#f-save'); b.disabled = true; b.textContent = 'ინახება…';
-      try { await persist(editing ? 'პროდუქტი შეიცვალა' : 'პროდუქტი დაემატა'); closeForm(); render(); } catch (err) { toast(Backend.message(err)); }
+      try { await persist(ROOMS ? (editing ? 'ოთახი შეიცვალა' : 'ოთახი დაემატა') : editing ? 'პროდუქტი შეიცვალა' : 'პროდუქტი დაემატა'); closeForm(); render(); } catch (err) { toast(Backend.message(err)); }
       b.disabled = false; b.textContent = 'შენახვა';
       return;
     }
@@ -425,8 +453,9 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
     document.title = (site.name || 'საიტი') + ', ადმინ პანელი';
     $('#design').href = '/editor/?site=' + encodeURIComponent(ID);
     if (published) { $('#view').hidden = false; $('#view').href = liveUrl(); }
-    SHOP = !!(site.products || (site.sections || []).some((s) => s.type === 'shop'));
-    if (!SHOP && !site.listings && !(site.sections || []).some((s) => s.type === 'listings')) tab = 'info';
+    ROOMS = !!(site.rooms || (site.sections || []).some((s) => s.type === 'rooms'));
+    SHOP = !ROOMS && !!(site.products || (site.sections || []).some((s) => s.type === 'shop'));
+    if (!ROOMS && !SHOP && !site.listings && !(site.sections || []).some((s) => s.type === 'listings')) tab = 'info';
     render();
   })();
 }

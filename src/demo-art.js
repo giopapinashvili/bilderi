@@ -20,6 +20,8 @@
     tapli: { wall: '#ffe7a8', wall2: '#ffd977', table: '#3b2412', table2: '#2b190b', plate: '#fffaf0', cup: '#ffffff', accent: '#e09b00', sky: '#bcd3ee', wood: '#3b2412', cloth: '#c0392b' },
     kvadrati: { wall: '#eef2f6', wall2: '#dfe6ee', table: '#9fb0c4', table2: '#8798ad', plate: '#ffffff', cup: '#ffffff', accent: '#e4572e', sky: '#bcd6f0', wood: '#122033', cloth: '#122033' },
     bazari: { wall: '#f6f1ee', wall2: '#e9ded8', table: '#d8c3b5', table2: '#c9b0a0', plate: '#ffffff', cup: '#ffffff', accent: '#c8102e', sky: '#bcd6f0', wood: '#2a2320', cloth: '#1f3a5f' },
+    badagi: { wall: '#f5ebe6', wall2: '#ead9d0', table: '#9e2a2b', table2: '#7f2122', plate: '#ffffff', cup: '#ffffff', accent: '#9e2a2b', sky: '#b9cde6', wood: '#2b1d1a', cloth: '#9e2a2b' },
+    mtsvadi: { wall: '#fff1e0', wall2: '#ffe0bd', table: '#d1361e', table2: '#b02c17', plate: '#ffffff', cup: '#ffffff', accent: '#d1361e', sky: '#ffd8b0', wood: '#2a1410', cloth: '#2a1410' },
     tikha: { wall: '#f2ebe4', wall2: '#e4d7ca', table: '#d9c6b4', table2: '#cbb59f', plate: '#ffffff', cup: '#ffffff', accent: '#c0392b', sky: '#f2ebe4', wood: '#2a2320', cloth: '#2f4a6b' }
   };
 
@@ -395,6 +397,18 @@ ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((k) => `<path d="M${236 + k * 32} 490v2
     churchkhela: (p) => product(p, `<path d="M240 120h320" stroke="${p.wood}" stroke-width="10" stroke-linecap="round"/>${[[290, '#7a1f3d', 340], [370, '#b5651d', 370], [450, '#7a1f3d', 330], [530, '#9b2f2f', 360]].map(([x, c, h]) => `<path d="M${x} 120v40" stroke="#c9b28a" stroke-width="4"/><path d="M${x - 26} 170c0-14 52-14 52 0v${h - 30}c0 30-52 30-52 0z" fill="${c}"/>${[0, 1, 2, 3, 4, 5].map((k) => `<ellipse cx="${x}" cy="${200 + k * 50}" rx="24" ry="6" fill="#000" opacity=".08"/>`).join('')}<path d="M${x - 14} 190v${h - 70}" stroke="#fff" stroke-opacity=".2" stroke-width="6" stroke-linecap="round"/>`).join('')}`),
     candle: (p) => product(p, `<ellipse cx="400" cy="480" rx="130" ry="20" fill="#000" opacity=".1"/><rect x="290" y="280" width="220" height="200" rx="20" fill="${p.cloth}"/><rect x="400" y="280" width="110" height="200" rx="20" fill="#000" opacity=".1"/><rect x="300" y="340" width="200" height="80" fill="#efe4d2"/><rect x="330" y="368" width="140" height="10" rx="5" fill="${p.accent}"/>
 <ellipse cx="400" cy="282" rx="110" ry="18" fill="#f6eedd"/><rect x="396" y="236" width="8" height="44" rx="4" fill="#3a2a1a"/><path d="M400 190c18 22 18 40 0 50-18-10-18-28 0-50z" fill="#ffb02e"/><circle cx="400" cy="220" r="60" fill="#ffd27a" opacity=".2"/>`)
+,
+    grill: (p) => {
+      const coals = Array.from({ length: 34 }, (_, i) => `<circle cx="${110 + ((i * 89) % 580)}" cy="${470 + ((i * 37) % 80)}" r="${14 + (i % 4) * 3}" fill="${['#3a1a10', '#ff6a1f', '#c8361e', '#2a120b'][i % 4]}"/>`).join('');
+      const skewer = (y, rot) => `<g transform="rotate(${rot} 400 ${y})"><rect x="60" y="${y - 4}" width="680" height="8" rx="4" fill="#c9ccd4"/>${[0, 1, 2, 3, 4, 5].map((k) => `<rect x="${170 + k * 86}" y="${y - 30}" width="74" height="60" rx="22" fill="${k % 2 ? '#7a3a1a' : '#8f4a22'}"/><rect x="${178 + k * 86}" y="${y - 24}" width="56" height="14" rx="7" fill="#b86a35" opacity=".8"/>`).join('')}${[0, 1, 2, 3, 4].map((k) => `<rect x="${236 + k * 86}" y="${y - 18}" width="18" height="36" rx="6" fill="#f2e6c8"/>`).join('')}</g>`;
+      return svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="420" width="800" height="180" fill="#1a0d08"/>${coals}<rect y="420" width="800" height="180" fill="#ff6a1f" opacity=".12"/>${skewer(300, -4)}${skewer(390, 3)}
+<path d="M200 260c-10-40 20-60 10-100M420 250c-10-40 20-60 10-100M600 270c-10-40 20-60 10-100" stroke="#fff" stroke-width="10" stroke-linecap="round" fill="none" opacity=".35"/>`);
+    },
+    salad: (p) => {
+      const veg = [[330, 280, '#e5392b', 34], [430, 260, '#e5392b', 30], [470, 330, '#e5392b', 32], [360, 350, '#e5392b', 28], [400, 300, '#f2efe6', 26], [300, 320, '#f2efe6', 22], [500, 290, '#7a1f3d', 18], [380, 250, '#7a1f3d', 16], [450, 380, '#f2efe6', 22]].map(([x, y, c, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${r * 0.55}" fill="#fff" opacity=".22"/>`).join('');
+      const herbs = [[350, 300], [420, 340], [470, 270], [330, 250], [390, 380]].map(([x, y], k) => `<ellipse cx="${x}" cy="${y}" rx="14" ry="6" fill="#4f7d3a" transform="rotate(${k * 40} ${x} ${y})"/>`).join('');
+      return svg(`${room(p, 360)}${shadow(410, 440, 260, 70)}<ellipse cx="400" cy="400" rx="250" ry="90" fill="${p.plate}"/><ellipse cx="400" cy="330" rx="200" ry="120" fill="${p.plate}"/><ellipse cx="400" cy="320" rx="170" ry="96" fill="#000" opacity=".05"/>${veg}${herbs}`);
+    }
   };
 
   const cache = {};
