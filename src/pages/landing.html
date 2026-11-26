@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ბილდერი: საიტი კაფესთვის</title>
-<meta name="description" content="შენი კაფის ან რესტორნის საიტი 10 წუთში, უფასოდ. მენიუ, ფასები, ფოტოები და QR კოდი მაგიდებისთვის.">
+<title>ბილდერი: უფასო საიტი შენი ბიზნესისთვის</title>
+<meta name="description" content="კაფე, მაღაზია, სალონი, სასტუმრო თუ ბინების აგენტი: საიტი 10 წუთში, უფასოდ. კალათა, დაჯავშნა, ადმინ პანელი და QR კოდი, სრულად ქართულად.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,300..900&family=Noto+Serif+Georgian:wght@400..800&display=swap">
 <style>
@@ -183,6 +183,14 @@ svg{display:block}
 .res p{grid-column:1/-1;margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}
 .card.hot .res strong{text-decoration:underline}
 
+.caps{background:var(--soft)}
+.cap-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 40px}
+.cap-ic{display:grid;place-items:center;width:52px;height:52px;margin-bottom:14px;border-radius:16px;background:var(--red);color:#fff;transform:rotate(-4deg)}
+.cap:nth-child(even) .cap-ic{background:var(--cob);transform:rotate(4deg)}
+.cap h3{margin:0 0 6px;font-size:22px}
+.cap p{margin:0;color:var(--muted);font-size:15.5px;max-width:36ch}
+@media(max-width:900px){.cap-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.cap-grid{grid-template-columns:1fr}}
 .tfilter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
 .tfilter button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1.5px solid var(--line);border-radius:99px;background:#fff;font:inherit;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .15s}
 .tfilter button:hover{border-color:var(--ink)}
@@ -326,9 +334,9 @@ body{font-size:16px}
 <section class="hero">
   <div class="wrap">
     <div class="hero-head">
-      <h1>შენი კაფის საიტი 10&nbsp;წუთში, უფასოდ</h1>
+      <h1>შენი ბიზნესის საიტი 10&nbsp;წუთში, უფასოდ</h1>
       <div>
-        <p class="lead">აირჩიე დიზაინი, ჩაწერე მენიუ და ფასები, ატვირთე ფოტოები. საიტი მაშინვე ინტერნეტშია, კოდის გარეშე.</p>
+        <p class="lead">კაფე, მაღაზია, სალონი, სასტუმრო თუ ბინების აგენტი. აირჩიე შაბლონი, ჩაწერე ფასები, ატვირთე ფოტოები. შეკვეთები და ჯავშნები WhatsApp-ზე მოგივა.</p>
         <div class="cta">
           <a class="btn btn-red btn-lg" href="#" data-demo="signup">საიტის შექმნა</a>
           <a class="btn btn-line btn-lg" href="#templates">შაბლონების ნახვა</a>
@@ -366,7 +374,7 @@ body{font-size:16px}
         <div class="vis"><div class="minis" id="minis"></div></div>
         <span class="num">1</span>
         <h3>აირჩიე შაბლონი</h3>
-        <p>კაფე, რესტორანი თუ ბარი. ფერებს და შრიფტს ნებისმიერ დროს შეცვლი.</p>
+        <p>22 შაბლონი: კაფე, მაღაზია, სალონი, კლინიკა, სასტუმრო, ბროკერი და სხვა. ფერებს და შრიფტს ნებისმიერ დროს შეცვლი.</p>
       </li>
       <li class="card tilt">
         <div class="vis">
@@ -378,7 +386,7 @@ body{font-size:16px}
         </div>
         <span class="num">2</span>
         <h3>შეავსე</h3>
-        <p>მენიუ, ფასები, ფოტოები და საათები. ყოველ ცვლილებას მაშინვე ხედავ.</p>
+        <p>მენიუ, პროდუქტები, ოთახები, ფასები და ფოტოები. ყოველ ცვლილებას მაშინვე ხედავ.</p>
       </li>
       <li class="card tilt">
         <div class="vis">
@@ -399,7 +407,7 @@ body{font-size:16px}
 <section class="band feat" id="features">
   <div class="wrap">
     <div class="sec-head">
-      <h2>ყველაფერი, რაც კაფეს სჭირდება</h2>
+      <h2>ყველაფერი, რაც ბიზნესს სჭირდება</h2>
       <p>სრულად ქართულად. საიტს კომპიუტერიდანაც მართავ და ტელეფონიდანაც.</p>
     </div>
     <div class="bento">
@@ -450,6 +458,13 @@ body{font-size:16px}
         <p>სათაურს და აღწერას თვითონ ჩაწერ, Facebook-ზე გაზიარებისას კი ლამაზი სურათი ჩანს.</p>
       </article>
     </div>
+  </div>
+</section>
+
+<section class="band caps" id="caps">
+  <div class="wrap">
+    <div class="sec-head"><h2>ვიზიტკაზე მეტი</h2><p>კლიენტი უკვეთავს, ჯავშნის და გწერს პირდაპირ საიტიდან.</p></div>
+    <div class="cap-grid"><div class="cap"><span class="cap-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg></span><h3>კალათა და შეკვეთა</h3><p>კლიენტი პროდუქტს ან კერძს კალათაში აგდებს, შეკვეთა სიით და ჯამით WhatsApp-ზე მოგდის.</p></div><div class="cap"><span class="cap-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2 2 4-4"/></svg></span><h3>დაჯავშნა</h3><p>მაგიდა, ოთახი თარიღებით ან ჩაწერა ექიმთან და ოსტატთან. ოთახის ფასი თავისით ითვლება.</p></div><div class="cap"><span class="cap-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg></span><h3>ბინები ფილტრებით</h3><p>ყველა ბინას თავისი გვერდი, ფოტოები, იპოთეკის კალკულატორი და WhatsApp ღილაკი.</p></div><div class="cap"><span class="cap-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg></span><h3>ადმინ პანელი ტელეფონიდან</h3><p>პროდუქტს, ბინას ან ოთახს ფორმით დაამატებ, ორ წუთში. საიტზე მაშინვე ჩანს.</p></div><div class="cap"><span class="cap-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><h3>ფორმები</h3><p>საკუთარი ველებით: განაცხადი, სამუშაოზე აყვანა, ქორწილის პასუხი.</p></div><div class="cap"><span class="cap-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><h3>Instagram-ის გვერდი</h3><p>ერთი ბმული bio-ში: ფასები, შეკვეთა, სოციალური ქსელები.</p></div></div>
   </div>
 </section>
 
@@ -524,7 +539,7 @@ body{font-size:16px}
 {
   const ALL = /*SAMPLES*/;
   const SITES = ['finjani', 'dzveli-ubani', 'talgha'].map((k) => ALL.find((s) => s.slug === k)).filter(Boolean);
-  const CATS = { all: 'ყველა', realestate: 'უძრავი ქონება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
+  const CATS = { all: 'ყველა', realestate: 'უძრავი ქონება', personal: 'Instagram და პირადი', event: 'ღონისძიება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
   const DOMAIN = 'bilderi.pages.dev/s/';
   const DUR = 6500;
   const PICK = { finjani: [0, 2], 'dzveli-ubani': [1, 0], talgha: [0, 1] };

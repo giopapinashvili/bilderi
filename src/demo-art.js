@@ -22,6 +22,9 @@
     bazari: { wall: '#f6f1ee', wall2: '#e9ded8', table: '#d8c3b5', table2: '#c9b0a0', plate: '#ffffff', cup: '#ffffff', accent: '#c8102e', sky: '#bcd6f0', wood: '#2a2320', cloth: '#1f3a5f' },
     badagi: { wall: '#f5ebe6', wall2: '#ead9d0', table: '#9e2a2b', table2: '#7f2122', plate: '#ffffff', cup: '#ffffff', accent: '#9e2a2b', sky: '#b9cde6', wood: '#2b1d1a', cloth: '#9e2a2b' },
     mtsvadi: { wall: '#fff1e0', wall2: '#ffe0bd', table: '#d1361e', table2: '#b02c17', plate: '#ffffff', cup: '#ffffff', accent: '#d1361e', sky: '#ffd8b0', wood: '#2a1410', cloth: '#2a1410' },
+    denta: { wall: '#eef5f8', wall2: '#dde9ef', table: '#2f6f8f', table2: '#255a74', plate: '#ffffff', cup: '#ffffff', accent: '#e0574f', sky: '#bfe0f0', wood: '#1b3a4b', cloth: '#2f6f8f' },
+    'ana-luka': { wall: '#fbf3f1', wall2: '#f2e2de', table: '#b5485c', table2: '#963a4b', plate: '#ffffff', cup: '#ffffff', accent: '#b5485c', sky: '#f4d6cf', wood: '#3b2a2a', cloth: '#b5485c' },
+    'nino-cakes': { wall: '#ffe9ee', wall2: '#ffd6df', table: '#e0457b', table2: '#c23768', plate: '#ffffff', cup: '#ffffff', accent: '#e0457b', sky: '#ffe9ee', wood: '#3a1f2b', cloth: '#e0457b' },
     tikha: { wall: '#f2ebe4', wall2: '#e4d7ca', table: '#d9c6b4', table2: '#cbb59f', plate: '#ffffff', cup: '#ffffff', accent: '#c0392b', sky: '#f2ebe4', wood: '#2a2320', cloth: '#2f4a6b' }
   };
 
@@ -409,6 +412,16 @@ ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((k) => `<path d="M${236 + k * 32} 490v2
       const herbs = [[350, 300], [420, 340], [470, 270], [330, 250], [390, 380]].map(([x, y], k) => `<ellipse cx="${x}" cy="${y}" rx="14" ry="6" fill="#4f7d3a" transform="rotate(${k * 40} ${x} ${y})"/>`).join('');
       return svg(`${room(p, 360)}${shadow(410, 440, 260, 70)}<ellipse cx="400" cy="400" rx="250" ry="90" fill="${p.plate}"/><ellipse cx="400" cy="330" rx="200" ry="120" fill="${p.plate}"/><ellipse cx="400" cy="320" rx="170" ry="96" fill="#000" opacity=".05"/>${veg}${herbs}`);
     }
+,
+    clinic: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/><rect y="470" width="800" height="130" fill="${p.wall2}"/>
+<rect x="480" y="70" width="240" height="180" rx="10" fill="#fff"/><rect x="496" y="86" width="208" height="148" rx="6" fill="${p.sky}"/><path d="M560 160h80M600 120v80" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
+${shadow(330, 560, 220, 18, 0.2)}<path d="M150 420c0-30 20-50 50-50h200l120-120c14-14 36-14 50 0s14 36 0 50L430 440c-10 10-24 16-38 16H190c-22 0-40-16-40-36z" fill="${p.accent}"/>
+<rect x="300" y="456" width="40" height="80" fill="#9aa0ac"/><ellipse cx="320" cy="545" rx="110" ry="14" fill="#9aa0ac"/>
+<path d="M240 140v150" stroke="#9aa0ac" stroke-width="10"/><path d="M240 140h140" stroke="#9aa0ac" stroke-width="10"/><ellipse cx="400" cy="160" rx="56" ry="26" fill="#fff"/><ellipse cx="400" cy="160" rx="36" ry="14" fill="#ffe7a3"/>
+<rect x="600" y="330" width="120" height="140" rx="8" fill="#fff"/><rect x="616" y="350" width="88" height="10" rx="5" fill="${p.accent}"/><rect x="616" y="372" width="60" height="8" rx="4" fill="${p.wood}" opacity=".3"/>`),
+    rings: (p) => svg(`<rect width="800" height="600" fill="${p.wall}"/>${[0, 1, 2, 3, 4, 5, 6, 7, 8].map((k) => `<circle cx="${(k * 131) % 800}" cy="${(k * 89) % 600}" r="${40 + (k % 3) * 20}" fill="${p.accent}" opacity=".08"/>`).join('')}
+${shadow(400, 470, 220, 26, 0.15)}<circle cx="340" cy="330" r="110" fill="none" stroke="#d9b35a" stroke-width="26"/><circle cx="470" cy="330" r="110" fill="none" stroke="#c9a24a" stroke-width="26"/><path d="M340 220a110 110 0 0 1 0 220" fill="none" stroke="#e8c97a" stroke-width="10" opacity=".6"/>
+<path d="M330 210l20-34 20 34-20 16z" fill="#e8f3ff"/>${[[180, 150], [640, 170], [620, 470], [170, 460]].map(([x, y]) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map((a) => `<ellipse rx="14" ry="28" cy="-22" fill="${p.accent}" transform="rotate(${a})"/>`).join('')}<circle r="10" fill="#ffd27a"/></g>`).join('')}`)
   };
 
   const cache = {};

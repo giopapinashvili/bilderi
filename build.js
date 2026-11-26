@@ -6,7 +6,7 @@ const r = (p) => fs.readFileSync(path.join(__dirname, p), 'utf8');
 const out = (p, s) => { fs.mkdirSync(path.dirname(path.join(__dirname, p)), { recursive: true }); fs.writeFileSync(path.join(__dirname, p), s); console.log(p, (s.length / 1024).toFixed(1) + ' KB'); };
 
 // ნიმუშების რიგი: ჯერ კაფე-რესტორნები, მერე სერვისები, დასვენება და მაღაზიები
-const ORDER = ['finjani', 'dzveli-ubani', 'talgha', 'mtsvadi', 'pesvi', 'tone', 'gumeli', 'marani', 'ia', 'britva', 'motori', 'balansi', 'kadri', 'badagi', 'mtis-sakhli', 'kvadrati', 'bazari', 'tapli', 'tikha'];
+const ORDER = ['finjani', 'dzveli-ubani', 'talgha', 'mtsvadi', 'pesvi', 'tone', 'gumeli', 'marani', 'ia', 'britva', 'motori', 'balansi', 'kadri', 'denta', 'badagi', 'mtis-sakhli', 'kvadrati', 'bazari', 'tapli', 'tikha', 'nino-cakes', 'ana-luka'];
 const files = fs.readdirSync(path.join(__dirname, 'src/samples')).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5));
 for (const f of files) if (!ORDER.includes(f)) ORDER.push(f);
 const samples = ORDER.filter((s) => files.includes(s)).map((s) => JSON.parse(r(`src/samples/${s}.json`)));

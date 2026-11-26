@@ -1,0 +1,134 @@
+{
+  "template": "supra",
+  "slug": "ana-luka",
+  "name": "ანა და ლუკა",
+  "kind": "ქორწილის მოსაწვევი",
+  "category": "event",
+  "hideNav": true,
+  "meta": {
+    "title": "ანა და ლუკა, 12 ივნისი",
+    "description": "გეპატიჟებით ჩვენს ქორწილში. დეტალები და პასუხი აქ."
+  },
+  "theme": {
+    "style": "elegant",
+    "font": "classic",
+    "corners": "soft",
+    "colors": {
+      "bg": "#fffaf8",
+      "ink": "#3b2a2a",
+      "surface": "#fbefec",
+      "accent": "#b5485c",
+      "accentInk": "#ffffff"
+    }
+  },
+  "contact": {
+    "phone": "+995 555 12 06 27",
+    "whatsapp": "995555120627",
+    "address": "შატო მუხრანი, მუხრანი"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "variant": "center",
+      "tone": "base",
+      "kicker": "ვქორწინდებით",
+      "tagline": "გეპატიჟებით ჩვენს ქორწილში. 2027 წლის 12 ივნისს, მუხრანში.",
+      "image": {
+        "src": "demo:rings",
+        "alt": "ბეჭდები და ყვავილები"
+      },
+      "buttons": [
+        {
+          "label": "მოვალ / ვერ მოვალ",
+          "link": "#rsvp"
+        }
+      ]
+    },
+    {
+      "type": "countdown",
+      "tone": "surface",
+      "title": "ქორწილამდე დარჩა",
+      "date": "2027-06-12T16:00:00",
+      "note": "ველით ყველას, ვისაც გვიყვარს."
+    },
+    {
+      "type": "events",
+      "id": "program",
+      "tone": "base",
+      "title": "დღის გეგმა",
+      "items": [
+        {
+          "date": "16:00",
+          "title": "ჯვრისწერა",
+          "text": "მცხეთა, სვეტიცხოველი"
+        },
+        {
+          "date": "18:00",
+          "title": "მისაღები",
+          "text": "შატო მუხრანის ეზოში"
+        },
+        {
+          "date": "19:30",
+          "title": "ვახშამი და ცეკვა",
+          "text": "დრესკოდი: ღია ფერები"
+        }
+      ]
+    },
+    {
+      "type": "form",
+      "id": "rsvp",
+      "tone": "surface",
+      "title": "გვიპასუხე",
+      "note": "გთხოვთ, გვიპასუხოთ 1 მაისამდე, რომ ადგილები სწორად დავგეგმოთ.",
+      "msgTitle": "პასუხი ქორწილზე",
+      "submit": "პასუხის გაგზავნა",
+      "items": [
+        {
+          "label": "სახელი და გვარი",
+          "type": "text",
+          "req": true
+        },
+        {
+          "label": "მოხვალ?",
+          "type": "choice",
+          "opts": "კი, სიამოვნებით, სამწუხაროდ ვერა"
+        },
+        {
+          "label": "რამდენი იქნებით",
+          "type": "select",
+          "opts": "1, 2, 3, 4"
+        },
+        {
+          "label": "საჭმელზე რამე გვითხარი",
+          "type": "textarea"
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "tone": "base",
+      "title": "ჩვენ",
+      "images": [
+        {
+          "src": "demo:rings",
+          "alt": "ბეჭდები"
+        },
+        {
+          "src": "demo:person2",
+          "alt": "ანა"
+        },
+        {
+          "src": "demo:person1",
+          "alt": "ლუკა"
+        }
+      ]
+    },
+    {
+      "type": "visit",
+      "tone": "surface",
+      "title": "სად",
+      "note": "თბილისიდან 40 წუთი. ავტობუსი 15:00-ზე წავა რუსთაველის მეტროსთან.",
+      "contactTitle": "კითხვებზე"
+    }
+  ]
+}

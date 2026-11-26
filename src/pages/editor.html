@@ -424,6 +424,9 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     cta: sv('<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M8 12h8"/>'),
     services: sv('<circle cx="6" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8 8.5L20 18M8 15.5L20 6"/>'),
     products: sv('<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>'),
+    form: sv('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'),
+    links: sv('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
+    countdown: sv('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>'),
     rooms: sv('<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>'),
     plans: sv('<rect x="3" y="5" width="7" height="14" rx="2"/><rect x="14" y="5" width="7" height="14" rx="2"/><path d="M6 9h1M17 9h1"/>'),
     features: sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'),
@@ -451,6 +454,9 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
   ];
   const TYPES = [
     { h: 'ძირითადი' },
+    { type: 'form', name: 'ფორმა', desc: 'შენი ველები, პასუხი WhatsApp-ზე' },
+    { type: 'links', name: 'ბმულების სია', desc: 'დიდი ღილაკები, Instagram-ის გვერდისთვის' },
+    { type: 'countdown', name: 'უკუთვლა', desc: 'დღეები და საათები თარიღამდე' },
     { type: 'rooms', name: 'ოთახები', desc: 'სასტუმროს ოთახები ცალკე გვერდებით' },
     { type: 'booking', name: 'დაჯავშნის ფორმა', desc: 'მაგიდა ან ოთახი, თარიღით, WhatsApp-ით' },
     { type: 'shop', name: 'კატალოგი და კალათა', desc: 'პროდუქტები, კატეგორიები, შეკვეთა WhatsApp-ით' },
@@ -474,7 +480,7 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     { type: 'visit', name: 'მისამართი', desc: 'საათები, კონტაქტი, რუკა' },
     { type: 'hero', name: 'მთავარი ბლოკი', desc: 'სახელი, ფოტო, ღილაკები' }
   ];
-  const CATS = { realestate: 'უძრავი ქონება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
+  const CATS = { personal: 'Instagram და პირადი', event: 'ღონისძიება', realestate: 'უძრავი ქონება', food: 'კაფე და რესტორანი', services: 'სილამაზე და სერვისი', stay: 'დასვენება', shop: 'მაღაზია' };
   const STYLES = [['poster', 'აბრა', 'დიდი, თამამი სათაურები'], ['elegant', 'ელეგანტური', 'მსუბუქი, შუაში, თხელი ხაზები'], ['warm', 'თბილი', 'რბილი ბარათები ჩრდილით'], ['clean', 'სუფთა', 'მაღაზიისთვის, პროდუქტი მთავარია']];
 
   const RESERVED = ['admin', 'api', 'app', 'www', 'mail', 'bog', 'tbc', 'bank', 'gov', 'police', 'support', 'help', 'login', 'bilderi', 'pay'];
@@ -861,6 +867,7 @@ ${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="$
     title: ['სახელი', 'text'], text: ['აღწერა', 'area'], price: ['ფასი', 'num'], oldPrice: ['ძველი ფასი (გადახაზული)', 'num'],
     unit: ['ფასის შემდეგ', 'text', 'მაგ. / ღამე ან -დან'], meta: ['დამატებითი ხაზი', 'text', 'მაგ. 45 წთ ან 2 სტუმარი'], badge: ['იარლიყი', 'text', 'მაგ. ახალი'],
     icon: ['ხატულა', 'icon'], image: ['ფოტო', 'image'], featured: ['გამოყოფა ჩარჩოთი', 'toggle'],
+    label: ['სახელი', 'text'], ftype: ['ველის ტიპი', 'ftype'], opts: ['ვარიანტები, მძიმით', 'text', 'მაგ. კი, არა'], req: ['სავალდებულო', 'toggle'], link: ['ბმული', 'text', 'https://... ან @whatsapp, @phone, #სექცია'],
     q: ['კითხვა', 'text'], a: ['პასუხი', 'area'], name: ['სახელი', 'text'], note: ['მინაწერი', 'text', 'მაგ. ქალაქი ან თარიღი'], stars: ['ვარსკვლავები', 'stars'], date: ['დღე ან თარიღი', 'text', 'მაგ. პარასკევი, 6 დეკ.']
   };
   const iconPick = (path) => { const cur = get(site, path) || 'star'; return `<div class="icons-pick">${Supra.ICONS.map((n) => `<button type="button" data-act="set" data-path="${path}" data-x="${n}" aria-pressed="${cur === n}" aria-label="${n}">${Supra.icon(n)}</button>`).join('')}</div>`; };
@@ -871,6 +878,7 @@ ${more ? `<div class="i-more"><input class="inp" data-bind="${ip}.desc" value="$
     if (kind === 'icon') return `<div class="fld"><span class="lt">${label}</span>${iconPick(path)}</div>`;
     if (kind === 'image') return `<div class="fld"><span class="lt">${label}</span>${miniImg(path)}</div>`;
     if (kind === 'toggle') return togl(label, path, false);
+    if (kind === 'ftype') { const v = get(site, ip + '.type') || 'text'; return `<label class="fld"><span class="lt">${label}</span><select class="inp" data-bind="${ip}.type" data-rerender="1">${[['text', 'ტექსტი'], ['tel', 'ტელეფონი'], ['email', 'ელფოსტა'], ['number', 'რიცხვი'], ['date', 'თარიღი'], ['textarea', 'გრძელი ტექსტი'], ['select', 'სიიდან არჩევა'], ['choice', 'ღილაკებით არჩევა']].map(([k2, l]) => `<option value="${k2}"${v === k2 ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`; }
     if (kind === 'stars') { const v = Number(get(site, path) || 0); return `<label class="fld"><span class="lt">${label}</span><select class="inp" data-bind="${path}" data-type="int">${[5, 4, 3, 0].map((n) => `<option value="${n}"${v === n ? ' selected' : ''}>${n ? '★'.repeat(n) : 'არ ჩანს'}</option>`).join('')}</select></label>`; }
     return fld(label, path, { ph });
   }
@@ -908,7 +916,7 @@ ${more ? `<div class="i-more">${spec.more.map((k) => fieldEd(ip, k)).join('')}<d
     const seg = (path, opts) => { const cur = get(site, path) ?? opts[0][0]; return `<div class="cards2">${opts.map(([v, l, pic]) => `<button type="button" class="optc" data-act="set" data-path="${path}" data-x="${v}" aria-pressed="${String(cur) === String(v)}">${pic}<small>${l}</small></button>`).join('')}</div>`; };
     const pic = (a) => `<span class="lay">${a}</span>`;
     if (s.type === 'hero') {
-      h += grp('განლაგება', seg(`${P}.variant`, [['poster', 'დიდი სახელი, ფოტო ქვემოთ', pic('<i style="width:40px;height:10px"></i><i style="width:24px;height:22px;opacity:.6"></i>')], ['photo', 'ფოტო ფონად', pic('<i style="width:64px;height:34px;opacity:.6"></i>')], ['split', 'ტექსტი და ფოტო გვერდიგვერდ', pic('<i style="width:26px;height:8px"></i><i style="width:24px;height:30px;opacity:.6"></i>')], ['center', 'შუაში, ფოტო ქვემოთ', pic('<i style="width:30px;height:8px;margin:0 auto"></i>')]]));
+      h += grp('განლაგება', seg(`${P}.variant`, [['poster', 'დიდი სახელი, ფოტო ქვემოთ', pic('<i style="width:40px;height:10px"></i><i style="width:24px;height:22px;opacity:.6"></i>')], ['photo', 'ფოტო ფონად', pic('<i style="width:64px;height:34px;opacity:.6"></i>')], ['split', 'ტექსტი და ფოტო გვერდიგვერდ', pic('<i style="width:26px;height:8px"></i><i style="width:24px;height:30px;opacity:.6"></i>')], ['center', 'შუაში, ფოტო ქვემოთ', pic('<i style="width:30px;height:8px;margin:0 auto"></i>')], ['profile', 'პროფილი: მრგვალი ფოტო, სოციალური ქსელები', pic('<i style="width:20px;height:20px;border-radius:50%;margin:0 auto"></i>')]]));
       h += grp('ტექსტი', (s.variant === 'split' || s.variant === 'center' ? fld('პატარა წარწერა სახელის ზემოთ', `${P}.kicker`, { ph: 'მაგ. საცხობი საბურთალოზე' }) : '') + fld('სათაური (ბიზნესის სახელი)', 'name') + fld('ქვესათაური', `${P}.tagline`, { rows: 3 }) + fld('მოკლე შენიშვნა', `${P}.note`, { ph: 'მაგ. ყოველდღე 08:00-დან' }));
       h += grp('ფოტო', imgFld(`${P}.image`, 'photo'));
       h += grp('ღილაკები', btnsEd(`${P}.buttons`));
@@ -951,13 +959,24 @@ ${more ? `<div class="i-more">${spec.more.map((k) => fieldEd(ip, k)).join('')}<d
       }
       h += grp('ღილაკები ქვემოთ', btnsEd(`${P}.buttons`));
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'form') {
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }) + fld('ღილაკის ტექსტი', `${P}.submit`, { ph: 'გაგზავნა WhatsApp-ით' }) + fld('შეტყობინების სათაური', `${P}.msgTitle`, { ph: 'განაცხადი საიტიდან', hint: 'WhatsApp-ში ასე დაიწყება შეტყობინება.' }));
+      h += grp('ველები', itemsEd(i, { main: 'label', more: ['ftype', 'opts', 'req'], add: 'ველის დამატება', x: 'field' }), (s.items || []).length + '');
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'links') {
+      h += grp('ტექსტი', fld('სათაური (არასავალდებულო)', `${P}.title`));
+      h += grp('ბმულები', itemsEd(i, { main: 'label', more: ['text', 'link', 'icon', 'featured'], add: 'ბმულის დამატება', x: 'lnk' }), (s.items || []).length + '');
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'countdown') {
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }) + `<label class="fld"><span class="lt">თარიღი და დრო</span><input class="inp" type="datetime-local" data-bind="${P}.date" value="${esc(s.date || '')}"></label>`);
+      h += grp('ღილაკები', btnsEd(`${P}.buttons`)) + grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     } else if (s.type === 'rooms') {
       const n = (site.rooms || []).length;
       h += grp('ოთახები', `<p class="hint" style="margin-top:0">${n ? `საიტზე ${n} ოთახია.` : 'ოთახები ჯერ არ არის.'} ოთახებს, ფოტოებს და ფასებს ადმინ პანელიდან ამატებ.</p>${REMOTE ? `<a class="btn btn-red wide" href="/admin/?site=${encodeURIComponent(SITE_ID)}">ადმინ პანელის გახსნა</a>` : '<p class="hint">ადმინ პანელი შესვლის შემდეგ გაიხსნება, „ჩემი საიტებიდან".</p>'}`);
       h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     } else if (s.type === 'booking') {
-      h += grp('რას აჯავშნინებ', seg(`${P}.mode`, [['table', 'მაგიდა: თარიღი, დრო, სტუმრები', pic('<i style="width:30px;height:20px;opacity:.6"></i>')], ['room', 'ოთახი: შესვლა, გასვლა, ოთახი', pic('<i style="width:34px;height:14px;opacity:.6"></i>')]]));
+      h += grp('რას აჯავშნინებ', seg(`${P}.mode`, [['table', 'მაგიდა: თარიღი, დრო, სტუმრები', pic('<i style="width:30px;height:20px;opacity:.6"></i>')], ['room', 'ოთახი: შესვლა, გასვლა, ოთახი', pic('<i style="width:34px;height:14px;opacity:.6"></i>')], ['appt', 'ჩაწერა: სერვისი, სპეციალისტი, დრო', pic('<i style="width:14px;height:14px;border-radius:50%"></i><i style="width:20px;height:6px"></i>')]]) + (s.mode === 'appt' ? '<p class="hint">სერვისები და სპეციალისტები თავისით აიღება „სერვისები და ფასები" და „გუნდი" სექციებიდან.</p>' : ''));
       h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 3 }) + fld('ტექსტი ღილაკის ქვემოთ', `${P}.formNote`, { ph: 'მაგ. დაგიდასტურებთ 15 წუთში' }));
       h += grp('სად მოდის', '<p class="hint" style="margin-top:0">მოთხოვნა WhatsApp-ზე მოგივა, ინფოს ჩანართში მითითებულ ნომერზე. ოთახის რეჟიმში ფასი თავისით ითვლება.</p>');
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
@@ -1019,9 +1038,10 @@ ${grp('ლოგო', imgFld('brand.logo', 'logo', { alt: false, empty: 'ლო�
 ${grp('პატარა ლოგო ბრაუზერში', `<div class="favs"><div class="tabprev"><img src="${esc(favUrl())}" alt=""><span>${esc((site.meta && site.meta.title) || site.name)}</span></div><img src="${esc(favUrl())}" width="40" height="40" alt="პატარა ლოგო"></div>
 <div class="seg">${[['auto', 'ასოთი'], ['logo', 'ლოგოდან'], ['custom', 'საკუთარი']].map(([v, l]) => `<button type="button" data-act="set" data-path="brand.faviconMode" data-x="${v}" aria-pressed="${mode === v}"${v === 'logo' && !hasLogo ? ' disabled title="ჯერ ლოგო ატვირთე"' : ''}>${l}</button>`).join('')}</div>
 <p class="hint">ჩანს ბრაუზერის ჩანართში, სანიშნეებში და ტელეფონის მთავარ ეკრანზე.${mode === 'auto' ? ' ახლა სახელის პირველი ასოა მთავარ ფერზე.' : ''}</p>${mode === 'custom' ? imgFld('brand.faviconImg', 'favicon', { alt: false, empty: 'კვადრატული ხატულის ატვირთვა' }) : ''}`)}
+${grp('ზედა მენიუ', togl('ზედა მენიუს დამალვა (ერთგვერდიანი, Instagram-ის საიტისთვის)', 'hideNav', false))}
 ${grp('ზედა ზოლი', fld('განცხადება საიტის თავში', 'notice', { ph: 'მაგ. უფასო მიტანა 100 ₾-დან', hint: 'ცარიელს თუ დატოვებ, ზოლი არ გამოჩნდება.' }))}
 ${grp('ზედა ღილაკი', togl('ჩვენება', 'navButton.show', true) + (get(site, 'navButton.show') === false ? '' : fld('ტექსტი', 'navButton.label', { ph: 'დარეკვა' }) + linkEd('navButton', '@phone') + togl('ტელეფონზე ქვემოთაც ჩანდეს', 'navButton.bar', false) + '<p class="hint">ტელეფონზე ეს ღილაკი ეკრანის ქვედა ნაწილში მუდმივად ჩანს. კარგია შეკვეთისთვის და ჩაწერისთვის.</p>'))}
-${grp('კონტაქტი', fld('ტელეფონი', 'contact.phone', { im: 'tel', ph: '+995 5XX XX XX XX' }) + fld('WhatsApp', 'contact.whatsapp', { im: 'tel', ph: '995555123456', hint: 'მხოლოდ ციფრები, ქვეყნის კოდით.' }) + fld('მისამართი', 'contact.address') + fld('რუკაზე საძიებო სიტყვა', 'contact.mapQuery', { ph: 'თუ მისამართი რუკაზე არ იძებნება' }) + fld('Instagram', 'contact.instagram', { pre: '@', ph: 'saxeli' }) + fld('Facebook', 'contact.facebook', { pre: 'facebook.com/', ph: 'saxeli' }))}
+${grp('კონტაქტი', fld('ტელეფონი', 'contact.phone', { im: 'tel', ph: '+995 5XX XX XX XX' }) + fld('WhatsApp', 'contact.whatsapp', { im: 'tel', ph: '995555123456', hint: 'მხოლოდ ციფრები, ქვეყნის კოდით.' }) + fld('მისამართი', 'contact.address') + fld('რუკაზე საძიებო სიტყვა', 'contact.mapQuery', { ph: 'თუ მისამართი რუკაზე არ იძებნება' }) + fld('Instagram', 'contact.instagram', { pre: '@', ph: 'saxeli' }) + fld('Facebook', 'contact.facebook', { pre: 'facebook.com/', ph: 'saxeli' }) + fld('TikTok', 'contact.tiktok', { pre: '@', ph: 'saxeli' }))}
 ${grp('სამუშაო საათები', hours.map((r, k) => `<div class="hrow"><input class="inp" data-bind="hours.${k}.days" value="${esc(r.days)}" placeholder="დღეები" aria-label="დღეები"><input class="inp" data-bind="hours.${k}.time" value="${esc(r.time)}" placeholder="10:00–22:00" aria-label="საათები"><button class="ib sm danger" type="button" data-act="del" data-path="hours.${k}" aria-label="წაშლა">${IC.del}</button></div>`).join('') + `<button class="add-btn sm" type="button" data-act="push" data-path="hours" data-x="hour">${IC.plus}რიგის დამატება</button>`)}
 ${grp('ქვედა ზოლი', fld('დამატებითი ტექსტი', 'footer.text', { ph: '© 2026 ' + (site.name || '') }))}`;
   }
@@ -1121,6 +1141,8 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     para: () => 'ახალი აბზაცი. დაწერე, რით გამოირჩევით.',
     hour: () => ({ days: 'შაბათი', time: '10:00–22:00' }),
     card: (path) => { const s = get(site, path.replace(/\.items$/, '')) || {}; return s.layout === 'icons' ? { icon: 'star', title: 'ახალი', text: 'მოკლედ აღწერე.' } : s.layout === 'list' ? { title: 'ახალი სერვისი', meta: '30 წთ', price: 30 } : { title: 'ახალი', text: 'მოკლე აღწერა', price: 20 }; },
+    field: () => ({ label: 'ახალი ველი', type: 'text' }),
+    lnk: () => ({ label: 'ახალი ბმული', link: 'https://', icon: 'link' }),
     person: () => ({ title: 'სახელი გვარი', text: 'როლი' }),
     review: () => ({ name: 'სახელი', text: 'რა მოეწონა კლიენტს.', stars: 5 }),
     qa: () => ({ q: 'ახალი კითხვა?', a: 'პასუხი.' }),
@@ -1135,6 +1157,9 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     about: () => ({ type: 'about', tone: 'surface', title: 'ჩვენ შესახებ', paragraphs: ['მოგვიყევით თქვენს ისტორიაზე: როდის გაიხსენით, რით გამოირჩევით და რატომ უნდა გესტუმრონ.'] }),
     gallery: () => ({ type: 'gallery', tone: 'base', title: 'ფოტოები', images: [] }),
     visit: () => ({ type: 'visit', tone: 'base', title: 'გვესტუმრეთ' }),
+    form: () => ({ type: 'form', tone: 'surface', title: 'მოგვწერეთ', inNav: false, items: [{ label: 'სახელი', type: 'text', req: true }, { label: 'ტელეფონი', type: 'tel', req: true }, { label: 'შეტყობინება', type: 'textarea' }] }),
+    links: () => ({ type: 'links', tone: 'base', inNav: false, items: [{ label: 'მოგვწერე WhatsApp-ზე', link: '@whatsapp', icon: 'chat', featured: true }, { label: 'დარეკვა', link: '@phone', icon: 'phone' }] }),
+    countdown: () => ({ type: 'countdown', tone: 'surface', title: 'დარჩა', date: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 16), inNav: false }),
     rooms: () => { site.rooms = site.rooms || []; return { type: 'rooms', tone: 'base', title: 'ოთახები' }; },
     booking: () => ({ type: 'booking', mode: site.rooms ? 'room' : 'table', tone: 'surface', title: site.rooms ? 'დაჯავშნე პირდაპირ' : 'მაგიდის დაჯავშნა', navLabel: 'დაჯავშნა' }),
     shop: () => { site.products = site.products || []; site.shop = site.shop || { fee: 5, freeFrom: 100 }; return { type: 'shop', tone: 'base', title: 'კატალოგი' }; },
@@ -1178,7 +1203,7 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
       toast(isSec ? 'სექცია წაიშალა' : 'წაიშალა', 'დაბრუნება', () => jump(-1));
     },
     dup: (p) => { const [, i] = parentOf(p); const c = clone(site.sections[i]); c.id = newId(c.type); site.sections.splice(i + 1, 0, c); state.sec = i + 1; after(i + 1); toast('სექცია დუბლირდა'); },
-    push: (p, x) => { const arr = get(site, p) || []; arr.push(NEW[x](p)); set(site, p, arr); if (['item', 'card', 'person', 'review', 'qa', 'step', 'event'].includes(x)) openItems.add(`${p}.${arr.length - 1}`); after(); },
+    push: (p, x) => { const arr = get(site, p) || []; arr.push(NEW[x](p)); set(site, p, arr); if (['item', 'card', 'person', 'review', 'qa', 'step', 'event', 'field', 'lnk'].includes(x)) openItems.add(`${p}.${arr.length - 1}`); after(); },
     set: (p, x) => { set(site, p, x === 'true' ? true : x === 'false' ? false : x); after(); },
     tone: (p, x) => { set(site, p + '.tone', x); if (x === 'custom' && !get(site, p + '.bg')) set(site, p + '.bg', '#ffd23f'); after(); },
     preset: (p, x) => { site.theme = site.theme || {}; site.theme.colors = Object.assign({}, PRESETS[Number(x)].c); after(); },

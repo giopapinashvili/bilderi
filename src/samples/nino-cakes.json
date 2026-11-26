@@ -1,0 +1,131 @@
+{
+  "template": "supra",
+  "slug": "nino-cakes",
+  "name": "ნინოს ტორტები",
+  "kind": "Link-in-bio, Instagram-ისთვის",
+  "category": "personal",
+  "hideNav": true,
+  "meta": {
+    "title": "ნინოს ტორტები",
+    "description": "სახლის ტორტები შეკვეთით. ფასები, შეკვეთა და კონტაქტი ერთ გვერდზე."
+  },
+  "theme": {
+    "style": "warm",
+    "font": "modern",
+    "corners": "round",
+    "colors": {
+      "bg": "#fff6f8",
+      "ink": "#3a1f2b",
+      "surface": "#ffe9ee",
+      "accent": "#e0457b",
+      "accentInk": "#ffffff"
+    }
+  },
+  "contact": {
+    "phone": "+995 555 90 90 12",
+    "whatsapp": "995555909012",
+    "instagram": "nino.cakes",
+    "facebook": "ninocakes",
+    "tiktok": "nino.cakes"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "variant": "profile",
+      "tone": "base",
+      "image": {
+        "src": "demo:torte",
+        "alt": "ნინოს ტორტი"
+      },
+      "tagline": "სახლის ტორტები შეკვეთით, თბილისში. დაბადების დღე, ნათლობა, ქორწილი.",
+      "note": "შეკვეთა 3 დღით ადრე"
+    },
+    {
+      "type": "links",
+      "tone": "base",
+      "items": [
+        {
+          "label": "შეკვეთა WhatsApp-ით",
+          "text": "პასუხს 10 წუთში გცემ",
+          "link": "@whatsapp",
+          "icon": "chat",
+          "featured": true
+        },
+        {
+          "label": "ტორტების ფასები",
+          "text": "კილოგრამი 45 ₾-დან",
+          "link": "#prices",
+          "icon": "cake"
+        },
+        {
+          "label": "ნამუშევრები Instagram-ზე",
+          "link": "https://instagram.com/nino.cakes",
+          "icon": "insta"
+        },
+        {
+          "label": "TikTok, როგორ ვაცხობ",
+          "link": "https://www.tiktok.com/@nino.cakes",
+          "icon": "tiktok"
+        },
+        {
+          "label": "დარეკვა",
+          "link": "@phone",
+          "icon": "phone"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "kind": "products",
+      "layout": "list",
+      "id": "prices",
+      "tone": "surface",
+      "title": "ფასები",
+      "order": true,
+      "orderLabel": "შეკვეთა",
+      "orderText": "გამარჯობა! მინდა შევუკვეთო:",
+      "items": [
+        {
+          "title": "ნაპოლეონი",
+          "meta": "1 კგ",
+          "price": 45
+        },
+        {
+          "title": "შოკოლადის ტორტი",
+          "meta": "1 კგ",
+          "price": 55
+        },
+        {
+          "title": "ბავშვის ტორტი ფიგურით",
+          "meta": "2 კგ-დან",
+          "price": 130,
+          "unit": "-დან"
+        },
+        {
+          "title": "კაპკეიქები",
+          "meta": "12 ცალი",
+          "price": 40
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "tone": "base",
+      "title": "ბოლო ნამუშევრები",
+      "images": [
+        {
+          "src": "demo:torte",
+          "alt": "ტორტი"
+        },
+        {
+          "src": "demo:cake",
+          "alt": "ნაპოლეონი"
+        },
+        {
+          "src": "demo:torte",
+          "alt": "ბავშვის ტორტი"
+        }
+      ]
+    }
+  ]
+}
