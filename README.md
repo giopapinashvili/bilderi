@@ -20,5 +20,11 @@
 - `build.js` — `node build.js` აწყობს `public/` საქაღალდის გვერდებს
 - `wrangler.jsonc` — Cloudflare Worker-ის პარამეტრები
 
+## მისამართი
+https://bilderi.gio-papinashvili20-bd3.workers.dev
+
+## Firebase
+პროექტი `bilderi-ge`: შესვლა (ელფოსტა/პაროლი და Google) და Firestore (ევროპა, eur3). წესები: `firestore.rules`, გამოქვეყნება: `firebase deploy --only firestore,auth`.
+
 ## Cloudflare
 Worker `bilderi`, დაკავშირებულია ამ რეპოსთან. ყოველ push-ზე Cloudflare თავისით აქვეყნებს `public/` საქაღალდეს (`npx wrangler deploy`).
