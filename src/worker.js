@@ -61,7 +61,7 @@ async function page(slug, origin, item) {
   const f = await getDoc('published/' + slug);
   if (!f || !f.data) return html(freePage(slug), 404);
   const site = prepare(JSON.parse(f.data.stringValue), origin, slug);
-  if (item && !(site.listings || []).some((l) => l.id === item && !l.hidden)) return html(Supra.renderSite(site, { page: item }), 404);
+  if (item && ![...(site.listings || []), ...(site.products || [])].some((l) => l.id === item && !l.hidden)) return html(Supra.renderSite(site, { page: item }), 404);
   return html(Supra.renderSite(site, item ? { page: item } : undefined), 200, 'public, max-age=30');
 }
 

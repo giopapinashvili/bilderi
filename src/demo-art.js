@@ -19,6 +19,7 @@
     'mtis-sakhli': { wall: '#efe3d3', wall2: '#e4d3bd', table: '#8c2f39', table2: '#73252e', plate: '#ffffff', cup: '#ffffff', accent: '#8c2f39', sky: '#a9c8ec', wood: '#2b2118', cloth: '#8c2f39' },
     tapli: { wall: '#ffe7a8', wall2: '#ffd977', table: '#3b2412', table2: '#2b190b', plate: '#fffaf0', cup: '#ffffff', accent: '#e09b00', sky: '#bcd3ee', wood: '#3b2412', cloth: '#c0392b' },
     kvadrati: { wall: '#eef2f6', wall2: '#dfe6ee', table: '#9fb0c4', table2: '#8798ad', plate: '#ffffff', cup: '#ffffff', accent: '#e4572e', sky: '#bcd6f0', wood: '#122033', cloth: '#122033' },
+    bazari: { wall: '#f6f1ee', wall2: '#e9ded8', table: '#d8c3b5', table2: '#c9b0a0', plate: '#ffffff', cup: '#ffffff', accent: '#c8102e', sky: '#bcd6f0', wood: '#2a2320', cloth: '#1f3a5f' },
     tikha: { wall: '#f2ebe4', wall2: '#e4d7ca', table: '#d9c6b4', table2: '#cbb59f', plate: '#ffffff', cup: '#ffffff', accent: '#c0392b', sky: '#f2ebe4', wood: '#2a2320', cloth: '#2f4a6b' }
   };
 
@@ -385,6 +386,15 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
 <rect x="520" y="150" width="36" height="70" fill="${p.wood}"/><rect x="200" y="456" width="400" height="10" fill="${p.wood}" opacity=".3"/>
 <path d="M330 600l40-136h60l40 136z" fill="#e8dcc8" opacity=".8"/>
 <circle cx="110" cy="400" r="60" fill="${p.accent}" opacity=".55"/><rect x="104" y="400" width="12" height="70" fill="${p.wood}"/><circle cx="700" cy="410" r="48" fill="${p.accent}" opacity=".45"/><rect x="695" y="410" width="10" height="60" fill="${p.wood}"/>`)
+,
+    tote: (p) => product(p, `<path d="M330 230c0-70 30-100 70-100s70 30 70 100" fill="none" stroke="${p.wood}" stroke-width="12"/><path d="M250 230h300l-20 270H270z" fill="#efe4d2"/><path d="M400 230h150l-20 270H400z" fill="#000" opacity=".06"/>
+<path d="M300 330c30-30 70-30 100 0s70 30 100 0" stroke="${p.accent}" stroke-width="12" fill="none"/><circle cx="400" cy="400" r="34" fill="${p.accent}"/><circle cx="400" cy="400" r="14" fill="#efe4d2"/>`),
+    blanket: (p) => product(p, `<rect x="220" y="330" width="360" height="160" rx="18" fill="${p.accent}"/><rect x="230" y="270" width="340" height="80" rx="18" fill="#efe4d2"/><rect x="240" y="210" width="320" height="80" rx="18" fill="${p.cloth}"/>
+${[0, 1, 2, 3, 4, 5].map((k) => `<path d="M${250 + k * 54} 410l20-20 20 20-20 20z" fill="#efe4d2"/>`).join('')}${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => `<rect x="${262 + k * 38}" y="300" width="16" height="16" fill="${p.accent}" transform="rotate(45 ${270 + k * 38} 308)"/>`).join('')}
+${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((k) => `<path d="M${236 + k * 32} 490v22" stroke="${p.accent}" stroke-width="5" stroke-linecap="round"/>`).join('')}`),
+    churchkhela: (p) => product(p, `<path d="M240 120h320" stroke="${p.wood}" stroke-width="10" stroke-linecap="round"/>${[[290, '#7a1f3d', 340], [370, '#b5651d', 370], [450, '#7a1f3d', 330], [530, '#9b2f2f', 360]].map(([x, c, h]) => `<path d="M${x} 120v40" stroke="#c9b28a" stroke-width="4"/><path d="M${x - 26} 170c0-14 52-14 52 0v${h - 30}c0 30-52 30-52 0z" fill="${c}"/>${[0, 1, 2, 3, 4, 5].map((k) => `<ellipse cx="${x}" cy="${200 + k * 50}" rx="24" ry="6" fill="#000" opacity=".08"/>`).join('')}<path d="M${x - 14} 190v${h - 70}" stroke="#fff" stroke-opacity=".2" stroke-width="6" stroke-linecap="round"/>`).join('')}`),
+    candle: (p) => product(p, `<ellipse cx="400" cy="480" rx="130" ry="20" fill="#000" opacity=".1"/><rect x="290" y="280" width="220" height="200" rx="20" fill="${p.cloth}"/><rect x="400" y="280" width="110" height="200" rx="20" fill="#000" opacity=".1"/><rect x="300" y="340" width="200" height="80" fill="#efe4d2"/><rect x="330" y="368" width="140" height="10" rx="5" fill="${p.accent}"/>
+<ellipse cx="400" cy="282" rx="110" ry="18" fill="#f6eedd"/><rect x="396" y="236" width="8" height="44" rx="4" fill="#3a2a1a"/><path d="M400 190c18 22 18 40 0 50-18-10-18-28 0-50z" fill="#ffb02e"/><circle cx="400" cy="220" r="60" fill="#ffd27a" opacity=".2"/>`)
   };
 
   const cache = {};

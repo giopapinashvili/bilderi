@@ -432,6 +432,7 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     faq: sv('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>'),
     steps: sv('<path d="M4 18h5v-5h5V8h6"/><circle cx="4" cy="18" r="1"/>'),
     events: sv('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+    shop: sv('<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>'),
     listings: sv('<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>')
   };
   const secIc = (s) => IC[s.type === 'cards' ? s.kind || 'features' : s.type] || IC.about;
@@ -448,6 +449,7 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
   ];
   const TYPES = [
     { h: 'ძირითადი' },
+    { type: 'shop', name: 'კატალოგი და კალათა', desc: 'პროდუქტები, კატეგორიები, შეკვეთა WhatsApp-ით' },
     { type: 'listings', name: 'განცხადებები', desc: 'ბინები ფილტრებით და ცალკე გვერდებით' },
     { type: 'menu', name: 'მენიუ', desc: 'კატეგორიები, კერძები და ფასები' },
     { type: 'services', name: 'სერვისები და ფასები', desc: 'ფასების სია, ხანგრძლივობით' },
@@ -944,6 +946,12 @@ ${more ? `<div class="i-more">${spec.more.map((k) => fieldEd(ip, k)).join('')}<d
       }
       h += grp('ღილაკები ქვემოთ', btnsEd(`${P}.buttons`));
       h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
+    } else if (s.type === 'shop') {
+      const n = (site.products || []).length;
+      h += grp('პროდუქტები', `<p class="hint" style="margin-top:0">${n ? `კატალოგში ${n} პროდუქტია.` : 'პროდუქტები ჯერ არ არის.'} პროდუქტებს, ფასებს, მარაგს და მიტანის პირობებს ადმინ პანელიდან მართავ.</p>${REMOTE ? `<a class="btn btn-red wide" href="/admin/?site=${encodeURIComponent(SITE_ID)}">ადმინ პანელის გახსნა</a>` : '<p class="hint">ადმინ პანელი შესვლის შემდეგ გაიხსნება, „ჩემი საიტებიდან".</p>'}<p class="hint">კლიენტი პროდუქტებს კალათაში აგროვებს და შეკვეთას WhatsApp-ით გიგზავნის, სიით და ჯამით.</p>`);
+      h += grp('ტექსტი', fld('სათაური', `${P}.title`) + fld('შენიშვნა', `${P}.note`, { rows: 2 }));
+      h += grp('ღილაკები ქვემოთ', btnsEd(`${P}.buttons`));
+      h += grp('ფონი', tonesEd(i)) + grp('ნავიგაცია', navEd(i));
     } else if (s.type === 'listings') {
       const n = (site.listings || []).length;
       h += grp('განცხადებები', `<p class="hint" style="margin-top:0">${n ? `საიტზე ${n} განცხადებაა.` : 'განცხადებები ჯერ არ არის.'} ბინებს, ფოტოებს და ფასებს ადმინ პანელიდან ამატებ: იქ მარტივი ფორმაა და ტელეფონიდანაც მოსახერხებელია.</p>${REMOTE ? `<a class="btn btn-red wide" href="/admin/?site=${encodeURIComponent(SITE_ID)}">ადმინ პანელის გახსნა</a>` : '<p class="hint">ადმინ პანელი შესვლის შემდეგ გაიხსნება, „ჩემი საიტებიდან".</p>'}`);
@@ -996,6 +1004,7 @@ ${grp('ლოგო', imgFld('brand.logo', 'logo', { alt: false, empty: 'ლო�
 ${grp('პატარა ლოგო ბრაუზერში', `<div class="favs"><div class="tabprev"><img src="${esc(favUrl())}" alt=""><span>${esc((site.meta && site.meta.title) || site.name)}</span></div><img src="${esc(favUrl())}" width="40" height="40" alt="პატარა ლოგო"></div>
 <div class="seg">${[['auto', 'ასოთი'], ['logo', 'ლოგოდან'], ['custom', 'საკუთარი']].map(([v, l]) => `<button type="button" data-act="set" data-path="brand.faviconMode" data-x="${v}" aria-pressed="${mode === v}"${v === 'logo' && !hasLogo ? ' disabled title="ჯერ ლოგო ატვირთე"' : ''}>${l}</button>`).join('')}</div>
 <p class="hint">ჩანს ბრაუზერის ჩანართში, სანიშნეებში და ტელეფონის მთავარ ეკრანზე.${mode === 'auto' ? ' ახლა სახელის პირველი ასოა მთავარ ფერზე.' : ''}</p>${mode === 'custom' ? imgFld('brand.faviconImg', 'favicon', { alt: false, empty: 'კვადრატული ხატულის ატვირთვა' }) : ''}`)}
+${grp('ზედა ზოლი', fld('განცხადება საიტის თავში', 'notice', { ph: 'მაგ. უფასო მიტანა 100 ₾-დან', hint: 'ცარიელს თუ დატოვებ, ზოლი არ გამოჩნდება.' }))}
 ${grp('ზედა ღილაკი', togl('ჩვენება', 'navButton.show', true) + (get(site, 'navButton.show') === false ? '' : fld('ტექსტი', 'navButton.label', { ph: 'დარეკვა' }) + linkEd('navButton', '@phone') + togl('ტელეფონზე ქვემოთაც ჩანდეს', 'navButton.bar', false) + '<p class="hint">ტელეფონზე ეს ღილაკი ეკრანის ქვედა ნაწილში მუდმივად ჩანს. კარგია შეკვეთისთვის და ჩაწერისთვის.</p>'))}
 ${grp('კონტაქტი', fld('ტელეფონი', 'contact.phone', { im: 'tel', ph: '+995 5XX XX XX XX' }) + fld('WhatsApp', 'contact.whatsapp', { im: 'tel', ph: '995555123456', hint: 'მხოლოდ ციფრები, ქვეყნის კოდით.' }) + fld('მისამართი', 'contact.address') + fld('რუკაზე საძიებო სიტყვა', 'contact.mapQuery', { ph: 'თუ მისამართი რუკაზე არ იძებნება' }) + fld('Instagram', 'contact.instagram', { pre: '@', ph: 'saxeli' }) + fld('Facebook', 'contact.facebook', { pre: 'facebook.com/', ph: 'saxeli' }))}
 ${grp('სამუშაო საათები', hours.map((r, k) => `<div class="hrow"><input class="inp" data-bind="hours.${k}.days" value="${esc(r.days)}" placeholder="დღეები" aria-label="დღეები"><input class="inp" data-bind="hours.${k}.time" value="${esc(r.time)}" placeholder="10:00–22:00" aria-label="საათები"><button class="ib sm danger" type="button" data-act="del" data-path="hours.${k}" aria-label="წაშლა">${IC.del}</button></div>`).join('') + `<button class="add-btn sm" type="button" data-act="push" data-path="hours" data-x="hour">${IC.plus}რიგის დამატება</button>`)}
@@ -1111,6 +1120,7 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     about: () => ({ type: 'about', tone: 'surface', title: 'ჩვენ შესახებ', paragraphs: ['მოგვიყევით თქვენს ისტორიაზე: როდის გაიხსენით, რით გამოირჩევით და რატომ უნდა გესტუმრონ.'] }),
     gallery: () => ({ type: 'gallery', tone: 'base', title: 'ფოტოები', images: [] }),
     visit: () => ({ type: 'visit', tone: 'base', title: 'გვესტუმრეთ' }),
+    shop: () => { site.products = site.products || []; site.shop = site.shop || { fee: 5, freeFrom: 100 }; return { type: 'shop', tone: 'base', title: 'კატალოგი' }; },
     listings: () => { site.listings = site.listings || []; return { type: 'listings', tone: 'base', title: 'განცხადებები', navLabel: 'ბინები' }; },
     services: () => ({ type: 'cards', kind: 'services', layout: 'list', tone: 'surface', title: 'სერვისები და ფასები', order: true, orderLabel: 'ჩაწერა', orderText: 'გამარჯობა! მინდა ჩავეწერო:', items: [{ title: 'პირველი სერვისი', meta: '45 წთ', price: 40 }, { title: 'მეორე სერვისი', meta: '1 სთ', price: 60, unit: '-დან' }] }),
     products: () => ({ type: 'cards', kind: 'products', layout: 'grid', tone: 'base', title: 'პროდუქტები', order: true, orderLabel: 'შეკვეთა', orderText: 'გამარჯობა! მინდა შევუკვეთო:', items: [{ title: 'პირველი პროდუქტი', text: 'მოკლე აღწერა', price: 25 }, { title: 'მეორე პროდუქტი', text: 'მოკლე აღწერა', price: 40 }, { title: 'მესამე პროდუქტი', text: 'მოკლე აღწერა', price: 60 }] }),

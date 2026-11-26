@@ -139,13 +139,10 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
     <a class="btn btn-line btn-sm" id="view" href="#" target="_blank" rel="noopener" hidden>საიტის ნახვა</a>
     <a class="btn btn-ink btn-sm" id="design" href="#">დიზაინი</a>
   </div>
-  <div class="tabs" role="tablist">
-    <button type="button" role="tab" data-tab="list" aria-selected="true">განცხადებები</button>
-    <button type="button" role="tab" data-tab="info" aria-selected="false">კონტაქტი და აგენტი</button>
-  </div>
+  <div class="tabs" role="tablist" id="tabs"></div>
 </header>
 <main id="main"><div class="state"><span class="spin"></span>იტვირთება…</div></main>
-<button class="btn btn-red fab" type="button" id="fab" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ბინის დამატება</button>
+<button class="btn btn-red fab" type="button" id="fab" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="fab-t">ბინის დამატება</span></button>
 
 <div class="modal sheet" id="sheet" aria-hidden="true">
   <form class="mbox" id="form" role="dialog" aria-modal="true" aria-labelledby="f-t" novalidate>
@@ -180,6 +177,7 @@ main{max-width:1100px;margin:0 auto;padding:22px var(--pad) 120px}
     'mtis-sakhli': { wall: '#efe3d3', wall2: '#e4d3bd', table: '#8c2f39', table2: '#73252e', plate: '#ffffff', cup: '#ffffff', accent: '#8c2f39', sky: '#a9c8ec', wood: '#2b2118', cloth: '#8c2f39' },
     tapli: { wall: '#ffe7a8', wall2: '#ffd977', table: '#3b2412', table2: '#2b190b', plate: '#fffaf0', cup: '#ffffff', accent: '#e09b00', sky: '#bcd3ee', wood: '#3b2412', cloth: '#c0392b' },
     kvadrati: { wall: '#eef2f6', wall2: '#dfe6ee', table: '#9fb0c4', table2: '#8798ad', plate: '#ffffff', cup: '#ffffff', accent: '#e4572e', sky: '#bcd6f0', wood: '#122033', cloth: '#122033' },
+    bazari: { wall: '#f6f1ee', wall2: '#e9ded8', table: '#d8c3b5', table2: '#c9b0a0', plate: '#ffffff', cup: '#ffffff', accent: '#c8102e', sky: '#bcd6f0', wood: '#2a2320', cloth: '#1f3a5f' },
     tikha: { wall: '#f2ebe4', wall2: '#e4d7ca', table: '#d9c6b4', table2: '#cbb59f', plate: '#ffffff', cup: '#ffffff', accent: '#c0392b', sky: '#f2ebe4', wood: '#2a2320', cloth: '#2f4a6b' }
   };
 
@@ -546,6 +544,15 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
 <rect x="520" y="150" width="36" height="70" fill="${p.wood}"/><rect x="200" y="456" width="400" height="10" fill="${p.wood}" opacity=".3"/>
 <path d="M330 600l40-136h60l40 136z" fill="#e8dcc8" opacity=".8"/>
 <circle cx="110" cy="400" r="60" fill="${p.accent}" opacity=".55"/><rect x="104" y="400" width="12" height="70" fill="${p.wood}"/><circle cx="700" cy="410" r="48" fill="${p.accent}" opacity=".45"/><rect x="695" y="410" width="10" height="60" fill="${p.wood}"/>`)
+,
+    tote: (p) => product(p, `<path d="M330 230c0-70 30-100 70-100s70 30 70 100" fill="none" stroke="${p.wood}" stroke-width="12"/><path d="M250 230h300l-20 270H270z" fill="#efe4d2"/><path d="M400 230h150l-20 270H400z" fill="#000" opacity=".06"/>
+<path d="M300 330c30-30 70-30 100 0s70 30 100 0" stroke="${p.accent}" stroke-width="12" fill="none"/><circle cx="400" cy="400" r="34" fill="${p.accent}"/><circle cx="400" cy="400" r="14" fill="#efe4d2"/>`),
+    blanket: (p) => product(p, `<rect x="220" y="330" width="360" height="160" rx="18" fill="${p.accent}"/><rect x="230" y="270" width="340" height="80" rx="18" fill="#efe4d2"/><rect x="240" y="210" width="320" height="80" rx="18" fill="${p.cloth}"/>
+${[0, 1, 2, 3, 4, 5].map((k) => `<path d="M${250 + k * 54} 410l20-20 20 20-20 20z" fill="#efe4d2"/>`).join('')}${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => `<rect x="${262 + k * 38}" y="300" width="16" height="16" fill="${p.accent}" transform="rotate(45 ${270 + k * 38} 308)"/>`).join('')}
+${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((k) => `<path d="M${236 + k * 32} 490v22" stroke="${p.accent}" stroke-width="5" stroke-linecap="round"/>`).join('')}`),
+    churchkhela: (p) => product(p, `<path d="M240 120h320" stroke="${p.wood}" stroke-width="10" stroke-linecap="round"/>${[[290, '#7a1f3d', 340], [370, '#b5651d', 370], [450, '#7a1f3d', 330], [530, '#9b2f2f', 360]].map(([x, c, h]) => `<path d="M${x} 120v40" stroke="#c9b28a" stroke-width="4"/><path d="M${x - 26} 170c0-14 52-14 52 0v${h - 30}c0 30-52 30-52 0z" fill="${c}"/>${[0, 1, 2, 3, 4, 5].map((k) => `<ellipse cx="${x}" cy="${200 + k * 50}" rx="24" ry="6" fill="#000" opacity=".08"/>`).join('')}<path d="M${x - 14} 190v${h - 70}" stroke="#fff" stroke-opacity=".2" stroke-width="6" stroke-linecap="round"/>`).join('')}`),
+    candle: (p) => product(p, `<ellipse cx="400" cy="480" rx="130" ry="20" fill="#000" opacity=".1"/><rect x="290" y="280" width="220" height="200" rx="20" fill="${p.cloth}"/><rect x="400" y="280" width="110" height="200" rx="20" fill="#000" opacity=".1"/><rect x="300" y="340" width="200" height="80" fill="#efe4d2"/><rect x="330" y="368" width="140" height="10" rx="5" fill="${p.accent}"/>
+<ellipse cx="400" cy="282" rx="110" ry="18" fill="#f6eedd"/><rect x="396" y="236" width="8" height="44" rx="4" fill="#3a2a1a"/><path d="M400 190c18 22 18 40 0 50-18-10-18-28 0-50z" fill="#ffb02e"/><circle cx="400" cy="220" r="60" fill="#ffd27a" opacity=".2"/>`)
   };
 
   const cache = {};
@@ -826,10 +833,68 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
 <button class="btn btn-red wide" type="submit">შენახვა</button></form>`;
   }
 
+  /* ================= მაღაზია ================= */
+  let SHOP = false;
+  const TABS = () => (SHOP ? [['list', 'პროდუქტები'], ['shop', 'მიტანა და გადახდა'], ['info', 'კონტაქტი']] : [['list', 'განცხადებები'], ['info', 'კონტაქტი და აგენტი']]);
+  const gel = (n) => { const v = Math.round((Number(n) || 0) * 100) / 100; return (v % 1 ? v.toFixed(2) : String(v)) + ' ₾'; };
+  function vShopList() {
+    const L = site.products || (site.products = []);
+    const cats = [...new Set(L.map((x) => x.category).filter(Boolean))];
+    const shown = L.filter((x) => (!fDeal || (fDeal === 'out' ? x.out : (x.category || '') === fDeal)) && (!q || [x.title, x.category].join(' ').toLowerCase().includes(q.toLowerCase())));
+    const pub = `<div class="pub${published ? '' : ' off'}"><span><span class="dot"></span>${published ? 'მაღაზია გამოქვეყნებულია. ცვლილებები საიტზე მაშინვე ჩანს.' : 'მაღაზია ჯერ არ გამოქვეყნებულა. გამოაქვეყნე დიზაინის რედაქტორიდან.'}</span>${published ? `<a class="lnk" href="${esc(liveUrl())}" target="_blank" rel="noopener">${esc(liveUrl().replace('https://', ''))}</a>` : `<a class="btn btn-red btn-sm" href="/editor/?site=${encodeURIComponent(ID)}">გამოქვეყნება</a>`}</div>`;
+    const stats = `<div class="stats"><div class="stat"><b>${L.filter((x) => !x.hidden).length}</b><span>საიტზე ჩანს</span></div><div class="stat"><b>${cats.length}</b><span>კატეგორია</span></div><div class="stat"><b>${L.filter((x) => x.oldPrice).length}</b><span>ფასდაკლებით</span></div><div class="stat"><b>${L.filter((x) => x.out).length}</b><span>ამოწურული</span></div></div>
+<div class="note ok" style="margin-bottom:16px">შეკვეთები WhatsApp-ზე მოგივა, მზა სიით და ჯამით. პანელში შეკვეთების სია შემდეგ განახლებაში დაემატება.</div>`;
+    if (!L.length) return pub + `<div class="empty"><h2>პირველი პროდუქტი დაამატე</h2><p>ფოტო, სახელი და ფასი საკმარისია. საიტზე მაშინვე გამოჩნდება.</p><button class="btn btn-red" type="button" data-new>${I.plus}პროდუქტის დამატება</button></div>`;
+    return pub + stats + `<div class="bar"><input class="inp" type="search" id="q" placeholder="ძებნა: სახელი ან კატეგორია" value="${esc(q)}"><div class="chips">${[['', 'ყველა'], ...cats.map((c) => [c, c]), ['out', 'ამოწურული']].map(([v, l]) => `<button type="button" data-fd="${esc(v)}" aria-pressed="${fDeal === v}">${esc(l)}</button>`).join('')}</div></div>
+<div class="list">${shown.map((x) => { const ph = (x.photos || [])[0], src = ph && srcOf(ph.src); return `<article class="row">${src ? `<img src="${esc(src)}" alt="">` : '<div class="noimg"></div>'}<div><h3>${esc(x.title || 'უსახელო')}</h3><p>${x.category ? `<span class="pill">${esc(x.category)}</span>` : ''}${x.out ? '<span class="pill sold">ამოიწურა</span>' : ''}${x.hidden ? '<span class="pill hid">დამალულია</span>' : ''}${x.options && x.options.values ? esc(x.options.name + ': ' + x.options.values.join(', ')) : ''}</p><div class="pr">${gel(x.price)}${x.oldPrice ? ` <s style="font-weight:500;color:var(--muted)">${gel(x.oldPrice)}</s>` : ''}</div></div>
+<div class="acts"><label class="pill" style="display:flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;font-size:13px"><input type="checkbox" data-out="${esc(x.id)}"${x.out ? '' : ' checked'}>მარაგშია</label><button class="ib" type="button" data-edit="${esc(x.id)}" aria-label="რედაქტირება">${I.edit}</button><button class="ib" type="button" data-del="${esc(x.id)}" aria-label="წაშლა">${I.del}</button></div></article>`; }).join('') || '<p style="color:var(--muted);padding:20px 4px">ვერაფერი მოიძებნა.</p>'}</div>`;
+  }
+  function vShopForm() {
+    const x = draft, o = x.options || {};
+    return `<div class="sec-t">ფოტოები</div><div class="photos">${(x.photos || []).map((ph, k) => `<div class="ph"><img src="${esc(srcOf(ph.src))}" alt="">${k === 0 ? '<span class="cv">მთავარი</span>' : ''}<div class="ov"><button type="button" data-pm="${k}" data-d="-1" aria-label="მარცხნივ"${k === 0 ? ' disabled' : ''}>${I.left}</button><button type="button" data-pd="${k}" aria-label="წაშლა">${I.x}</button><button type="button" data-pm="${k}" data-d="1" aria-label="მარჯვნივ">${I.right}</button></div></div>`).join('')}<button class="addph" type="button" id="addph">${I.plus}ფოტოები</button></div><p class="hint" style="margin:0 0 16px">პირველი ფოტო კატალოგში ჩანს. კვადრატული ფოტო საუკეთესოა.</p>
+<label class="fld"><span class="lt">სახელი</span><input class="inp" name="title" value="${val(x, 'title')}" placeholder="მაგ. ხელნაკეთი ჯამი" required maxlength="80"></label>
+<div class="g3"><label class="fld"><span class="lt">ფასი, ₾</span><input class="inp" name="price" value="${val(x, 'price')}" inputmode="decimal" required></label><label class="fld"><span class="lt">ძველი ფასი</span><input class="inp" name="oldPrice" value="${val(x, 'oldPrice')}" inputmode="decimal" placeholder="ფასდაკლებისთვის"></label><label class="fld"><span class="lt">კატეგორია</span><input class="inp" name="category" value="${val(x, 'category')}" list="dl-c" placeholder="მაგ. კერამიკა"></label></div>
+<datalist id="dl-c">${[...new Set((site.products || []).map((p) => p.category).filter(Boolean))].map((c) => `<option value="${esc(c)}">`).join('')}</datalist>
+<label class="fld"><span class="lt">მოკლე აღწერა</span><input class="inp" name="short" value="${val(x, 'short')}" placeholder="ერთი წინადადება ფასის ქვემოთ"></label>
+<div class="g2"><label class="fld"><span class="lt">ვარიანტის სახელი</span><input class="inp" name="optName" value="${esc(o.name || '')}" placeholder="მაგ. ზომა ან ფერი"></label><label class="fld"><span class="lt">ვარიანტები, მძიმით</span><input class="inp" name="optVals" value="${esc((o.values || []).join(', '))}" placeholder="S, M, L"></label></div>
+<label class="fld"><span class="lt">აღწერა</span><textarea class="inp" name="desc" rows="4">${esc(x.desc || '')}</textarea></label>
+<label class="fld"><span class="lt">დეტალები (თითო ხაზზე „სახელი: მნიშვნელობა")</span><textarea class="inp" name="specs" rows="3" placeholder="მასალა: თიხა&#10;ზომა: 16 სმ">${esc((x.specs || []).map((r) => r.join(': ')).join('\n'))}</textarea></label>
+<label class="fld"><span class="lt">იარლიყი</span><input class="inp" name="badge" value="${val(x, 'badge')}" placeholder="მაგ. ახალი"></label>
+<label class="togl">მარაგშია<input type="checkbox" name="instock"${x.out ? '' : ' checked'}></label>
+<label class="togl">რჩეული (კატალოგში პირველი)<input type="checkbox" name="featured"${x.featured ? ' checked' : ''}></label>
+<label class="togl">დამალვა საიტიდან<input type="checkbox" name="hidden"${x.hidden ? ' checked' : ''}></label>`;
+  }
+  const readShopForm = () => {
+    const f = $('#form'), g = (n) => (f.elements[n] ? f.elements[n].value.trim() : '');
+    const num = (n) => { const v = g(n).replace(/[\s]/g, '').replace(',', '.'); return v === '' ? '' : Number(v); };
+    const vals = g('optVals').split(',').map((v) => v.trim()).filter(Boolean);
+    Object.assign(draft, { title: g('title'), price: num('price'), oldPrice: num('oldPrice'), category: g('category'), short: g('short'), desc: f.elements.desc.value.trim(), badge: g('badge'),
+      specs: f.elements.specs.value.split(/\n+/).map((l) => { const i = l.indexOf(':'); return i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : null; }).filter((r) => r && r[0] && r[1]),
+      options: vals.length ? { name: g('optName') || 'ვარიანტი', values: vals } : '', out: !f.elements.instock.checked, featured: f.elements.featured.checked, hidden: f.elements.hidden.checked });
+  };
+  function vShopSettings() {
+    const sh = site.shop || {};
+    return `<form id="shopset"><div class="card"><h2>მიტანა და გადახდა</h2><p class="hint" style="margin:0 0 14px">კალათა ამით ითვლის ჯამს. ტექსტები პროდუქტის გვერდზე ჩანს.</p>
+<div class="g2"><label class="fld"><span class="lt">მიტანის ფასი, ₾</span><input class="inp" name="fee" value="${esc(sh.fee ?? '')}" inputmode="decimal" placeholder="0 თუ უფასოა"></label><label class="fld"><span class="lt">უფასო მიტანა, ₾-დან</span><input class="inp" name="freeFrom" value="${esc(sh.freeFrom ?? '')}" inputmode="decimal" placeholder="მაგ. 100"></label></div>
+<label class="fld"><span class="lt">მიტანის პირობები</span><input class="inp" name="delivery" value="${esc(sh.delivery || '')}"></label>
+<label class="fld"><span class="lt">დაბრუნება</span><input class="inp" name="returns" value="${esc(sh.returns || '')}"></label>
+<label class="fld"><span class="lt">გადახდა</span><input class="inp" name="payment" value="${esc(sh.payment || '')}"></label>
+<label class="fld"><span class="lt">ზედა ზოლის ტექსტი</span><input class="inp" name="notice" value="${esc(site.notice || '')}" placeholder="მაგ. უფასო მიტანა 100 ₾-დან"></label></div>
+<button class="btn btn-red wide" type="submit">შენახვა</button></form>`;
+  }
+  function vShopInfo() {
+    const c = site.contact || {};
+    return `<form id="info"><div class="card"><h2>კონტაქტი</h2><p class="hint" style="margin:0 0 14px">შეკვეთები ამ WhatsApp ნომერზე მოვა.</p><div class="g2"><label class="fld"><span class="lt">WhatsApp</span><input class="inp" name="c.whatsapp" value="${esc(c.whatsapp)}" inputmode="tel" placeholder="995555123456"></label><label class="fld"><span class="lt">ტელეფონი</span><input class="inp" name="c.phone" value="${esc(c.phone)}" inputmode="tel"></label></div>
+<label class="fld"><span class="lt">მისამართი (თუ გაქვს მაღაზია)</span><input class="inp" name="c.address" value="${esc(c.address)}"></label><div class="g2"><label class="fld"><span class="lt">Instagram</span><input class="inp" name="c.instagram" value="${esc(c.instagram)}"></label><label class="fld"><span class="lt">Facebook</span><input class="inp" name="c.facebook" value="${esc(c.facebook)}"></label></div></div>
+<button class="btn btn-red wide" type="submit">შენახვა</button></form>`;
+  }
+
   function render() {
+    $('#tabs').innerHTML = TABS().map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${l}</button>`).join('');
     $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
-    $('#main').innerHTML = tab === 'list' ? vList() : vInfo();
-    $('#fab').hidden = tab !== 'list' || !(site.listings || []).length;
+    $('#main').innerHTML = SHOP ? (tab === 'list' ? vShopList() : tab === 'shop' ? vShopSettings() : vShopInfo()) : (tab === 'list' ? vList() : vInfo());
+    $('#fab').hidden = tab !== 'list' || !(SHOP ? site.products || [] : site.listings || []).length;
+    $('#fab-t').textContent = SHOP ? 'პროდუქტის დამატება' : 'ბინის დამატება';
     const qi = $('#q'); if (qi) qi.addEventListener('input', () => { q = qi.value; const p = qi.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); });
   }
 
@@ -858,14 +923,15 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
     Object.assign(draft, { title: g('title'), price: num('price'), currency: g('currency') || '$', area: num('area'), rooms: num('rooms'), bedrooms: num('bedrooms'), floor: num('floor'), floors: num('floors'), type: g('type'), district: g('district'), address: g('address'), condition: g('condition'), desc: f.elements.desc.value.trim(),
       features: $$('input[name=feat]:checked', f).map((x) => x.value), featured: f.elements.featured.checked, hidden: f.elements.hidden.checked });
   };
-  const drawForm = () => { const st = $('#f-body').scrollTop; $('#f-body').innerHTML = vForm(); $('#f-body').scrollTop = st; };
+  const drawForm = () => { const st = $('#f-body').scrollTop; $('#f-body').innerHTML = SHOP ? vShopForm() : vForm(); $('#f-body').scrollTop = st; };
+  const readAny = () => (SHOP ? readShopForm() : readForm());
   let lastFocus = null;
   function openForm(id) {
     editing = id;
-    const L = site.listings || [];
+    const L = (SHOP ? site.products : site.listings) || [];
     const cur = id ? L.find((x) => x.id === id) : null;
-    draft = cur ? clone(cur) : { deal: 'sale', currency: '$', type: 'ბინა', photos: [], features: [] };
-    $('#f-t').textContent = cur ? 'განცხადების შეცვლა' : 'ახალი განცხადება';
+    draft = cur ? clone(cur) : SHOP ? { photos: [] } : { deal: 'sale', currency: '$', type: 'ბინა', photos: [], features: [] };
+    $('#f-t').textContent = SHOP ? (cur ? 'პროდუქტის შეცვლა' : 'ახალი პროდუქტი') : cur ? 'განცხადების შეცვლა' : 'ახალი განცხადება';
     drawForm();
     lastFocus = document.activeElement;
     $('#sheet').classList.add('open'); $('#sheet').setAttribute('aria-hidden', 'false');
@@ -883,7 +949,7 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
         const id = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         IMGS[id] = data; n++;
         if (fileTarget === 'agent') { site.agent = site.agent || {}; site.agent.image = { src: 'img:' + id, alt: site.agent.name || '' }; }
-        else { readForm(); draft.photos = draft.photos || []; draft.photos.push({ src: 'img:' + id, alt: draft.title || '' }); }
+        else { readAny(); draft.photos = draft.photos || []; draft.photos.push({ src: 'img:' + id, alt: draft.title || '' }); }
       } catch (e) { toast('ეს ფაილი ფოტოდ ვერ წავიკითხე. სცადე JPG ან PNG.'); }
     }
     if (!n) return;
@@ -901,20 +967,23 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
     const ed = t.closest('[data-edit]'); if (ed) return openForm(ed.dataset.edit);
     const dl = t.closest('[data-del]');
     if (dl) {
-      const l = site.listings.find((x) => x.id === dl.dataset.del);
+      const key = SHOP ? 'products' : 'listings';
+      const l = site[key].find((x) => x.id === dl.dataset.del);
       if (!confirm(`„${l.title}" წაიშლება საიტიდან. გავაგრძელოთ?`)) return;
-      site.listings = site.listings.filter((x) => x !== l); render();
-      try { await persist('განცხადება წაიშალა'); } catch (err) { toast(Backend.message(err)); }
+      site[key] = site[key].filter((x) => x !== l); render();
+      try { await persist(SHOP ? 'პროდუქტი წაიშალა' : 'განცხადება წაიშალა'); } catch (err) { toast(Backend.message(err)); }
       return;
     }
     if (t.closest('#addph')) { fileTarget = 'listing'; $('#file').multiple = true; $('#file').value = ''; return $('#file').click(); }
     if (t.closest('#ag-ph')) { fileTarget = 'agent'; $('#file').multiple = false; $('#file').value = ''; return $('#file').click(); }
     const dbtn = t.closest('[data-deal]'); if (dbtn) { readForm(); draft.deal = dbtn.dataset.deal; return drawForm(); }
     const pm = t.closest('[data-pm]');
-    if (pm) { readForm(); const k = +pm.dataset.pm, j = k + +pm.dataset.d, a = draft.photos; if (j >= 0 && j < a.length) { [a[k], a[j]] = [a[j], a[k]]; drawForm(); } return; }
-    const pd = t.closest('[data-pd]'); if (pd) { readForm(); draft.photos.splice(+pd.dataset.pd, 1); return drawForm(); }
+    if (pm) { readAny(); const k = +pm.dataset.pm, j = k + +pm.dataset.d, a = draft.photos; if (j >= 0 && j < a.length) { [a[k], a[j]] = [a[j], a[k]]; drawForm(); } return; }
+    const pd = t.closest('[data-pd]'); if (pd) { readAny(); draft.photos.splice(+pd.dataset.pd, 1); return drawForm(); }
   });
   document.addEventListener('change', async (e) => {
+    const ob = e.target.closest('[data-out]');
+    if (ob) { const x = site.products.find((p) => p.id === ob.dataset.out); if (ob.checked) delete x.out; else x.out = true; render(); try { await persist(ob.checked ? 'მარაგშია' : 'მონიშნულია: ამოიწურა'); } catch (err) { toast(Backend.message(err)); } return; }
     const s = e.target.closest('[data-state]');
     if (!s) return;
     const l = site.listings.find((x) => x.id === s.dataset.state);
@@ -926,8 +995,19 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
 
   $('#form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    readForm();
+    readAny();
     const f = $('#form');
+    if (SHOP) {
+      if (!draft.title) { f.elements.title.setAttribute('aria-invalid', 'true'); f.elements.title.focus(); return toast('ჩაწერე სახელი.'); }
+      if (draft.price === '' || isNaN(draft.price)) { f.elements.price.setAttribute('aria-invalid', 'true'); f.elements.price.focus(); return toast('ჩაწერე ფასი ციფრებით.'); }
+      for (const k of Object.keys(draft)) if (draft[k] === '' || draft[k] === false || (Array.isArray(draft[k]) && !draft[k].length && k !== 'photos')) delete draft[k];
+      const L = site.products || (site.products = []);
+      if (editing) L[L.findIndex((x) => x.id === editing)] = draft; else { draft.id = 'p' + Date.now().toString(36); L.unshift(draft); }
+      const b = $('#f-save'); b.disabled = true; b.textContent = 'ინახება…';
+      try { await persist(editing ? 'პროდუქტი შეიცვალა' : 'პროდუქტი დაემატა'); closeForm(); render(); } catch (err) { toast(Backend.message(err)); }
+      b.disabled = false; b.textContent = 'შენახვა';
+      return;
+    }
     if (!draft.title) { f.elements.title.setAttribute('aria-invalid', 'true'); f.elements.title.focus(); return toast('ჩაწერე სათაური.'); }
     if (draft.price === '' || isNaN(draft.price)) { f.elements.price.setAttribute('aria-invalid', 'true'); f.elements.price.focus(); return toast('ჩაწერე ფასი ციფრებით.'); }
     for (const k of Object.keys(draft)) if (draft[k] === '' || draft[k] === false || (Array.isArray(draft[k]) && !draft[k].length && k !== 'photos')) delete draft[k];
@@ -945,6 +1025,15 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
     b.disabled = false; b.textContent = 'შენახვა';
   });
   document.addEventListener('submit', async (e) => {
+    if (e.target.id === 'shopset') {
+      e.preventDefault();
+      const f = e.target, sh = site.shop = site.shop || {};
+      for (const k of ['fee', 'freeFrom']) { const v = f.elements[k].value.trim().replace(',', '.'); if (v === '') delete sh[k]; else sh[k] = Number(v) || 0; }
+      for (const k of ['delivery', 'returns', 'payment']) { const v = f.elements[k].value.trim(); if (v) sh[k] = v; else delete sh[k]; }
+      const n = f.elements.notice.value.trim(); if (n) site.notice = n; else delete site.notice;
+      try { await persist('შენახულია'); } catch (err) { toast(Backend.message(err)); }
+      return;
+    }
     if (e.target.id !== 'info') return;
     e.preventDefault();
     const f = e.target; site.agent = site.agent || {}; site.contact = site.contact || {};
@@ -968,7 +1057,8 @@ ${shadow(400, 470, 250, 20, 0.2)}<rect x="200" y="250" width="400" height="210" 
     document.title = (site.name || 'საიტი') + ', ადმინ პანელი';
     $('#design').href = '/editor/?site=' + encodeURIComponent(ID);
     if (published) { $('#view').hidden = false; $('#view').href = liveUrl(); }
-    if (!site.listings && !(site.sections || []).some((s) => s.type === 'listings')) tab = 'info';
+    SHOP = !!(site.products || (site.sections || []).some((s) => s.type === 'shop'));
+    if (!SHOP && !site.listings && !(site.sections || []).some((s) => s.type === 'listings')) tab = 'info';
     render();
   })();
 }

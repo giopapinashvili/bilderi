@@ -22,10 +22,10 @@
   const STYLES = ['poster', 'elegant', 'warm', 'clean'];
   const DEFAULT_COLORS = { bg: '#ffffff', ink: '#16181d', surface: '#f1f2f4', accent: '#c8102e', accentInk: '#ffffff' };
   const TONES = ['base', 'surface', 'accent', 'inverse', 'custom'];
-  const LABELS = { listings: 'განცხადებები', hero: 'მთავარი ბლოკი', menu: 'მენიუ', about: 'ჩვენ შესახებ', gallery: 'ფოტოები', visit: 'მისამართი', cta: 'ბანერი', cards: 'ბარათები', reviews: 'შეფასებები', faq: 'ხშირი კითხვები', steps: 'ნაბიჯები', events: 'განრიგი' };
+  const LABELS = { shop: 'კატალოგი', listings: 'განცხადებები', hero: 'მთავარი ბლოკი', menu: 'მენიუ', about: 'ჩვენ შესახებ', gallery: 'ფოტოები', visit: 'მისამართი', cta: 'ბანერი', cards: 'ბარათები', reviews: 'შეფასებები', faq: 'ხშირი კითხვები', steps: 'ნაბიჯები', events: 'განრიგი' };
   const KINDS = { services: 'სერვისები', products: 'პროდუქტები', rooms: 'ოთახები', features: 'უპირატესობები', team: 'გუნდი', plans: 'პაკეტები' };
   const NAV_DEFAULT = { menu: 'მენიუ', about: 'ჩვენ შესახებ', gallery: 'ფოტოები', visit: 'მისამართი' };
-  const NAV_ON = { listings: true, menu: true, about: true, gallery: true, visit: true, cards: true, events: true };
+  const NAV_ON = { shop: true, listings: true, menu: true, about: true, gallery: true, visit: true, cards: true, events: true };
   const label = (s) => (s && s.type === 'cards' && KINDS[s.kind]) || LABELS[s && s.type] || '';
   const inNav = (s) => (s.inNav ?? !!NAV_ON[s.type]);
 
@@ -64,6 +64,7 @@
     dumbbell: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
     area: '<path d="M4 4h16v16H4z"/><path d="M4 10V4h6M20 14v6h-6"/>',
     stairs: '<path d="M4 20h4v-4h4v-4h4V8h4V4"/>',
+    bag: '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>',
     music: '<path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'
   };
   const icon = (n) => `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n] || IC.star}</svg>`;
@@ -92,6 +93,7 @@
   // ფასი: $125 000 ან 1 800 ₾
   const group = (n) => String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
   const money = (n, cur) => (cur === '₾' ? `${group(n)}\u00a0₾` : `$${group(n)}`);
+  const gel = (n) => { const v = Math.round((Number(n) || 0) * 100) / 100; return (v % 1 ? v.toFixed(2) : String(v)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + '\u00a0₾'; };
   const DEALS = { sale: 'იყიდება', rent: 'ქირავდება', daily: 'დღიურად' };
   const STATES = { reserved: 'დაჯავშნილია', sold: 'გაყიდულია', rented: 'გაქირავებულია' };
 
@@ -345,6 +347,28 @@ ${districts.length > 1 ? `<label class="lf-sel"><span>უბანი</span><sel
       return `${open(s, i, 'band listings')}<div class="wrap">${head(s, i, 'განცხადებები')}${filters}<div class="cards lgrid" data-list>${list.map(lCard).join('') || (edit ? '<p class="lf-empty" style="display:block">განცხადებები ჯერ არ არის. დაამატე ადმინ პანელიდან.</p>' : '')}</div><p class="lf-empty" data-empty>ასეთი განცხადება ვერ მოიძებნა. შეცვალე ფილტრი.</p>${btns(s.buttons, P(i) + '.buttons')}</div></section>`;
     };
 
+    // ---------- მაღაზია ----------
+    const PR = (site.products || []).filter((x) => x && x.hidden !== true);
+    const shop = site.shop || {};
+    const pPrice = (x, cls) => `<span class="${cls || 'price'}">${gel(x.price)}${filled(x.oldPrice) && Number(x.oldPrice) > Number(x.price) ? ` <s>${gel(x.oldPrice)}</s>` : ''}</span>`;
+    const sale = (x) => (filled(x.oldPrice) && Number(x.oldPrice) > Number(x.price) ? Math.round((1 - Number(x.price) / Number(x.oldPrice)) * 100) : 0);
+    const pCard = (x) => {
+      const ph = (x.photos || [])[0], off = sale(x);
+      return `<article class="card pcard tilt${x.out ? ' done' : ''}" data-cat="${esc(x.category || '')}" data-price="${Number(x.price) || 0}" data-name="${esc(String(x.title || '').toLowerCase())}">
+${edit ? '' : `<a class="lc-link" href="${base}p/${esc(x.id)}/" aria-label="${esc(x.title)}"></a>`}<div class="lc-pic">${has(ph) ? `<img class="c-img" src="${imgSrc(ph.src)}" alt="${esc(ph.alt || x.title)}" loading="lazy" decoding="async">` : '<div class="c-img img-empty"><span>ფოტო</span></div>'}${off ? `<span class="badge">-${off}%</span>` : x.badge ? `<span class="badge">${esc(x.badge)}</span>` : ''}${x.out ? '<span class="badge b-state">ამოიწურა</span>' : ''}</div>
+<div class="c-body">${x.category ? `<span class="c-meta">${esc(x.category)}</span>` : ''}<h3>${esc(x.title)}</h3><div class="c-foot">${pPrice(x)}${x.out ? '' : `<button class="btn btn-xs p-add" type="button" data-add="${esc(x.id)}"${(x.options && x.options.values && x.options.values.length) ? ` data-pick="1">არჩევა` : `>${esc(shop.addLabel || 'კალათაში')}`}</button>`}</div></div></article>`;
+    };
+    S.shop = (s, i) => {
+      const list = PR.slice().sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+      const cats = [...new Set(list.map((x) => x.category).filter(Boolean))];
+      const bar = list.length < 2 ? '' : `<form class="lf" data-sf onsubmit="return false" aria-label="ძებნა">
+${cats.length > 1 ? `<div class="lf-seg" role="group" aria-label="კატეგორია"><button type="button" data-f="cat" data-v="" aria-pressed="true">ყველა</button>${cats.map((c2) => `<button type="button" data-f="cat" data-v="${esc(c2)}" aria-pressed="false">${esc(c2)}</button>`).join('')}</div>` : ''}
+<label class="lf-sel lf-q"><span>ძებნა</span><input type="search" data-f="q" placeholder="რას ეძებ?"></label>
+<label class="lf-sel"><span>დალაგება</span><select data-f="sort"><option value="">რჩეული</option><option value="asc">იაფიდან</option><option value="desc">ძვირიდან</option></select></label>
+<p class="lf-n" data-count aria-live="polite">${list.length} პროდუქტი</p></form>`;
+      return `${open(s, i, 'band shop')}<div class="wrap">${head(s, i, 'კატალოგი')}${bar}<div class="cards pgrid" data-plist>${list.map(pCard).join('') || (edit ? '<p class="lf-empty" style="display:block">პროდუქტები ჯერ არ არის. დაამატე ადმინ პანელიდან.</p>' : '')}</div><p class="lf-empty" data-empty>ვერაფერი მოიძებნა. სცადე სხვა სიტყვა.</p>${btns(s.buttons, P(i) + '.buttons')}</div></section>`;
+    };
+
     const all = (site.sections || []).map((s, i) => ({ s, i })).filter(({ s }) => s && s.enabled !== false && S[s.type]);
 
     const b = site.brand || {};
@@ -356,7 +380,7 @@ ${districts.length > 1 ? `<label class="lf-sel"><span>უბანი</span><sel
     const showNb = nb.show !== false && (nb.link || c.phone);
     const nbHref = href(nb.link || '@phone');
     const nav = `<header class="nav tone-base"><div class="wrap nav-in"><a class="brand" href="${base || '#top'}">${logo}${showName ? `<span${E('name')}>${esc(site.name)}</span>` : ''}</a>
-<nav aria-label="გვერდის ნაწილები">${navLinks}</nav>${showNb ? `<a class="btn btn-sm" href="${nbHref}"${edit ? ' data-btn="navButton"' : ''}><span${E('navButton.label')}>${esc(nb.label ?? 'დარეკვა')}</span></a>` : ''}</div></header>`;
+<nav aria-label="გვერდის ნაწილები">${navLinks}</nav>${PR.length && !edit ? `<button class="cart-btn" type="button" data-cart-open aria-label="კალათა">${icon('bag')}<span data-cart-n hidden>0</span></button>` : ''}${showNb ? `<a class="btn btn-sm" href="${nbHref}"${edit ? ' data-btn="navButton"' : ''}><span${E('navButton.label')}>${esc(nb.label ?? 'დარეკვა')}</span></a>` : ''}</div></header>`;
     const bar = showNb && nb.bar ? `<div class="mbar tone-base"><a class="btn" href="${nbHref}">${esc(nb.label ?? 'დარეკვა')}</a></div>` : '';
 
     const f = site.footer || {};
@@ -369,7 +393,7 @@ ${districts.length > 1 ? `<label class="lf-sel"><span>უბანი</span><sel
     const st = STYLES.includes(t.style) ? t.style : 'poster';
     const col = (n) => color(k[n], DEFAULT_COLORS[n]);
     const lh = Math.min(96, Math.max(20, Number(b.logoHeight) || 36));
-    const css = `:root{--bg:${col('bg')};--ink:${col('ink')};--surface:${col('surface')};--accent:${col('accent')};--accent-ink:${col('accentInk')};--r:${CORNERS[t.corners] || CORNERS.soft};--display:${fo.display};--dw:${fo.weight};--ds:${fo.stretch};--dt:${fo.track};--logo-h:${lh}px}\n` + BASE_CSS + SECTIONS_CSS + (site.listings ? LIST_CSS : '') + SKIN_CSS;
+    const css = `:root{--bg:${col('bg')};--ink:${col('ink')};--surface:${col('surface')};--accent:${col('accent')};--accent-ink:${col('accentInk')};--r:${CORNERS[t.corners] || CORNERS.soft};--display:${fo.display};--dw:${fo.weight};--ds:${fo.stretch};--dt:${fo.track};--logo-h:${lh}px}\n` + BASE_CSS + SECTIONS_CSS + (site.listings || site.products ? LIST_CSS : '') + SKIN_CSS;
 
     const meta = site.meta || {};
     const title = meta.title || site.name || '';
@@ -416,10 +440,45 @@ ${similar.length ? `<div class="lp-sim"><h2>მსგავსი განც�
       headX = `<title>${esc(L.title)}, ${esc(site.name)}</title><meta name="description" content="${esc(String(L.desc || L.title).slice(0, 160))}">
 <meta property="og:title" content="${esc(L.title)}"><meta property="og:description" content="${esc(lPrice(L).replace(/<[^>]+>/g, ''))}">${cover && !cover.startsWith('data:') ? `<meta property="og:image" content="${cover}">` : ''}
 ${b.favicon && imgSrc(b.favicon) ? `<link rel="icon" href="${imgSrc(b.favicon)}">` : ''}`;
+    } else if (pageId && PR.find((x) => x.id === pageId)) {
+      const X = PR.find((x) => x.id === pageId);
+      const photos = (X.photos || []).filter(has), off = sale(X);
+      const opts = X.options && (X.options.values || []).filter(Boolean);
+      const specs = (X.specs || []).filter((r) => r && r[0] && r[1]).map(([k2, v]) => `<div><dt>${esc(k2)}</dt><dd>${esc(v)}</dd></div>`).join('');
+      const related = PR.filter((x) => x.id !== X.id && !x.out && (x.category || '') === (X.category || '')).concat(PR.filter((x) => x.id !== X.id && !x.out && (x.category || '') !== (X.category || ''))).slice(0, 4);
+      const shopSec = (site.sections || []).find((x) => x.type === 'shop');
+      main = `<section class="band lpage tone-base"><div class="wrap">
+<a class="back" href="${base}#${esc(shopSec ? shopSec.id || 'shop' : 'top')}">← ${esc(shopSec && shopSec.title ? shopSec.title : 'კატალოგი')}</a>
+<div class="pp" data-prod>${photos.length ? `<div class="lp-gal pp-gal${photos.length === 1 ? ' one' : ''}"><figure class="lp-main"><img src="${imgSrc(photos[0].src)}" alt="${esc(photos[0].alt || X.title)}" fetchpriority="high" data-main></figure>${photos.length > 1 ? `<div class="lp-thumbs">${photos.slice(0, 8).map((ph, k) => `<button type="button" data-src="${imgSrc(ph.src)}" aria-label="ფოტო ${k + 1}"${k === 0 ? ' aria-current="true"' : ''}><img src="${imgSrc(ph.src)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>` : '<div></div>'}
+<div class="pp-info">${X.category ? `<p class="kicker">${esc(X.category)}</p>` : ''}<h1>${esc(X.title)}</h1>
+<div class="pp-price">${pPrice(X, 'lp-price')}${off ? `<span class="badge pp-off">-${off}%</span>` : ''}</div>
+<p class="pp-stock${X.out ? ' out' : ''}">${X.out ? 'ამჟამად ამოიწურა' : 'მარაგშია'}</p>
+${X.short ? `<p class="pp-short">${esc(X.short)}</p>` : ''}
+${opts && opts.length ? `<div class="pp-opt"><span>${esc(X.options.name || 'ვარიანტი')}</span><div>${opts.map((v, k) => `<button type="button" data-opt="${esc((X.options.name || 'ვარიანტი') + ': ' + v)}" aria-pressed="${k === 0}">${esc(v)}</button>`).join('')}</div></div>` : ''}
+${X.out ? `<div class="actions"><a class="btn" href="${orderHref({ orderText: 'გამარჯობა! როდის გექნებათ:' }, X.title)}">მომწერეთ, როცა შემოვა</a></div>` : `<div class="pp-buy"><div class="pp-qty"><button type="button" data-step="-1" aria-label="ნაკლები">−</button><input data-qty value="1" inputmode="numeric" aria-label="რაოდენობა"><button type="button" data-step="1" aria-label="მეტი">+</button></div><button class="btn" type="button" data-add="${esc(X.id)}">კალათაში დამატება</button><button class="btn btn-alt" type="button" data-add="${esc(X.id)}" data-buy>ყიდვა ახლავე</button></div>`}
+<ul class="pp-perks">${shop.delivery ? `<li>${icon('truck')}<span>${esc(shop.delivery)}</span></li>` : ''}${shop.returns ? `<li>${icon('refresh')}<span>${esc(shop.returns)}</span></li>` : ''}${shop.payment ? `<li>${icon('card')}<span>${esc(shop.payment)}</span></li>` : ''}</ul>
+</div></div>
+<div class="lp-grid pp-more"><div class="lp-body">${X.desc ? `<h2>აღწერა</h2>${String(X.desc).split(/\n+/).filter(Boolean).map((t2) => `<p>${esc(t2)}</p>`).join('')}` : ''}${specs ? `<h2>დეტალები</h2><dl class="lp-specs">${specs}</dl>` : ''}</div></div>
+${related.length ? `<div class="lp-sim"><h2>შეიძლება მოგეწონოს</h2><div class="cards pgrid">${related.map(pCard).join('')}</div></div>` : ''}
+</div></section>`;
+      const cover = photos[0] ? imgSrc(photos[0].src) : '';
+      headX = `<title>${esc(X.title)}, ${esc(site.name)}</title><meta name="description" content="${esc(String(X.short || X.desc || X.title).slice(0, 160))}">
+<meta property="og:title" content="${esc(X.title)}"><meta property="og:description" content="${esc(gel(X.price))}">${cover && !cover.startsWith('data:') ? `<meta property="og:image" content="${cover}">` : ''}
+${b.favicon && imgSrc(b.favicon) ? `<link rel="icon" href="${imgSrc(b.favicon)}">` : ''}`;
     } else if (pageId) {
       main = `<section class="band tone-base"><div class="wrap"><h1 style="font-size:clamp(40px,6vw,72px)">განცხადება ვერ მოიძებნა</h1><p>შეიძლება უკვე წაიშალა.</p><div class="actions"><a class="btn" href="${base}">ყველა განცხადება</a></div></div></section>`;
     }
-    const body = `<div class="site st-${st}${t.font === 'classic' ? ' f-classic' : ''}${bar ? ' has-bar' : ''}">${nav}<main>${main}</main>${footer}${bar}</div>`;
+    const notice = site.notice ? `<div class="notice tone-accent"${E('notice')}>${esc(site.notice)}</div>` : '';
+    const wnum = String(c.whatsapp || c.phone || '').replace(/\D/g, '');
+    const cartUi = PR.length && !edit ? `<button class="btn cart-fab" type="button" data-cart-open hidden>${icon('bag')}კალათა <span data-cart-n>0</span></button>
+<div class="cart" data-cart aria-hidden="true"><div class="ct-box tone-base" role="dialog" aria-modal="true" aria-label="კალათა"><div class="ct-head"><h2>კალათა</h2><button class="ct-x" type="button" data-cart-close aria-label="დახურვა">×</button></div>
+<div class="ct-list" data-cart-list></div>${shop.freeFrom ? '<p class="ct-free" data-free></p>' : ''}
+<form class="ct-form" onsubmit="return false"><label>სახელი<input name="name" autocomplete="name"></label><label>ტელეფონი<input name="phone" inputmode="tel" autocomplete="tel"></label><label class="w">მისამართი<input name="addr" autocomplete="street-address" placeholder="ქალაქი, ქუჩა, სადარბაზო"></label><label class="w">კომენტარი<input name="note" placeholder="მაგ. დარეკეთ მოსვლამდე"></label></form>
+<dl class="ct-sum"><div><dt>პროდუქტები</dt><dd data-sub></dd></div><div><dt>მიტანა</dt><dd data-fee></dd></div><div class="tot"><dt>ჯამი</dt><dd data-tot></dd></div></dl>
+<button class="btn ct-send" type="button" data-send>შეკვეთის გაგზავნა WhatsApp-ით</button><p class="ct-note">შეკვეთა WhatsApp-ში გაიგზავნება და დაგიკავშირდებით დასადასტურებლად. გადახდა მიტანისას ან გადარიცხვით.</p></div></div>
+<div class="ct-toast" data-toast role="status">კალათაში დაემატა</div>
+<script type="application/json" id="shop-data">${JSON.stringify({ k: site.slug || site.name || 'shop', w: wnum, t: c.phone || '', f: Number(shop.fee) || 0, free: Number(shop.freeFrom) || 0, p: PR.map((x) => ({ id: x.id, t: x.title, p: Number(x.price) || 0, img: (x.photos || [])[0] && has(x.photos[0]) ? imgSrc(x.photos[0].src).replace(/&amp;/g, '&') : '' })) }).replace(/</g, '\\u003c')}<\/script>` : '';
+    const body = `${notice}<div class="site st-${st}${t.font === 'classic' ? ' f-classic' : ''}${bar ? ' has-bar' : ''}">${nav}<main>${main}</main>${footer}${bar}${cartUi}</div>`;
     return { css, body, head: headX };
   }
 
@@ -747,6 +806,71 @@ body{font-size:16px}
 .calc-note{margin:0;font-size:13.5px;color:var(--m)}
 .lp-sim{margin-top:clamp(48px,6vw,88px)}
 .lp-sim h2{font-size:clamp(28px,3vw,40px);margin-bottom:24px}
+.notice{padding:10px max(5vw,20px);text-align:center;font-size:14.5px;font-weight:600;background:var(--accent);color:var(--accent-ink)}
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
+.pcard .c-img,.pcard .img-empty{aspect-ratio:1/1}
+.pcard h3{font-size:17px;line-height:1.3}
+.pcard .p-add{position:relative;z-index:3}
+.lf-q input{min-height:44px;min-width:200px;padding:0 12px;border:1px solid var(--l);border-radius:calc(var(--r) * .7);background:var(--b);color:var(--t);font:inherit;font-size:15px}
+.cart-btn{position:relative;display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--l);border-radius:calc(var(--r) * .7 + 2px);background:transparent;color:var(--t);cursor:pointer}
+.cart-btn [data-cart-n]{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;display:grid;place-items:center}
+.cart-btn [data-cart-n][hidden]{display:none}
+.cart-fab{position:fixed;right:16px;bottom:16px;z-index:25;gap:8px;--bb:var(--accent);--bi:var(--accent-ink);box-shadow:0 14px 30px -12px rgba(0,0,0,.5)}
+.cart-fab[hidden]{display:none}
+.cart{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.cart.open{opacity:1;visibility:visible}
+.ct-box{position:absolute;top:0;right:0;bottom:0;width:min(440px,100%);display:flex;flex-direction:column;gap:14px;padding:20px;overflow:auto;background:var(--b);color:var(--t);transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.cart.open .ct-box{transform:none}
+.ct-head{display:flex;justify-content:space-between;align-items:center}
+.ct-head h2{font-size:30px}
+.ct-x{width:44px;height:44px;border:1px solid var(--l);border-radius:12px;background:transparent;color:var(--t);font-size:24px;cursor:pointer}
+.ct-row{display:grid;grid-template-columns:60px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--l)}
+.ct-row img,.ct-ph{width:60px;height:60px;border-radius:10px;object-fit:cover;background:var(--cb)}
+.ct-row b{display:block;font-size:15px;line-height:1.3}
+.ct-row small{display:block;font-size:13px;color:var(--m)}
+.ct-q{display:flex;align-items:center;gap:6px}
+.ct-q button{width:32px;height:32px;border:1px solid var(--l);border-radius:9px;background:transparent;color:var(--t);font-size:18px;cursor:pointer}
+.ct-empty{color:var(--m);margin:10px 0}
+.ct-free{margin:0;padding:10px 12px;border-radius:10px;background:var(--cb);font-size:14px;font-weight:600}
+.ct-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ct-form label{display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--m)}
+.ct-form .w{grid-column:1/-1}
+.ct-form input{min-height:44px;padding:0 12px;border:1px solid var(--l);border-radius:10px;background:var(--b);color:var(--t);font:inherit;font-size:15px}
+.ct-sum{margin:0;display:grid;gap:6px}
+.ct-sum div{display:flex;justify-content:space-between}
+.ct-sum dt{color:var(--m)}
+.ct-sum dd{margin:0;font-weight:700}
+.ct-sum .tot{padding-top:8px;border-top:1px solid var(--l);font-size:19px}
+.ct-send:disabled{opacity:.5;cursor:default;transform:none}
+.ct-note{margin:0;font-size:13px;color:var(--m)}
+.ct-toast{position:fixed;left:50%;bottom:24px;z-index:45;transform:translate(-50%,16px);padding:12px 18px;border-radius:12px;background:var(--ink);color:var(--bg);font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.ct-toast.on{opacity:1;transform:translate(-50%,0)}
+.pp{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,72px);align-items:start}
+.pp-gal{margin:0}
+.pp-gal .lp-main img{aspect-ratio:1/1}
+.pp-info h1{font-size:clamp(32px,4vw,52px);line-height:1.04;margin-bottom:16px}
+.pp-price{display:flex;align-items:center;gap:12px}
+.pp-price .lp-price{display:inline;color:var(--t)}
+.pp-price s{font-size:20px}
+.pp-off{position:static}
+.pp-stock{margin:10px 0 0;font-weight:700;color:var(--hi)}
+.pp-stock.out{color:var(--m)}
+.pp-short{margin:16px 0 0;color:var(--m);max-width:46ch}
+.pp-opt{margin-top:22px}
+.pp-opt>span{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
+.pp-opt div{display:flex;flex-wrap:wrap;gap:8px}
+.pp-opt button{min-width:52px;min-height:44px;padding:0 14px;border:1.5px solid var(--l);border-radius:calc(var(--r) * .7);background:transparent;color:var(--t);font:inherit;font-weight:600;cursor:pointer}
+.pp-opt button[aria-pressed=true]{border-color:var(--t);background:var(--t);color:var(--b)}
+.pp-buy{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.pp-buy .btn{flex:1 1 160px}
+.pp-qty{display:flex;align-items:center;border:1.5px solid var(--l);border-radius:var(--r)}
+.pp-qty button{width:44px;height:46px;border:0;background:transparent;color:var(--t);font-size:20px;cursor:pointer}
+.pp-qty input{width:40px;border:0;background:transparent;color:var(--t);text-align:center;font:inherit;font-weight:700}
+.pp-perks{list-style:none;margin:26px 0 0;padding:16px 0 0;border-top:1px solid var(--l);display:grid;gap:12px}
+.pp-perks li{display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.pp-perks svg{width:22px;height:22px;color:var(--hi)}
+.pp-more{margin-top:clamp(36px,5vw,64px)}
+@media(max-width:860px){.pp{grid-template-columns:minmax(0,1fr)}.nav .cart-btn{margin-left:auto}}
 @media(max-width:860px){.lp-grid{grid-template-columns:minmax(0,1fr)}.lp-side{position:static;order:-1}.lp-gal{grid-template-columns:minmax(0,1fr)}.lp-thumbs{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:600px){.lp-specs{grid-template-columns:minmax(0,1fr)}.calc-in{grid-template-columns:minmax(0,1fr)}.lp-price{justify-items:start}.lf-sel{flex:1 1 40%}.lf-sel select{width:100%;min-width:0}.lf-n{margin:0;width:100%}}
 `;
@@ -814,6 +938,8 @@ body{font-size:16px}
   // ფილტრები, ფოტოების გადართვა და იპოთეკის კალკულატორი (მხოლოდ გამოქვეყნებულ საიტზე)
   const LIST_JS = `(function(){var d=document;d.querySelectorAll('[data-lf]').forEach(function(f){var sec=f.closest('section'),box=sec.querySelector('[data-list]'),cards=[].slice.call(box.children),st={deal:'',district:'',rooms:'',sort:''},cnt=f.querySelector('[data-count]'),emp=sec.querySelector('[data-empty]');function run(){var n=0;cards.forEach(function(c){var ok=(!st.deal||c.dataset.deal===st.deal)&&(!st.district||c.dataset.district===st.district)&&(!st.rooms||(st.rooms==='4'?+c.dataset.rooms>=4:c.dataset.rooms===st.rooms));c.hidden=!ok;if(ok)n++});var s=cards.slice();if(st.sort)s.sort(function(a,b){return(st.sort==='asc'?1:-1)*(+a.dataset.price-+b.dataset.price)});s.forEach(function(c){box.appendChild(c)});if(cnt)cnt.textContent=n+' განცხადება';if(emp)emp.style.display=n?'none':'block'}f.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(!b)return;st[b.dataset.f]=b.dataset.v;f.querySelectorAll('button[data-f="'+b.dataset.f+'"]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});run()});f.addEventListener('change',function(e){var t=e.target;if(t.dataset.f){st[t.dataset.f]=t.value;run()}})});var m=d.querySelector('[data-main]');d.querySelectorAll('.lp-thumbs button').forEach(function(b){b.addEventListener('click',function(){m.src=b.dataset.src;d.querySelectorAll('.lp-thumbs button').forEach(function(x){x.removeAttribute('aria-current')});b.setAttribute('aria-current','true')})});var c=d.querySelector('[data-calc]');if(c){var g=function(k){return+c.querySelector('[data-c="'+k+'"]').value};var calc=function(){var P=+c.dataset.price*(1-g('down')/100),r=g('rate')/1200,n=g('years')*12,v=P*r/(1-Math.pow(1+r,-n));var t=String(Math.round(v)).replace(/\\B(?=(\\d{3})+(?!\\d))/g,'\\u00a0');c.querySelector('[data-c="out"]').textContent=c.dataset.cur==='₾'?t+'\\u00a0₾':'$'+t};c.addEventListener('change',calc);calc()}})();`;
 
+  const SHOP_JS = `(function(){var d=document,data;try{data=JSON.parse(d.getElementById('shop-data').textContent)}catch(e){return}var K='bilderi-cart:'+data.k,cart=[];try{cart=JSON.parse(localStorage.getItem(K)||'[]')}catch(e){}var P={};data.p.forEach(function(x){P[x.id]=x});cart=cart.filter(function(i){return P[i.id]&&i.q>0});function save(){try{localStorage.setItem(K,JSON.stringify(cart))}catch(e){}}function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}function fmt(n){n=Math.round(n*100)/100;var s=(n%1?n.toFixed(2):String(n)).replace(/\\B(?=(\\d{3})+(?!\\d))/g,'\\u00a0');return s+'\\u00a0₾'}function totals(){var sub=0,n=0;cart.forEach(function(i){sub+=P[i.id].p*i.q;n+=i.q});var fee=n&&data.f&&!(data.free&&sub>=data.free)?data.f:0;return{sub:sub,n:n,fee:fee,tot:sub+fee}}var dr=d.querySelector('[data-cart]');function draw(){var t=totals();d.querySelectorAll('[data-cart-n]').forEach(function(e){e.textContent=t.n;e.hidden=!t.n});d.querySelectorAll('.cart-fab').forEach(function(e){e.hidden=!t.n});var list=dr.querySelector('[data-cart-list]');list.innerHTML=cart.length?cart.map(function(i,k){var p=P[i.id];return '<div class="ct-row">'+(p.img?'<img src="'+p.img+'" alt="">':'<span class="ct-ph"></span>')+'<div><b>'+esc(p.t)+'</b>'+(i.v?'<small>'+esc(i.v)+'</small>':'')+'<small>'+fmt(p.p)+'</small></div><div class="ct-q"><button type="button" data-q="'+k+'" data-d="-1" aria-label="ნაკლები">−</button><span>'+i.q+'</span><button type="button" data-q="'+k+'" data-d="1" aria-label="მეტი">+</button></div></div>'}).join(''):'<p class="ct-empty">კალათა ცარიელია. დაამატე პროდუქტი და შეკვეთა აქედან გაგზავნე.</p>';dr.querySelector('[data-sub]').textContent=fmt(t.sub);dr.querySelector('[data-fee]').textContent=t.fee?fmt(t.fee):'უფასო';dr.querySelector('[data-tot]').textContent=fmt(t.tot);dr.querySelector('[data-send]').disabled=!cart.length;var fr=dr.querySelector('[data-free]');if(fr&&data.free){var left=data.free-t.sub;fr.textContent=left>0&&t.n?'კიდევ '+fmt(left)+' და მიტანა უფასოა':'მიტანა უფასოა '+fmt(data.free)+'-დან'}}function add(id,v,q){var it=null;cart.forEach(function(i){if(i.id===id&&(i.v||'')===(v||''))it=i});if(it)it.q+=q;else cart.push({id:id,v:v||'',q:q});save();draw()}function open(){dr.classList.add('open');dr.setAttribute('aria-hidden','false');var c=dr.querySelector('[data-cart-close]');if(c)c.focus()}function close(){dr.classList.remove('open');dr.setAttribute('aria-hidden','true')}var tst=d.querySelector('[data-toast]'),tt=0;d.addEventListener('click',function(e){var b=e.target.closest('[data-add]');if(b){e.preventDefault();if(b.dataset.pick&&!b.closest('[data-prod]')){var ln=b.closest('article').querySelector('.lc-link');if(ln){location.href=ln.href;return}}var box=b.closest('[data-prod]'),v='',q=1;if(box){var sel=box.querySelector('[data-opt][aria-pressed=true]');v=sel?sel.dataset.opt:'';var qi=box.querySelector('[data-qty]');q=Math.max(1,+(qi&&qi.value)||1)}add(b.dataset.add,v,q);if(b.hasAttribute('data-buy'))open();else if(tst){tst.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){tst.classList.remove('on')},1800)}return}if(e.target.closest('[data-cart-open]')){e.preventDefault();return open()}if(e.target.closest('[data-cart-close]')||e.target===dr)return close();var q=e.target.closest('[data-q]');if(q){var k=+q.dataset.q;cart[k].q+=+q.dataset.d;if(cart[k].q<1)cart.splice(k,1);save();draw();return}var o=e.target.closest('[data-opt]');if(o){o.parentNode.querySelectorAll('[data-opt]').forEach(function(x){x.setAttribute('aria-pressed',String(x===o))});return}var st=e.target.closest('[data-step]');if(st){var inp=st.parentNode.querySelector('[data-qty]');inp.value=Math.max(1,(+inp.value||1)+(+st.dataset.step));return}var s=e.target.closest('[data-send]');if(s&&cart.length){var f=dr.querySelector('form'),g=function(n){return(f.elements[n].value||'').trim()},t=totals();var lines=cart.map(function(i,k){var p=P[i.id];return(k+1)+'. '+p.t+(i.v?' ('+i.v+')':'')+' × '+i.q+' = '+fmt(p.p*i.q)});var msg='გამარჯობა! შეკვეთა საიტიდან:\\n'+lines.join('\\n')+'\\n\\nპროდუქტები: '+fmt(t.sub)+'\\nმიტანა: '+(t.fee?fmt(t.fee):'უფასო')+'\\nჯამი: '+fmt(t.tot)+(g('name')?'\\n\\nსახელი: '+g('name'):'')+(g('phone')?'\\nტელეფონი: '+g('phone'):'')+(g('addr')?'\\nმისამართი: '+g('addr'):'')+(g('note')?'\\nკომენტარი: '+g('note'):'');window.open(data.w?'https://wa.me/'+data.w+'?text='+encodeURIComponent(msg):'tel:'+data.t,'_blank');return}});d.addEventListener('keydown',function(e){if(e.key==='Escape'&&dr.classList.contains('open'))close()});d.querySelectorAll('[data-sf]').forEach(function(f){var sec=f.closest('section'),box=sec.querySelector('[data-plist]'),cards=[].slice.call(box.children),st={cat:'',q:'',sort:''},cnt=f.querySelector('[data-count]'),emp=sec.querySelector('[data-empty]');function run(){var n=0;cards.forEach(function(c){var ok=(!st.cat||c.dataset.cat===st.cat)&&(!st.q||c.dataset.name.indexOf(st.q)>-1);c.hidden=!ok;if(ok)n++});var s=cards.slice();if(st.sort)s.sort(function(a,b){return(st.sort==='asc'?1:-1)*(+a.dataset.price-+b.dataset.price)});s.forEach(function(c){box.appendChild(c)});if(cnt)cnt.textContent=n+' პროდუქტი';if(emp)emp.style.display=n?'none':'block'}f.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(!b)return;st.cat=b.dataset.v;f.querySelectorAll('button[data-f]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});run()});f.addEventListener('input',function(e){if(e.target.dataset.f==='q'){st.q=e.target.value.trim().toLowerCase();run()}});f.addEventListener('change',function(e){if(e.target.dataset.f==='sort'){st.sort=e.target.value;run()}})});draw()})();`;
+
   function renderParts(site, opts) { return make(site, opts); }
 
   function renderSite(site, opts) {
@@ -824,7 +950,7 @@ ${p.head}
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${esc(FONT_CSS)}">
 <style>${p.css}</style></head>
-<body id="top">${p.body}<script>${TILT_JS}${site && site.listings ? LIST_JS : ''}<\/script></body></html>`;
+<body id="top">${p.body}<script>${TILT_JS}${site && (site.listings || site.products) ? LIST_JS : ''}${site && site.products && site.products.length ? SHOP_JS : ''}<\/script></body></html>`;
   }
 
   const api = { renderSite, renderParts, FONT_CSS, LABELS, KINDS, NAV_DEFAULT, NAV_ON, TONES, STYLES, ICONS: Object.keys(IC), icon, label, inNav, fonts: Object.keys(FONTS), corners: Object.keys(CORNERS), autoInk, TILT_JS, DEALS, STATES, money, version: 4 };
