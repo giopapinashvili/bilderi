@@ -1,0 +1,98 @@
+{
+  "template": "supra",
+  "slug": "talgha",
+  "name": "ტალღა",
+  "kind": "ზღვისპირა ბარი",
+  "meta": {
+    "title": "ტალღა, ბარი ბათუმის ბულვარზე",
+    "description": "კოქტეილები, გრილი და მზის ჩასვლა ზღვის პირას."
+  },
+  "theme": {
+    "font": "modern",
+    "corners": "soft",
+    "colors": { "bg": "#ffffff", "ink": "#0a3a8f", "surface": "#e4f1ff", "accent": "#ff6a3d", "accentInk": "#1f0b04" }
+  },
+  "contact": {
+    "phone": "+995 555 24 68 10",
+    "whatsapp": "995555246810",
+    "address": "ბათუმის ბულვარი, ნაპირი 14",
+    "mapQuery": "Batumi Boulevard",
+    "instagram": "talgha.batumi"
+  },
+  "hours": [
+    { "days": "მაისი–ოქტომბერი, ყოველდღე", "time": "11:00–02:00" },
+    { "days": "ნოემბერი–აპრილი", "time": "დაკეტილია" }
+  ],
+  "sections": [
+    {
+      "type": "hero",
+      "variant": "poster",
+      "tone": "inverse",
+      "tagline": "ბარი ბათუმის ბულვარზე, პირდაპირ ზღვის პირას. კოქტეილები, გრილი და მზის ჩასვლა ყოველ საღამოს.",
+      "note": "ღიაა მაისიდან ოქტომბრამდე",
+      "image": { "src": "demo:sea", "alt": "მზის ჩასვლა ზღვაზე, ქოლგა ქვიშაზე" },
+      "buttons": [
+        { "label": "მენიუ", "link": "#menu" },
+        { "label": "WhatsApp", "link": "https://wa.me/995555246810" }
+      ]
+    },
+    {
+      "type": "gallery",
+      "tone": "base",
+      "title": "ზაფხული ტალღაზე",
+      "note": "შაბათობით 21:00-დან დიჯეი უკრავს.",
+      "images": [
+        { "src": "demo:drink", "alt": "ცივი კოქტეილი ლიმონით" },
+        { "src": "demo:khachapuri", "alt": "აჭარული ხაჭაპური" },
+        { "src": "demo:wine", "alt": "ღვინო" },
+        { "src": "demo:interior", "alt": "ბარის დარბაზი" },
+        { "src": "demo:cake", "alt": "დესერტი" }
+      ]
+    },
+    {
+      "type": "menu",
+      "tone": "surface",
+      "title": "მენიუ",
+      "categories": [
+        {
+          "name": "კოქტეილები",
+          "items": [
+            { "name": "აპეროლ სპრიცი", "price": 22 },
+            { "name": "მოხიტო", "price": 20 },
+            { "name": "ჭაჭა-ტონიკი", "price": 18, "tag": "ჩვენი" },
+            { "name": "მოხიტო ალკოჰოლის გარეშე", "price": 14 }
+          ]
+        },
+        {
+          "name": "გრილი სასმელები",
+          "items": [
+            { "name": "ფორთოხლის ფრეში", "price": 12 },
+            { "name": "ლუდი, 0.5 ლ", "price": 9 },
+            { "name": "სახლის ლიმონათი", "price": 7 }
+          ]
+        },
+        {
+          "name": "საჭმელი",
+          "items": [
+            { "name": "აჭარული ხაჭაპური", "price": 20 },
+            { "name": "კალმარი გრილზე", "price": 28, "desc": "ლიმონი, ნიორი, მწვანილი" },
+            { "name": "კარტოფილი ფრი", "price": 9 },
+            { "name": "ხილის ასორტი", "price": 25, "desc": "ორი-სამი ადამიანისთვის" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "about",
+      "enabled": false,
+      "title": "ჩვენ შესახებ",
+      "paragraphs": ["ეს სექცია გამორთულია: საიტზე არ ჩანს, მაგრამ ტექსტი შენახულია."]
+    },
+    {
+      "type": "visit",
+      "tone": "inverse",
+      "title": "სად გვიპოვო",
+      "note": "ბულვარზე, ბორბლის მხრიდან მეოთხე ბარი."
+    }
+  ]
+}

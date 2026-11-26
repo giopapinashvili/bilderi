@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ბილდერი: საიტი კაფესთვის</title>
+<meta name="description" content="შენი კაფის ან რესტორნის საიტი 10 წუთში, უფასოდ. მენიუ, ფასები, ფოტოები და QR კოდი მაგიდებისთვის.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,300..900&family=Noto+Serif+Georgian:wght@400..800&display=swap">
+<style>
+/* VOICE   მეგობრული და თავდაჯერებული; ბიზნესის პატრონს ელაპარაკება, არა პროგრამისტს
+   IDEA    ადგილობრივი სტამბის აფიშა და მენიუ, ბარათებად აწყობილი და ცოცხალი
+   PICTURE ნამდვილი საიტები (შაბლონი „სუფრა") ლეპტოპში და ტელეფონში, ზაფრანისფერ პანელზე
+   COLOUR  თეთრი ფონი, მელანი #1A1423, ბროწეული #E8253F ღილაკებზე, ზაფრანა #FFC83D დიდ ზოლებში, კობალტი #2438D6 დეტალებში
+   TYPE    Noto Sans Georgian: სათაურები ვიწრო 800, ტექსტი 400/600
+   LAYOUT  სათაური ზემოთ, ცოცხალი სცენა მთელ სიგანეზე; ბარათების ბადეები; ტელეფონზე ერთ სვეტად */
+:root{color-scheme:light;--bg:#fff;--ink:#1A1423;--ink-2:#4A4352;--muted:#6E6876;--line:#E7E4EC;--soft:#F6F4F9;--red:#E8253F;--red-d:#CC1730;--sun:#FFC83D;--cob:#2438D6;--f:'Noto Sans Georgian','Noto Sans',system-ui,sans-serif;--serif:'Noto Serif Georgian','Noto Serif',Georgia,serif;--ease:cubic-bezier(.2,.7,.2,1);--pad:max(4vw,20px)}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--f);overflow-x:clip}
+h1,h2,h3{margin:0;font-weight:800;font-stretch:72%;letter-spacing:-.015em;line-height:1.02;text-wrap:balance}
+h3{font-size:24px;font-stretch:84%;line-height:1.15;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+svg{display:block}
+.wrap{max-width:1288px;margin:0 auto;padding:0 var(--pad)}
+:focus-visible{outline:3px solid var(--cob);outline-offset:3px;border-radius:6px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:12px;border:2px solid transparent;font:600 16px/1 var(--f);text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .18s var(--ease),background-color .18s,color .18s,box-shadow .18s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(1px)}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:var(--red-d);box-shadow:0 12px 24px -12px rgba(232,37,63,.75)}
+.btn-line{border-color:var(--ink);color:var(--ink);background:transparent}
+.btn-line:hover{background:var(--ink);color:#fff}
+.btn-lg{min-height:58px;padding:0 28px;font-size:18px;border-radius:14px}
+.btn-sm{min-height:44px;padding:0 16px;font-size:15px}
+
+.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .25s,box-shadow .25s}
+.top.scrolled{border-color:var(--line);box-shadow:0 10px 30px -24px rgba(26,20,35,.45)}
+.top-in{display:flex;align-items:center;gap:28px;height:72px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-stretch:72%;font-size:27px;letter-spacing:-.01em;line-height:1}
+.mark{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--red);color:#fff;font-size:20px;font-stretch:100%;transform:rotate(-7deg);transition:transform .35s var(--ease)}
+.logo:hover .mark{transform:rotate(0) scale(1.06)}
+.links{display:flex;gap:28px;margin-left:auto}
+.links a,.mnav a{text-decoration:none;color:var(--ink-2);font-size:15px;font-weight:500;position:relative;padding:8px 0}
+.links a::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:2px;border-radius:2px;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .25s var(--ease)}
+.links a:hover{color:var(--ink)}
+.links a:hover::after{transform:scaleX(1)}
+.top-act{display:flex;align-items:center;gap:20px}
+.top-act .link{text-decoration:none;font-weight:600;font-size:15px}
+.menu-btn{display:none;width:44px;height:44px;place-items:center;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer}
+.mnav{display:none;position:absolute;left:0;right:0;top:72px;background:#fff;border-bottom:1px solid var(--line);padding:4px var(--pad) 16px;box-shadow:0 20px 30px -24px rgba(26,20,35,.4)}
+.mnav.open{display:grid}
+.mnav a{padding:12px 0;font-size:17px;border-bottom:1px solid var(--line)}
+
+.hero{padding:clamp(36px,5vw,72px) 0 clamp(56px,7vw,96px)}
+.hero-head{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:24px 56px;align-items:end}
+.hero h1{font-size:clamp(44px,7.6vw,104px);line-height:.97;letter-spacing:-.02em}
+.lead{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:38ch}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.fine{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:14px;color:var(--muted)}
+.stage{position:relative;margin-top:clamp(32px,4vw,56px);height:clamp(470px,46vw,640px);border-radius:32px;background:var(--sun);overflow:hidden;isolation:isolate}
+.stage::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 70% at 72% 0%,rgba(255,255,255,.55),transparent 70%),radial-gradient(rgba(26,20,35,.11) 1.3px,transparent 1.6px) 0 0/22px 22px}
+.rig{position:absolute;inset:0;transform-style:preserve-3d;transform:perspective(1700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .6s var(--ease)}
+.laptop{position:absolute;left:27%;right:5%;top:78px;bottom:-30px;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 0 0 1px rgba(26,20,35,.12),0 50px 80px -46px rgba(26,20,35,.6);overflow:hidden;display:flex;flex-direction:column}
+.l-bar{height:40px;flex:none;display:flex;align-items:center;gap:7px;padding:0 14px;background:#F3F1F6;border-bottom:1px solid var(--line)}
+.l-bar>i{width:11px;height:11px;border-radius:50%;background:#DCD8E2}
+.url{margin:0 auto;display:flex;align-items:center;gap:6px;background:#fff;border-radius:8px;padding:5px 16px;font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;max-width:62%}
+.scr{position:relative;flex:1;overflow:hidden;background:#fff}
+.scr iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none;transition:opacity .28s}
+.scr.fade iframe{opacity:0}
+.phone{position:absolute;left:7%;top:118px;width:clamp(180px,17.5vw,244px);aspect-ratio:9/19.3;background:var(--ink);border-radius:40px;box-shadow:0 60px 80px -46px rgba(26,20,35,.7),inset 0 0 0 2px #3a3145;transform:translateZ(70px)}
+.phone .scr{position:absolute;inset:9px;border-radius:31px}
+.phone::after{content:"";position:absolute;top:15px;left:50%;width:48px;height:14px;margin-left:-24px;border-radius:12px;background:var(--ink);z-index:2}
+.chips{position:absolute;left:22px;top:20px;z-index:3;display:flex;gap:4px;padding:4px;border-radius:15px;background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transform:translateZ(40px)}
+.chip{position:relative;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:0;border-radius:11px;background:transparent;font:600 14px var(--f);color:var(--ink-2);cursor:pointer;overflow:hidden;white-space:nowrap;transition:background-color .2s,color .2s,box-shadow .2s}
+.chip i{flex:none;width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px rgba(255,255,255,.8)}
+.chip:hover{color:var(--ink)}
+.chip[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 4px 12px -4px rgba(26,20,35,.28)}
+.chip::after{content:"";position:absolute;left:12px;right:12px;bottom:5px;height:2px;border-radius:2px;background:var(--c);transform-origin:left;transform:scaleX(0)}
+.chip.run::after{animation:prog var(--dur) linear forwards}
+.stage.paused .chip.run::after{animation-play-state:paused}
+.stage.manual .chip::after{display:none}
+@keyframes prog{to{transform:scaleX(1)}}
+.float{position:absolute;z-index:4;background:#fff;border-radius:16px;box-shadow:0 0 0 1px rgba(26,20,35,.08),0 26px 44px -26px rgba(26,20,35,.55);padding:12px 16px;font-size:14px;line-height:1.35}
+.f-pub{right:4%;bottom:34px;display:flex;align-items:center;gap:12px;transform:translateZ(120px)}
+.f-pub b{display:block;font-size:15px}
+.f-pub small{color:var(--muted);font-size:13px}
+.pulse{flex:none;width:10px;height:10px;border-radius:50%;background:var(--red);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,37,63,.55)}70%{box-shadow:0 0 0 10px rgba(232,37,63,0)}100%{box-shadow:0 0 0 0 rgba(232,37,63,0)}}
+.f-edit{right:3.5%;top:22px;width:244px;transform:translateZ(95px)}
+.lbl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:8px}
+.f-row{display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:6px}
+.inp{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;background:#fff}
+.inp.on{border-color:var(--cob);box-shadow:0 0 0 3px rgba(36,56,214,.14)}
+.inp em{font-style:normal;color:var(--muted);margin-left:auto;padding-left:4px}
+.caret{display:inline-block;width:1.5px;height:15px;background:var(--cob);margin-left:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.band{padding:clamp(72px,9vw,124px) 0}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 56px;margin-bottom:clamp(32px,4vw,56px)}
+.sec-head h2{font-size:clamp(40px,5.2vw,64px);max-width:13ch}
+.sec-head p{max-width:40ch;color:var(--ink-2);font-size:18px}
+
+.card{position:relative;isolation:isolate;background:#fff;border:1px solid var(--line);border-radius:24px;padding:14px;transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .3s}
+.card::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),rgba(255,200,61,.22),transparent 42%);opacity:0;transition:opacity .3s}
+.card.hot{--ty:-6px;box-shadow:0 34px 60px -36px rgba(26,20,35,.5);border-color:rgba(26,20,35,.16);transition:transform .14s linear,box-shadow .45s var(--ease),border-color .3s}
+.card.hot::before{opacity:1}
+.vis{position:relative;height:210px;border-radius:16px;background:var(--soft);overflow:hidden;display:grid;place-items:center}
+.card h3{margin:18px 6px 8px}
+.card p{margin:0 6px 8px;color:var(--ink-2);font-size:16px;line-height:1.55}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.num{display:block;margin:20px 6px -8px;font-weight:800;font-stretch:72%;font-size:60px;line-height:1;color:var(--red)}
+.minis{display:flex;gap:12px;align-items:flex-end}
+.mini{width:86px;height:140px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px rgba(26,20,35,.08),0 14px 22px -14px rgba(26,20,35,.45);overflow:hidden;transition:transform .5s var(--ease)}
+.mini b{display:flex;align-items:flex-end;height:64px;padding:8px;background:var(--c);color:var(--tc);font-weight:800;font-stretch:72%;font-size:15px;line-height:1}
+.mini.serif b{font-family:var(--serif);font-stretch:100%;font-size:13px;font-weight:700}
+.mini i{display:block;height:5px;border-radius:3px;background:#E7E4EC;margin:9px 9px 0}
+.mini i:nth-of-type(2){width:60%}
+.mini i:nth-of-type(3){width:75%;background:var(--c);opacity:.5}
+.mini.sel{outline:3px solid var(--red);outline-offset:3px;transform:translateY(-8px)}
+.card.hot .mini:nth-child(1){transform:translateX(-8px) rotate(-7deg)}
+.card.hot .mini:nth-child(3){transform:translateX(8px) rotate(7deg)}
+.card.hot .mini.sel{transform:translateY(-16px)}
+.ed{width:84%;background:#fff;border-radius:14px;padding:14px;box-shadow:0 0 0 1px rgba(26,20,35,.07),0 18px 30px -22px rgba(26,20,35,.45)}
+.sw{display:flex;gap:8px;margin-top:14px}
+.sw i{width:24px;height:24px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(26,20,35,.12);transition:transform .3s var(--ease)}
+.sw i.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--cob)}
+.card.hot .sw i:hover{transform:scale(1.15)}
+.pub{width:84%;display:grid;gap:12px}
+.addr{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:10px 12px;font-size:14px;box-shadow:0 0 0 1px rgba(26,20,35,.08)}
+.live{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--red)}
+.live .pulse{width:8px;height:8px}
+.pbtn{position:relative;display:grid;place-items:center;height:48px;border-radius:12px;background:var(--red);color:#fff;font-weight:600;transition:transform .2s var(--ease),background-color .2s}
+.pbtn span{grid-area:1/1;transition:opacity .25s,transform .25s var(--ease)}
+.pbtn span+span{opacity:0;transform:translateY(8px)}
+.card.hot .pbtn{background:var(--ink)}
+.card.hot .pbtn span:first-child{opacity:0;transform:translateY(-8px)}
+.card.hot .pbtn span+span{opacity:1;transform:none}
+.cur{position:absolute;right:18%;bottom:-14px;width:22px;transition:transform .35s var(--ease)}
+.card.hot .cur{transform:translate(-6px,-6px)}
+
+.feat{background:var(--sun)}
+.feat .card{border-color:rgba(26,20,35,.12)}
+.feat .card::before{background:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),rgba(36,56,214,.08),transparent 42%)}
+.bento{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.f-qr{grid-row:span 2;display:flex;flex-direction:column}
+.f-qr .vis{height:auto;flex:1;min-height:300px;background:linear-gradient(180deg,#FFF6DC,#FFE9A8)}
+.tent{width:200px;background:#fff;border-radius:16px;padding:16px 16px 14px;text-align:center;box-shadow:0 34px 40px -28px rgba(26,20,35,.55);transform:perspective(800px) rotateX(12deg);transition:transform .5s var(--ease)}
+.card.hot .tent{transform:perspective(800px) rotateX(0deg) translateY(-6px)}
+.tent b{display:block;font-weight:800;font-stretch:72%;font-size:24px;color:var(--cob);line-height:1;margin-bottom:10px}
+.tent svg{width:140px;height:140px;margin:0 auto}
+.tent small{display:block;margin-top:10px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.tent-shadow{position:absolute;bottom:34px;left:50%;width:220px;height:18px;margin-left:-110px;border-radius:50%;background:rgba(26,20,35,.14);filter:blur(6px)}
+.mlist{width:82%;background:#fff;border-radius:14px;padding:10px 16px;box-shadow:0 0 0 1px rgba(26,20,35,.07)}
+.mrow{display:flex;align-items:baseline;gap:8px;padding:7px 0;font-size:15px;font-weight:600}
+.mrow i{flex:1;border-bottom:2px dotted #D6D2DC;transform:translateY(-4px)}
+.mrow b{position:relative;display:inline-grid;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mrow b span{grid-area:1/1;transition:opacity .3s,transform .3s var(--ease)}
+.mrow b span+span{opacity:0;transform:translateY(8px);color:var(--red)}
+.mrow.chg{border-radius:8px;transition:background-color .3s}
+.card.hot .mrow.chg{background:#FFF3CC;margin:0 -8px;padding:7px 8px}
+.card.hot .mrow b span:first-child{opacity:0;transform:translateY(-8px)}
+.card.hot .mrow b span+span{opacity:1;transform:none}
+.mph{width:118px;height:170px;margin-top:40px;border-radius:22px 22px 0 0;background:var(--ink);padding:7px 7px 0;align-self:end;transition:transform .45s var(--ease)}
+.card.hot .mph{transform:translateY(-12px)}
+.mph div{height:100%;border-radius:16px 16px 0 0;background:#fff;overflow:hidden;display:grid;grid-template-rows:56px auto auto 1fr;gap:6px}
+.mph b{background:var(--cob);color:#fff;font-weight:800;font-stretch:72%;font-size:16px;display:flex;align-items:flex-end;padding:7px 9px;line-height:1}
+.mph span{margin:0 8px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--red);color:#fff}
+.mph span+span{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.map{position:absolute;inset:0;width:100%;height:100%}
+.hours{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;box-shadow:0 8px 18px -10px rgba(26,20,35,.4)}
+.pin{position:absolute;left:52%;top:30%;transition:transform .45s var(--ease);transform-origin:50% 100%}
+.card.hot .pin{transform:translateY(-8px) scale(1.08)}
+.serp{width:86%;background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 0 0 1px rgba(26,20,35,.07)}
+.q-bar{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--ink-2);margin-bottom:12px}
+.res{display:grid;grid-template-columns:24px minmax(0,1fr);gap:2px 10px;align-items:center}
+.fav{width:24px;height:24px;border-radius:50%;background:var(--cob);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.res small{font-size:12px;color:var(--muted)}
+.res strong{grid-column:1/-1;color:var(--cob);font-size:16px;font-weight:600;line-height:1.3;margin-top:4px}
+.res p{grid-column:1/-1;margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}
+.card.hot .res strong{text-decoration:underline}
+
+.tpls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.tpl .pv{position:relative;height:clamp(440px,40vw,540px);border-radius:16px;overflow:hidden;background:var(--soft)}
+.tpl .pv iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none}
+.tpl .pv::after{content:"";position:absolute;inset:auto 0 0;height:70px;background:linear-gradient(transparent,rgba(26,20,35,.14));pointer-events:none;transition:opacity .3s}
+.tpl.hot .pv::after{opacity:0}
+.tpl-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 6px 0}
+.tpl-meta h3{margin:0}
+.tpl-meta p{margin:2px 0 0;font-size:15px;color:var(--muted)}
+.dots{display:flex;flex:none}
+.dots i{width:20px;height:20px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px #fff;margin-left:-6px}
+.tpl-act{display:flex;gap:10px;margin:16px 6px 6px}
+.tpl-act .btn{flex:1}
+
+.faq{background:var(--soft)}
+.faq-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:24px 64px}
+.faq-side{position:sticky;top:112px;align-self:start}
+.faq-side h2{font-size:clamp(40px,5.2vw,64px)}
+.faq-side p{margin-top:18px;color:var(--ink-2);max-width:30ch}
+.faq-side a{font-weight:600;color:var(--cob)}
+.qa{border-bottom:1px solid rgba(26,20,35,.12)}
+.qa:first-child{border-top:1px solid rgba(26,20,35,.12)}
+.q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:44px;padding:24px 0;border:0;background:none;font:600 19px/1.35 var(--f);color:var(--ink);text-align:left;cursor:pointer}
+.pm{position:relative;flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px var(--line);transition:background-color .25s,transform .35s var(--ease)}
+.pm::before,.pm::after{content:"";grid-area:1/1;width:13px;height:2px;border-radius:2px;background:var(--red);transition:transform .35s var(--ease),background-color .25s}
+.pm::after{transform:rotate(90deg)}
+.q:hover .pm{transform:scale(1.08)}
+.qa.open .pm{background:var(--red);transform:rotate(180deg)}
+.qa.open .pm::before,.qa.open .pm::after{background:#fff}
+.qa.open .pm::after{transform:rotate(0deg)}
+.a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s var(--ease)}
+.a>div{overflow:hidden}
+.a p{padding:0 56px 24px 0;color:var(--ink-2);max-width:62ch}
+.qa.open .a{grid-template-rows:1fr}
+
+.final{position:relative;overflow:hidden;background:var(--ink);color:#fff;padding-top:clamp(72px,10vw,128px)}
+.final-in{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:24px 56px;align-items:end}
+.final h2{font-size:clamp(46px,6.6vw,88px);line-height:.98;letter-spacing:-.02em}
+.final p{color:rgba(255,255,255,.72);font-size:18px;max-width:36ch;margin-bottom:24px}
+.phones{display:flex;justify-content:center;gap:clamp(14px,3vw,44px);height:clamp(190px,25vw,330px);margin-top:clamp(48px,6vw,80px);padding:0 var(--pad)}
+.mphone{flex:none;width:clamp(104px,16vw,220px);aspect-ratio:9/19;border-radius:clamp(20px,2.4vw,34px);background:#2B2236;padding:clamp(5px,.6vw,8px);box-shadow:inset 0 0 0 1.5px #3d3349;transform:translateY(calc(var(--y,24px) + var(--up,0px))) rotate(var(--rot,0deg));transition:transform .6s var(--ease)}
+.final:hover .mphone{--up:-28px}
+.ms{height:100%;border-radius:clamp(15px,1.9vw,27px);overflow:hidden;background:var(--b)}
+.ms b{display:flex;align-items:flex-end;height:46%;padding:clamp(10px,1.4vw,18px);background:var(--c);color:var(--tc);font-weight:800;font-stretch:72%;font-size:clamp(18px,2.4vw,32px);line-height:1}
+.ms.serif b{font-family:var(--serif);font-stretch:100%;font-weight:700;font-size:clamp(15px,2vw,26px)}
+.ms div{display:flex;align-items:baseline;gap:6px;margin:clamp(8px,1vw,12px) clamp(10px,1.2vw,16px) 0;font-size:clamp(9px,.95vw,13px);font-weight:600;color:var(--t)}
+.ms div i{flex:1;border-bottom:1.5px dotted currentColor;opacity:.35;transform:translateY(-3px)}
+.foot{background:var(--ink);color:rgba(255,255,255,.66);border-top:1px solid rgba(255,255,255,.1);padding:28px 0 36px}
+.foot-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px}
+.foot .logo{color:#fff}
+.foot nav{display:flex;flex-wrap:wrap;gap:6px 24px}
+.foot a{text-decoration:none;font-size:15px}
+.foot nav a:hover{color:#fff}
+.foot small{font-size:14px}
+
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:rgba(26,20,35,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.modal.open{opacity:1;visibility:visible}
+.m-box{width:min(1240px,100%);height:min(880px,100%);background:#fff;border-radius:24px;display:flex;flex-direction:column;overflow:hidden;transform:translateY(18px) scale(.98);transition:transform .35s var(--ease)}
+.modal.open .m-box{transform:none}
+.m-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 10px 10px 20px;border-bottom:1px solid var(--line)}
+.m-bar h3{margin:0}
+.m-bar p{color:var(--muted);font-size:14px;margin-right:auto}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--soft)}
+.seg button{min-height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;font:600 14px var(--f);color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 2px 8px -3px rgba(26,20,35,.3)}
+.x{width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:12px;background:var(--soft);cursor:pointer;font-size:22px;line-height:1;color:var(--ink)}
+.m-stage{flex:1;display:flex;justify-content:center;background:var(--soft);overflow:hidden}
+.m-stage iframe{border:0;width:100%;height:100%;background:#fff}
+.m-stage.ph{padding:20px}
+.m-stage.ph iframe{width:390px;max-width:100%;border-radius:28px;box-shadow:0 0 0 8px var(--ink)}
+.toast{position:fixed;left:50%;bottom:22px;z-index:120;max-width:calc(100% - 32px);transform:translate(-50%,12px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:1060px){
+.hero-head,.final-in{grid-template-columns:minmax(0,1fr)}
+.bento{grid-template-columns:repeat(2,minmax(0,1fr))}
+.f-qr{grid-row:auto;grid-column:span 2}
+.f-qr .vis{min-height:280px}
+.faq-grid{grid-template-columns:minmax(0,1fr)}
+.faq-side{position:static}
+}
+@media(max-width:900px){
+.links,.top-act .link{display:none}
+.menu-btn{display:grid}
+.top-act{margin-left:auto;gap:10px}
+.top-act .btn{min-height:44px;padding:0 14px;font-size:15px}
+.steps{grid-template-columns:minmax(0,1fr);max-width:560px}
+.tpls{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px;margin:0 calc(var(--pad)*-1);padding:4px var(--pad) 12px;scrollbar-width:none}
+.tpl{flex:0 0 min(80vw,340px);scroll-snap-align:center}
+}
+@media(max-width:760px){
+.stage{height:560px}
+.laptop,.f-edit{display:none}
+.phone{left:50%;top:84px;width:min(60vw,250px);margin-left:calc(min(60vw,250px)/-2)}
+.chips{left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none}
+.chip{padding:0 11px}
+.f-pub{left:50%;right:auto;bottom:22px;transform:translateX(-50%);white-space:nowrap}
+}
+@media(max-width:600px){
+body{font-size:16px}
+.cta .btn{flex:1 1 100%}
+.bento{grid-template-columns:minmax(0,1fr)}
+.f-qr{grid-column:auto}
+.q{font-size:17px;padding:20px 0}
+.a p{padding-right:0}
+.m-box{border-radius:18px}
+.m-bar{padding-left:14px}
+.m-bar p{display:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="wrap top-in">
+    <a class="logo" href="#"><span class="mark">ბ</span>ბილდერი</a>
+    <nav class="links" aria-label="მთავარი მენიუ">
+      <a href="#how">როგორ მუშაობს</a><a href="#features">შესაძლებლობები</a><a href="#templates">შაბლონები</a><a href="#faq">კითხვები</a>
+    </nav>
+    <div class="top-act">
+      <a class="link" href="#" data-demo="login">შესვლა</a>
+      <a class="btn btn-red btn-sm" href="#" data-demo="signup">საიტის შექმნა</a>
+      <button class="menu-btn" id="menu-btn" type="button" aria-label="მენიუ" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <nav class="mnav" id="mnav" aria-label="მენიუ ტელეფონზე">
+    <a href="#how">როგორ მუშაობს</a><a href="#features">შესაძლებლობები</a><a href="#templates">შაბლონები</a><a href="#faq">კითხვები</a><a href="#" data-demo="login">შესვლა</a>
+  </nav>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-head">
+      <h1>შენი კაფის საიტი 10&nbsp;წუთში, უფასოდ</h1>
+      <div>
+        <p class="lead">აირჩიე დიზაინი, ჩაწერე მენიუ და ფასები, ატვირთე ფოტოები. საიტი მაშინვე ინტერნეტშია, კოდის გარეშე.</p>
+        <div class="cta">
+          <a class="btn btn-red btn-lg" href="#" data-demo="signup">საიტის შექმნა</a>
+          <a class="btn btn-line btn-lg" href="#templates">შაბლონების ნახვა</a>
+        </div>
+        <p class="fine"><svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>რეგისტრაცია Google-ით, ერთ წამში</p>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="rig" id="rig">
+        <div class="chips" id="chips" role="group" aria-label="ნიმუში-საიტები"></div>
+        <div class="laptop" aria-hidden="true">
+          <div class="l-bar"><i></i><i></i><i></i><span class="url"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="url">finjani.bilderi.ge</span></span></div>
+          <div class="scr" id="lap-scr"><iframe id="lap" title="საიტი ლეპტოპზე" tabindex="-1"></iframe></div>
+        </div>
+        <div class="phone" aria-hidden="true"><div class="scr" id="ph-scr"><iframe id="ph" title="საიტი ტელეფონზე" tabindex="-1"></iframe></div></div>
+        <div class="float f-edit" aria-hidden="true">
+          <div class="lbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>მენიუ, რედაქტირება</div>
+          <div class="f-row"><span class="inp" id="ed-name">კაპუჩინო</span><span class="inp on"><span id="ed-price">8</span><span class="caret"></span><em>₾</em></span></div>
+        </div>
+        <div class="float f-pub" aria-hidden="true"><span class="pulse"></span><span><small>გამოქვეყნდა</small><b id="pub-url">finjani.bilderi.ge</b></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>სამი ნაბიჯი და მზადაა</h2>
+      <p>არაფრის დაყენება არ გჭირდება. ყველაფერი ბრაუზერში ხდება, კომპიუტერიდანაც და ტელეფონიდანაც.</p>
+    </div>
+    <ol class="steps">
+      <li class="card tilt">
+        <div class="vis"><div class="minis" id="minis"></div></div>
+        <span class="num">1</span>
+        <h3>აირჩიე შაბლონი</h3>
+        <p>კაფე, რესტორანი თუ ბარი. ფერებს და შრიფტს ნებისმიერ დროს შეცვლი.</p>
+      </li>
+      <li class="card tilt">
+        <div class="vis">
+          <div class="ed">
+            <div class="lbl">კერძი და ფასი</div>
+            <div class="f-row"><span class="inp">კაპუჩინო</span><span class="inp on">8<span class="caret"></span><em>₾</em></span></div>
+            <div class="sw"><i class="on" style="--c:#2438D6"></i><i style="--c:#3A0C19"></i><i style="--c:#0A3A8F"></i><i style="--c:#FF6A3D"></i><i style="--c:#FFC83D"></i></div>
+          </div>
+        </div>
+        <span class="num">2</span>
+        <h3>შეავსე</h3>
+        <p>მენიუ, ფასები, ფოტოები და საათები. ყოველ ცვლილებას მაშინვე ხედავ.</p>
+      </li>
+      <li class="card tilt">
+        <div class="vis">
+          <div class="pub">
+            <div class="addr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>finjani.bilderi.ge<span class="live"><span class="pulse"></span>ცოცხალია</span></div>
+            <div class="pbtn"><span>გამოქვეყნება</span><span>გამოქვეყნდა ✓</span>
+              <svg class="cur" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.5L10 19z" fill="#fff" stroke="#1A1423" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+        <span class="num">3</span>
+        <h3>გამოაქვეყნე</h3>
+        <p>ერთი ღილაკი და საიტი ინტერნეტშია. მისამართს სტუმრებს მაშინვე გაუზიარებ.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="band feat" id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>ყველაფერი, რაც კაფეს სჭირდება</h2>
+      <p>სრულად ქართულად. საიტს კომპიუტერიდანაც მართავ და ტელეფონიდანაც.</p>
+    </div>
+    <div class="bento">
+      <article class="card tilt f-qr">
+        <div class="vis"><span class="tent-shadow"></span><div class="tent"><b>ფინჯანი</b><span id="qr"></span><small>დაასკანერე და ნახე მენიუ</small></div></div>
+        <h3>QR კოდი მაგიდებისთვის</h3>
+        <p>დაბეჭდე და დადე მაგიდებზე: სტუმარი მენიუს ტელეფონზე ნახავს. ფასს რომ შეცვლი, QR იგივე რჩება და ხელახლა ბეჭდვა არ გჭირდება.</p>
+      </article>
+      <article class="card tilt">
+        <div class="vis">
+          <div class="mlist">
+            <div class="mrow">ესპრესო<i></i><b><span>5 ₾</span></b></div>
+            <div class="mrow chg">კაპუჩინო<i></i><b><span>8 ₾</span><span>9 ₾</span></b></div>
+            <div class="mrow">ნაპოლეონი<i></i><b><span>11 ₾</span></b></div>
+          </div>
+        </div>
+        <h3>მენიუ ფასებით</h3>
+        <p>კერძს დაამატებ ან ფასს შეცვლი ერთ წუთში.</p>
+      </article>
+      <article class="card tilt">
+        <div class="vis"><div class="mph"><div><b>ფინჯანი</b><span>დარეკვა</span><span>WhatsApp</span></div></div></div>
+        <h3>ტელეფონზე იდეალურად</h3>
+        <p>სტუმრები საიტს ძირითადად ტელეფონიდან ნახულობენ, ამიტომ ყველა შაბლონი ჯერ ტელეფონისთვისაა აწყობილი.</p>
+      </article>
+      <article class="card tilt">
+        <div class="vis">
+          <svg class="map" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect width="400" height="220" fill="#EFECF3"/>
+            <path d="M-10 150 Q120 120 200 160 T420 140" stroke="#CFE0FF" stroke-width="22" fill="none"/>
+            <path d="M0 70H400M0 118H400M60 0V220M170 0V220M290 0V220M350 0V220" stroke="#fff" stroke-width="10"/>
+            <path d="M0 30L400 200" stroke="#fff" stroke-width="14"/>
+            <rect x="74" y="80" width="82" height="26" rx="4" fill="#FFE7A3"/><rect x="184" y="10" width="92" height="48" rx="4" fill="#E4E0EA"/><rect x="304" y="80" width="34" height="26" rx="4" fill="#E4E0EA"/>
+          </svg>
+          <svg class="pin" width="40" height="50" viewBox="0 0 40 50" aria-hidden="true"><path d="M20 49C20 49 4 31 4 19a16 16 0 0 1 32 0c0 12-16 30-16 30z" fill="#E8253F"/><circle cx="20" cy="19" r="6.5" fill="#fff"/></svg>
+          <span class="hours"><span class="pulse"></span>ღიაა 22:00-მდე</span>
+        </div>
+        <h3>რუკა და სამუშაო საათები</h3>
+        <p>რუკა, ზარი და WhatsApp ერთი შეხებით.</p>
+      </article>
+      <article class="card tilt">
+        <div class="vis">
+          <div class="serp">
+            <div class="q-bar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>ყავა ვაკეში</div>
+            <div class="res"><span class="fav">ფ</span><small>finjani.bilderi.ge</small><strong>ფინჯანი, ყავის სახლი ვაკეში</strong><p>სპეშელთი ყავა და ადგილზე გამომცხვარი დესერტები ვაკის პარკთან.</p></div>
+          </div>
+        </div>
+        <h3>Google-ში მოიძებნება</h3>
+        <p>სათაურს და აღწერას თვითონ ჩაწერ, Facebook-ზე გაზიარებისას კი ლამაზი სურათი ჩანს.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="templates">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>დაიწყე მზა დიზაინით</h2>
+      <p>ფერებს, ფოტოებს და ტექსტს შენ შეცვლი. მიიტანე მაუსი და საიტი თავისით ჩამოსქროლდება.</p>
+    </div>
+    <div class="tpls" id="tpls"></div>
+  </div>
+</section>
+
+<section class="band faq" id="faq">
+  <div class="wrap faq-grid">
+    <div class="faq-side">
+      <h2>ხშირი კითხვები</h2>
+      <p>პასუხი ვერ იპოვე? მოგვწერე <a href="mailto:info@bilderi.ge">info@bilderi.ge</a> და დაგეხმარებით.</p>
+    </div>
+    <div id="faq-list">
+      <div class="qa open"><button class="q" type="button" aria-expanded="true">მართლა უფასოა?<span class="pm"></span></button><div class="a"><div><p>კი. საიტის შექმნა და გამოქვეყნება უფასოა. მოგვიანებით დავამატებთ ფასიან დამატებებს, მაგალითად საკუთარ დომენს, მაგრამ უფასო საიტი უფასოდ დარჩება.</p></div></div></div>
+      <div class="qa"><button class="q" type="button" aria-expanded="false">ტელეფონიდან შემიძლია აწყობა?<span class="pm"></span></button><div class="a"><div><p>კი. რედაქტორი ტელეფონზეც მუშაობს, ასე რომ ფასს ან სამუშაო საათებს ნებისმიერი ადგილიდან შეცვლი.</p></div></div></div>
+      <div class="qa"><button class="q" type="button" aria-expanded="false">საკუთარი დომენი შემიძლია?<span class="pm"></span></button><div class="a"><div><p>მალე. ჯერჯერობით საიტი ჩვენს მისამართზე იქნება, მაგალითად finjani.bilderi.ge.</p></div></div></div>
+      <div class="qa"><button class="q" type="button" aria-expanded="false">რამდენი ფოტო შემიძლია ავტვირთო?<span class="pm"></span></button><div class="a"><div><p>ერთ საიტზე 30-მდე. ატვირთვისას ფოტოებს ავტომატურად ვაპატარავებთ, რომ საიტი სწრაფად ჩაიტვირთოს.</p></div></div></div>
+      <div class="qa"><button class="q" type="button" aria-expanded="false">რამდენი საიტის შექმნა შემიძლია?<span class="pm"></span></button><div class="a"><div><p>ერთ ანგარიშზე სამ საიტამდე.</p></div></div></div>
+      <div class="qa"><button class="q" type="button" aria-expanded="false">როგორ წავშალო საიტი?<span class="pm"></span></button><div class="a"><div><p>საიტის პარამეტრებში, ერთი ღილაკით. წაშლის შემდეგ მისამართი სხვებისთვის თავისუფლდება.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="start">
+  <div class="wrap final-in">
+    <h2>შენი საიტი 10 წუთის საქმეა</h2>
+    <div>
+      <p>დარეგისტრირდი Google-ით და პირველი საიტი დღესვე გამოაქვეყნე.</p>
+      <a class="btn btn-red btn-lg" href="#" data-demo="signup">საიტის შექმნა</a>
+    </div>
+  </div>
+  <div class="phones" id="phones" aria-hidden="true"></div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a class="logo" href="#"><span class="mark">ბ</span>ბილდერი</a>
+    <nav aria-label="ქვედა მენიუ"><a href="#templates">შაბლონები</a><a href="#faq">დახმარება</a><a href="#" data-demo="page">წესები</a><a href="#" data-demo="page">კონფიდენციალურობა</a><a href="mailto:info@bilderi.ge">კონტაქტი</a></nav>
+    <small>© 2026 ბილდერი. საიტები ქართული ბიზნესებისთვის.</small>
+  </div>
+</footer>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="m-box" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <div class="m-bar">
+      <h3 id="m-title">ფინჯანი</h3><p id="m-kind"></p>
+      <div class="seg" role="group" aria-label="ეკრანი"><button type="button" id="m-desk" aria-pressed="true">კომპიუტერი</button><button type="button" id="m-ph" aria-pressed="false">ტელეფონი</button></div>
+      <a class="btn btn-red btn-sm" href="#" data-demo="signup">ამით დაწყება</a>
+      <button class="x" type="button" id="m-close" aria-label="დახურვა">×</button>
+    </div>
+    <div class="m-stage" id="m-stage"><iframe id="m-frame" title="შაბლონის სრული ნახვა"></iframe></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/*SUPRA*/
+</script>
+<script>
+/*ART*/
+</script>
+<script>
+{
+  const SITES = /*SAMPLES*/;
+  const DOMAIN = 'bilderi.ge';
+  const DUR = 6500;
+  const PICK = { finjani: [0, 2], 'dzveli-ubani': [1, 0], talgha: [0, 1] };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePtr = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const money = (p) => (Number.isInteger(p) ? p : Number(p).toFixed(2));
+  const cache = {};
+  const page = (i) => cache[i] || (cache[i] = Supra.renderSite(DemoArt.apply(SITES[i])).replace(/ loading="lazy"/g, ''));
+  const hero = (s) => {
+    const h = s.sections.find((x) => x.type === 'hero');
+    const c = s.theme.colors;
+    if (h.variant === 'photo') return { bg: c.bg, fg: '#fff' };
+    if (h.tone === 'inverse') return { bg: c.ink, fg: c.bg };
+    if (h.tone === 'surface') return { bg: c.surface, fg: c.ink };
+    return { bg: c.accent, fg: c.accentInk };
+  };
+  const menuItems = (s) => s.sections.find((x) => x.type === 'menu').categories.flatMap((c) => c.items);
+
+  let toastT = 0;
+  const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2800); };
+  const MSG = {
+    signup: 'აქედან რეგისტრაცია და ახალი საიტის შექმნა გაიხსნება. ამ გვერდებს შემდეგ ნაბიჯებზე ავაწყობთ.',
+    login: 'აქედან შესვლის გვერდი გაიხსნება. მას შემდეგ ნაბიჯებზე ავაწყობთ.',
+    page: 'ეს გვერდი გაშვებამდე დაემატება.'
+  };
+  const LIVE = /(^|\.)(pages\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-demo]');
+    if (!a) return;
+    e.preventDefault();
+    if (LIVE && a.dataset.demo === 'signup') { location.href = '/editor/'; return; }
+    toast(MSG[a.dataset.demo] || MSG.page);
+  });
+
+  const top = $('#top');
+  const onScroll = () => top.classList.toggle('scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const mbtn = $('#menu-btn'), mnav = $('#mnav');
+  mbtn.addEventListener('click', () => { const o = !mnav.classList.contains('open'); mnav.classList.toggle('open', o); mbtn.setAttribute('aria-expanded', String(o)); });
+  mnav.addEventListener('click', (e) => { if (e.target.closest('a')) { mnav.classList.remove('open'); mbtn.setAttribute('aria-expanded', 'false'); } });
+
+  const fit = (box, frame, natW) => {
+    const w = box.clientWidth, h = box.clientHeight;
+    if (!w) return;
+    const k = w / natW;
+    frame.style.width = natW + 'px';
+    frame.style.height = Math.ceil(h / k) + 'px';
+    frame.style.transform = 'scale(' + k + ')';
+  };
+
+  /* მთავარი ბლოკი: ცოცხალი საიტები, ავტომატური გადართვა */
+  const stage = $('#stage'), rig = $('#rig'), chips = $('#chips');
+  const lapBox = $('#lap-scr'), lap = $('#lap'), phBox = $('#ph-scr'), ph = $('#ph');
+  const heroRO = new ResizeObserver(() => { fit(lapBox, lap, 1280); fit(phBox, ph, 390); });
+  heroRO.observe(lapBox); heroRO.observe(phBox);
+  chips.innerHTML = SITES.map((s, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="false" style="--c:${hero(s).bg};--dur:${DUR}ms"><i></i>${esc(s.name)}</button>`).join('');
+  let cur = 0, manual = reduce, paused = false, timer = 0, scrollT = 0;
+
+  const swap = (box, frame, i, after) => {
+    box.classList.add('fade');
+    setTimeout(() => {
+      frame.onload = () => { box.classList.remove('fade'); if (after) after(); };
+      frame.srcdoc = page(i);
+    }, reduce ? 0 : 240);
+  };
+  const scrollPhone = () => {
+    const d = ph.contentDocument, m = d && d.getElementById('menu');
+    if (m) ph.contentWindow.scrollTo({ top: m.offsetTop - 64, behavior: 'smooth' });
+  };
+  const restartBar = () => {
+    $$('.chip').forEach((c) => c.classList.remove('run'));
+    const on = chips.querySelector('[aria-pressed=true]');
+    if (on && !manual) { void on.offsetWidth; on.classList.add('run'); }
+  };
+  const schedule = () => {
+    clearTimeout(timer);
+    if (manual || paused) return;
+    timer = setTimeout(() => select((cur + 1) % SITES.length), DUR);
+  };
+  function select(i, byUser) {
+    cur = i;
+    const s = SITES[i];
+    $$('.chip').forEach((c, j) => c.setAttribute('aria-pressed', String(j === i)));
+    $('#url').textContent = s.slug + '.' + DOMAIN;
+    $('#pub-url').textContent = s.slug + '.' + DOMAIN;
+    const [ci, ii] = PICK[s.slug] || [0, 0];
+    const it = s.sections.find((x) => x.type === 'menu').categories[ci].items[ii];
+    $('#ed-name').textContent = it.name;
+    $('#ed-price').textContent = money(it.price);
+    clearTimeout(scrollT);
+    swap(lapBox, lap, i);
+    swap(phBox, ph, i, () => { if (!reduce) scrollT = setTimeout(scrollPhone, 2200); });
+    if (byUser) { manual = true; stage.classList.add('manual'); }
+    restartBar();
+    schedule();
+  }
+  chips.addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) select(Number(b.dataset.i), true); });
+  stage.addEventListener('pointerenter', () => { paused = true; stage.classList.add('paused'); clearTimeout(timer); });
+  stage.addEventListener('pointerleave', () => {
+    paused = false; stage.classList.remove('paused');
+    rig.style.setProperty('--rx', '0deg'); rig.style.setProperty('--ry', '0deg');
+    restartBar(); schedule();
+  });
+  if (finePtr && !reduce) {
+    stage.addEventListener('pointermove', (e) => {
+      const r = stage.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      rig.style.setProperty('--ry', (x * 6).toFixed(2) + 'deg');
+      rig.style.setProperty('--rx', (-y * 4).toFixed(2) + 'deg');
+    });
+  }
+  if (manual) stage.classList.add('manual');
+  select(0, false);
+
+  /* ნაბიჯი 1: მინი-შაბლონები */
+  $('#minis').innerHTML = SITES.map((s, i) => {
+    const h = hero(s);
+    return `<div class="mini${s.theme.font === 'classic' ? ' serif' : ''}${i === 1 ? ' sel' : ''}" style="--c:${h.bg};--tc:${h.fg}"><b>${esc(s.name)}</b><i></i><i></i><i></i></div>`;
+  }).join('');
+
+  /* QR (დემო ნახატი) */
+  const qr = (seed) => {
+    let s = seed;
+    const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    const N = 25, inF = (x, y) => (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+    let cells = '';
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!inF(x, y) && rnd() < 0.47) cells += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+    const f = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3"/>`;
+    return `<svg viewBox="-1 -1 ${N + 2} ${N + 2}" shape-rendering="crispEdges" aria-hidden="true"><rect x="-1" y="-1" width="${N + 2}" height="${N + 2}" fill="#fff"/><g fill="#1A1423">${cells}${f(0, 0)}${f(N - 7, 0)}${f(0, N - 7)}</g></svg>`;
+  };
+  $('#qr').innerHTML = qr(20261126);
+
+  /* ბარათების 3D დახრა */
+  if (finePtr && !reduce) {
+    $$('.tilt').forEach((c) => {
+      c.addEventListener('pointerenter', () => c.classList.add('hot'));
+      c.addEventListener('pointermove', (e) => {
+        const r = c.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        c.style.setProperty('--ry', ((x - 0.5) * 7).toFixed(2) + 'deg');
+        c.style.setProperty('--rx', ((0.5 - y) * 7).toFixed(2) + 'deg');
+        c.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+        c.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+      });
+      c.addEventListener('pointerleave', () => { c.classList.remove('hot'); c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); });
+    });
+  }
+
+  /* შაბლონები: გრძელი გვერდი, რომელიც მაუსზე ჩამოსქროლდება */
+  $('#tpls').innerHTML = SITES.map((s, i) => {
+    const c = s.theme.colors;
+    return `<article class="card tpl" data-i="${i}">
+<div class="pv"><iframe title="${esc(s.name)}, შაბლონის ნიმუში" tabindex="-1" aria-hidden="true"></iframe></div>
+<div class="tpl-meta"><div><h3>${esc(s.name)}</h3><p>${esc(s.kind)}</p></div><span class="dots"><i style="--c:${hero(s).bg}"></i><i style="--c:${c.accent}"></i><i style="--c:${c.surface}"></i></span></div>
+<div class="tpl-act"><button class="btn btn-line btn-sm" type="button" data-view="${i}">ნახვა</button><a class="btn btn-red btn-sm" href="#" data-demo="signup">ამით დაწყება</a></div></article>`;
+  }).join('');
+  $$('.tpl').forEach((card) => {
+    const box = card.querySelector('.pv'), fr = card.querySelector('iframe');
+    let H = 0, k = 1;
+    const size = () => {
+      k = box.clientWidth / 390;
+      fr.style.width = '390px';
+      fr.style.height = (H || Math.ceil(box.clientHeight / k)) + 'px';
+      fr.style.transition = 'none';
+      fr.style.transform = 'translateY(0) scale(' + k + ')';
+    };
+    const measure = () => { const d = fr.contentDocument; if (d && d.documentElement) { H = d.documentElement.scrollHeight; size(); } };
+    fr.onload = () => { measure(); const d = fr.contentDocument; if (d && d.fonts) d.fonts.ready.then(measure); };
+    fr.srcdoc = page(Number(card.dataset.i));
+    new ResizeObserver(size).observe(box);
+    card.addEventListener('pointerenter', () => {
+      card.classList.add('hot');
+      if (reduce || !H) return;
+      const dist = Math.max(0, H * k - box.clientHeight);
+      fr.style.transition = 'transform ' + Math.max(3, dist / 240).toFixed(1) + 's linear';
+      fr.style.transform = 'translateY(' + -dist + 'px) scale(' + k + ')';
+    });
+    card.addEventListener('pointerleave', () => {
+      card.classList.remove('hot');
+      fr.style.transition = 'transform .9s cubic-bezier(.2,.7,.2,1)';
+      fr.style.transform = 'translateY(0) scale(' + k + ')';
+    });
+  });
+
+  /* სრული ნახვა */
+  const modal = $('#modal'), mStage = $('#m-stage'), mf = $('#m-frame');
+  let lastFocus = null;
+  const setDev = (phone) => { mStage.classList.toggle('ph', phone); $('#m-desk').setAttribute('aria-pressed', String(!phone)); $('#m-ph').setAttribute('aria-pressed', String(phone)); };
+  const openModal = (i) => {
+    lastFocus = document.activeElement;
+    $('#m-title').textContent = SITES[i].name;
+    $('#m-kind').textContent = SITES[i].kind + ', ' + SITES[i].slug + '.' + DOMAIN;
+    mf.srcdoc = page(i);
+    setDev(window.innerWidth < 700);
+    modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    $('#m-close').focus();
+  };
+  const closeModal = () => {
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus();
+  };
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) openModal(Number(b.dataset.view)); });
+  $('#m-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+  $('#m-desk').addEventListener('click', () => setDev(false));
+  $('#m-ph').addEventListener('click', () => setDev(true));
+  mf.addEventListener('load', () => {
+    const d = mf.contentDocument;
+    if (!d) return;
+    d.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a');
+      if (!a) return;
+      e.preventDefault();
+      const h = a.getAttribute('href') || '';
+      if (h.startsWith('#')) { const el = h === '#top' ? d.body : d.getElementById(h.slice(1)); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+      else toast('გამოქვეყნებულ საიტზე ეს ღილაკი გაიხსნება.');
+    });
+  });
+
+  /* კითხვები */
+  $$('.q').forEach((b) => b.addEventListener('click', () => {
+    const qa = b.closest('.qa'), open = !qa.classList.contains('open');
+    qa.classList.toggle('open', open);
+    b.setAttribute('aria-expanded', String(open));
+  }));
+
+  /* ბოლო ბლოკის ტელეფონები */
+  const rots = ['-7deg', '0deg', '7deg'], ys = ['40px', '10px', '40px'];
+  $('#phones').innerHTML = SITES.map((s, i) => {
+    const h = hero(s), c = s.theme.colors;
+    const rows = menuItems(s).slice(0, 4).map((it) => `<div>${esc(it.name)}<i></i>${money(it.price)} ₾</div>`).join('');
+    return `<div class="mphone" style="--rot:${rots[i]};--y:${ys[i]}"><div class="ms${s.theme.font === 'classic' ? ' serif' : ''}" style="--b:${c.bg};--t:${c.ink};--c:${h.bg};--tc:${h.fg}"><b>${esc(s.name)}</b>${rows}</div></div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
