@@ -254,6 +254,11 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .toast button{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:9px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer}
 .toast button:empty{display:none}
 
+[hidden]{display:none!important}
+.loading{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(255,255,255,.97)}
+.loading>div{display:grid;justify-items:center;gap:14px;text-align:center;padding:24px;max-width:420px;font-size:16px;color:var(--ink-2)}
+.spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--red);border-right-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:1180px){body{grid-template-columns:72px 340px minmax(0,1fr)}.saved span,.back span{display:none}}
 @media(max-width:900px){
 body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) minmax(0,1fr) 64px;grid-template-areas:"bar" "canvas" "panel" "rail"}
@@ -335,8 +340,129 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     <div class="vstage" id="vstage"><iframe id="vframe" title="საიტი"></iframe></div>
   </div>
 </div>
+<div class="loading" id="loading" hidden><div><span class="spin"></span><p id="loading-msg">საიტი იტვირთება…</p><a class="btn btn-line" id="loading-act" href="/app/" hidden>ჩემ საიტებზე დაბრუნება</a></div></div>
 <div class="toast" id="toast" role="status"><span id="toast-msg"></span><button type="button" id="toast-act"></button></div>
 
+<script src="/js/firebase-config.js"></script>
+<script>
+/* ბილდერის backend: Firebase Auth (შესვლა) + Firestore (საიტები).
+   პარამეტრები public/js/firebase-config.js ფაილშია (window.FIREBASE_CONFIG).
+   თუ პარამეტრები არ არის, Backend.configured() აბრუნებს false-ს და გვერდები სატესტო რეჟიმში მუშაობს. */
+(function () {
+  'use strict';
+  if (window.__MOCK_BACKEND) { window.Backend = window.__MOCK_BACKEND; return; } // მხოლოდ ტესტებისთვის
+
+  const V = '11.0.2';
+  const CDN = (m) => `https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
+  const cfg = () => window.FIREBASE_CONFIG;
+  let boot = null;
+
+  function init() {
+    if (boot) return boot;
+    boot = (async () => {
+      if (!cfg() || !cfg().apiKey) return null;
+      const [app, A, F] = await Promise.all([import(CDN('app')), import(CDN('auth')), import(CDN('firestore'))]);
+      const a = app.initializeApp(cfg());
+      const auth = A.getAuth(a);
+      auth.languageCode = 'ka';
+      return { auth, A, db: F.getFirestore(a), F };
+    })();
+    return boot;
+  }
+  const need = async () => { const f = await init(); if (!f) throw Object.assign(new Error('not configured'), { code: 'bilderi/not-configured' }); return f; };
+  const uid = (f) => { const u = f.auth.currentUser; if (!u) throw Object.assign(new Error('signed out'), { code: 'bilderi/signed-out' }); return u.uid; };
+  const ms = (t) => (t && t.toMillis ? t.toMillis() : 0);
+
+  const MSG = {
+    'auth/invalid-email': 'ელფოსტა არასწორადაა ჩაწერილი.',
+    'auth/missing-email': 'ჩაწერე ელფოსტა.',
+    'auth/missing-password': 'ჩაწერე პაროლი.',
+    'auth/invalid-credential': 'ელფოსტა ან პაროლი არასწორია.',
+    'auth/wrong-password': 'ელფოსტა ან პაროლი არასწორია.',
+    'auth/user-not-found': 'ამ ელფოსტით ანგარიში ვერ მოიძებნა.',
+    'auth/email-already-in-use': 'ამ ელფოსტით ანგარიში უკვე არსებობს. სცადე შესვლა.',
+    'auth/weak-password': 'პაროლი მინიმუმ 6 სიმბოლო უნდა იყოს.',
+    'auth/too-many-requests': 'ძალიან ბევრი მცდელობა იყო. ცოტა ხანში სცადე თავიდან.',
+    'auth/network-request-failed': 'ინტერნეტთან კავშირი ვერ მოხერხდა. შეამოწმე კავშირი და სცადე თავიდან.',
+    'auth/popup-blocked': 'ბრაუზერმა Google-ის ფანჯარა დაბლოკა. ნება დართე ამომხტარ ფანჯრებს და სცადე თავიდან.',
+    'auth/unauthorized-domain': 'ეს მისამართი Firebase-ში დაშვებულ დომენებში არ არის დამატებული.',
+    'auth/operation-not-allowed': 'შესვლის ეს გზა Firebase-ში ჯერ ჩართული არ არის.',
+    'auth/account-exists-with-different-credential': 'ეს ელფოსტა სხვა გზით არის დარეგისტრირებული. სცადე ელფოსტით და პაროლით შესვლა.',
+    'permission-denied': 'ამ საიტზე წვდომა არ გაქვს.',
+    'not-found': 'საიტი ვერ მოიძებნა. შეიძლება წაშლილია.',
+    'unavailable': 'სერვერთან კავშირი ვერ მოხერხდა. სცადე თავიდან.',
+    'bilderi/not-configured': 'შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია.',
+    'bilderi/signed-out': 'ჯერ შედი ანგარიშზე.',
+    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.'
+  };
+
+  const B = {
+    configured: () => !!(cfg() && cfg().apiKey),
+    message(e) {
+      const c = (e && e.code) || '';
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return '';
+      return MSG[c] || MSG[c.replace(/^firestore\//, '')] || 'რაღაც შეცდომა მოხდა. სცადე თავიდან.';
+    },
+
+    async user() { const f = await init(); if (!f) return null; await f.auth.authStateReady(); return f.auth.currentUser; },
+    async google() { const f = await need(); const p = new f.A.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' }); return (await f.A.signInWithPopup(f.auth, p)).user; },
+    async signIn(email, pass) { const f = await need(); return (await f.A.signInWithEmailAndPassword(f.auth, email, pass)).user; },
+    async signUp(name, email, pass) {
+      const f = await need();
+      const c = await f.A.createUserWithEmailAndPassword(f.auth, email, pass);
+      if (name) await f.A.updateProfile(c.user, { displayName: name });
+      try { await f.A.sendEmailVerification(c.user); } catch (e) { /* არ არის აუცილებელი */ }
+      return c.user;
+    },
+    async reset(email) { const f = await need(); return f.A.sendPasswordResetEmail(f.auth, email); },
+    async signOut() { const f = await init(); if (f) await f.A.signOut(f.auth); },
+
+    async listSites() {
+      const f = await need(), F = f.F;
+      const snap = await F.getDocs(F.query(F.collection(f.db, 'sites'), F.where('owner', '==', uid(f))));
+      return snap.docs.map((d) => {
+        const x = d.data();
+        let data = {};
+        try { data = JSON.parse(x.data || '{}'); } catch (e) { /* დაზიანებული ჩანაწერი */ }
+        return { id: d.id, name: x.name, slug: x.slug, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
+      }).sort((a, b) => b.updated - a.updated);
+    },
+    async createSite(site) {
+      const f = await need(), F = f.F;
+      const ref = await F.addDoc(F.collection(f.db, 'sites'), { owner: uid(f), name: site.name || '', slug: site.slug || '', data: JSON.stringify(site), published: null, createdAt: F.serverTimestamp(), updatedAt: F.serverTimestamp() });
+      return ref.id;
+    },
+    async loadSite(id) {
+      const f = await need(), F = f.F;
+      uid(f);
+      const snap = await F.getDoc(F.doc(f.db, 'sites', id));
+      if (!snap.exists()) throw Object.assign(new Error('missing'), { code: 'not-found' });
+      const x = snap.data();
+      const imgs = {};
+      (await F.getDocs(F.collection(f.db, 'sites', id, 'images'))).forEach((d) => { imgs[d.id] = d.data().data; });
+      return { site: JSON.parse(x.data), imgs, published: x.published || null };
+    },
+    async saveSite(id, site, published) {
+      const f = await need(), F = f.F;
+      await F.updateDoc(F.doc(f.db, 'sites', id), { name: site.name || '', slug: site.slug || '', data: JSON.stringify(site), published: published || null, updatedAt: F.serverTimestamp() });
+    },
+    async saveImage(id, imgId, dataUrl) {
+      const f = await need(), F = f.F;
+      if (dataUrl.length > 1000000) throw Object.assign(new Error('too big'), { code: 'bilderi/too-big' });
+      await F.setDoc(F.doc(f.db, 'sites', id, 'images', imgId), { owner: uid(f), data: dataUrl });
+    },
+    async deleteSite(id) {
+      const f = await need(), F = f.F;
+      uid(f);
+      const imgs = await F.getDocs(F.collection(f.db, 'sites', id, 'images'));
+      await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
+      await F.deleteDoc(F.doc(f.db, 'sites', id));
+    }
+  };
+  window.Backend = B;
+})();
+
+</script>
 <script>
 /* შაბლონი „სუფრა" — კაფეებისა და რესტორნებისთვის. ვერსია 2.
    renderSite(site) ერთ საიტის აღწერას (JSON) სრულ HTML გვერდად აქცევს.
@@ -915,11 +1041,17 @@ ${plate(150, 150, 84, balls)}${plate(650, 150, 84, khin)}${plate(160, 470, 84, s
   const state = { tab: 'sections', sec: null, adding: false };
   const closedCats = new Set(), openItems = new Set();
   const fromSample = (slug) => { const s = clone(SAMPLES.find((x) => x.slug === slug) || SAMPLES[0]); s.artKey = s.slug; s.brand = s.brand || {}; return s; };
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) { const d = JSON.parse(raw); if (d && d.site && d.site.sections) { site = d.site; IMGS = d.imgs || {}; published = d.published || null; } }
-  } catch (e) { /* ბრაუზერი შენახვას არ გვაძლევს */ }
-  const restored = !!site;
+  const SITE_ID = new URLSearchParams(location.search).get('site');
+  const REMOTE = !!(SITE_ID && window.Backend && Backend.configured());
+  const LIVE = /(^|\.)(pages\.dev|workers\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
+  let ready = !REMOTE;
+  if (!REMOTE) {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) { const d = JSON.parse(raw); if (d && d.site && d.site.sections) { site = d.site; IMGS = d.imgs || {}; published = d.published || null; } }
+    } catch (e) { /* ბრაუზერი შენახვას არ გვაძლევს */ }
+  }
+  const restored = !REMOTE && !!site;
   if (!site) site = fromSample('finjani');
 
   const srcOf = (src) => {
@@ -992,8 +1124,23 @@ ${plate(150, 150, 84, balls)}${plate(650, 150, 84, khin)}${plate(160, 470, 84, s
   /* ---------- ისტორია და შენახვა ---------- */
   let hist = [JSON.stringify(site)], hi = 0, commitT = 0, saveT = 0;
   const setSaved = (t) => { $('#saved span:last-child').textContent = t; };
+  const uploaded = new Set();
+  let saving = false, again = false;
+  const remoteSave = async () => {
+    if (saving) { again = true; return; }
+    saving = true; setSaved('ინახება…');
+    try {
+      const used = new Set((JSON.stringify(site).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)));
+      for (const id of used) if (!uploaded.has(id) && IMGS[id]) { await Backend.saveImage(SITE_ID, id, IMGS[id]); uploaded.add(id); }
+      await Backend.saveSite(SITE_ID, site, published);
+      setSaved('შენახულია');
+    } catch (e) { setSaved('შენახვა ვერ მოხერხდა'); toast(Backend.message(e), 'თავიდან ცდა', () => remoteSave()); }
+    saving = false;
+    if (again) { again = false; remoteSave(); }
+  };
   const save = () => {
     clearTimeout(saveT);
+    if (REMOTE) { if (ready) saveT = setTimeout(remoteSave, 900); return; }
     saveT = setTimeout(() => {
       try { localStorage.setItem(KEY, JSON.stringify({ site, imgs: IMGS, published })); setSaved('შენახულია'); }
       catch (e) { setSaved('შენახულია ამ ფანჯარაში'); }
@@ -1151,7 +1298,8 @@ a{cursor:default}
       if (type === 'image/jpeg') { g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); }
       g.drawImage(im, 0, 0, w, h);
       URL.revokeObjectURL(url);
-      const out = cv.toDataURL(type, 0.82);
+      let q = 0.82, out = cv.toDataURL(type, q);
+      while (type === 'image/jpeg' && out.length > 900000 && q > 0.45) { q -= 0.12; out = cv.toDataURL(type, q); }
       res({ src: out, before: file.size, after: Math.round((out.length - out.indexOf(',') - 1) * 0.75) });
     };
     im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('read')); };
@@ -1504,11 +1652,10 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
   }
   $('#toast-act').addEventListener('click', () => { if (toastFn) toastFn(); $('#toast').classList.remove('on'); });
   const DEMO = { sites: '„ჩემი საიტები" შემდეგ ნაბიჯზე აიწყობა.', share: 'გამოქვეყნებულ ვერსიაში ეს ღილაკი გაზიარების ფანჯარას გახსნის.', qr: 'გამოქვეყნებულ ვერსიაში QR დასაბეჭდ ფაილად ჩამოიტვირთება.' };
-  const LIVE = /(^|\.)(pages\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
   document.addEventListener('click', (e) => {
     const d = e.target.closest('[data-demo]');
     if (!d) return;
-    if (LIVE && d.dataset.demo === 'sites') { location.href = '/'; return; }
+    if (LIVE && d.dataset.demo === 'sites') { location.href = REMOTE ? '/app/' : '/'; return; }
     toast(DEMO[d.dataset.demo]);
   });
 
@@ -1571,7 +1718,28 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
   /* ---------- დაწყება ---------- */
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { chrome(); if (state.tab === 'info') renderPanel(); });
   renderPanel(); updUndo(); status(); chrome();
-  if (restored) toast('შენი ბოლო ცვლილებები აღდგა', 'ნიმუშიდან დაწყება', () => ACT.sample(null, 'finjani'));
+  if (REMOTE) {
+    $('#loading').hidden = false;
+    (async () => {
+      try {
+        const u = await Backend.user();
+        if (!u) { location.href = '/login/?next=' + encodeURIComponent(location.pathname + location.search); return; }
+        const r = await Backend.loadSite(SITE_ID);
+        site = r.site; IMGS = r.imgs || {}; published = r.published || null;
+        site.brand = site.brand || {};
+        Object.keys(IMGS).forEach((k) => uploaded.add(k));
+        hist = [JSON.stringify(site)]; hi = 0; ready = true;
+        renderPanel(); updUndo(); status(); refresh(); chrome();
+        $('#loading').hidden = true;
+      } catch (e) {
+        $('#loading-msg').textContent = Backend.message(e);
+        $('#loading').querySelector('.spin').hidden = true;
+        $('#loading-act').hidden = false;
+      }
+    })();
+  } else if (LIVE && window.Backend && Backend.configured()) {
+    toast('სატესტო რეჟიმი: ცვლილებები მხოლოდ ამ ბრაუზერში ინახება.', 'შესვლა', () => { location.href = '/login/?next=' + encodeURIComponent('/app/'); });
+  } else if (restored) toast('შენი ბოლო ცვლილებები აღდგა', 'ნიმუშიდან დაწყება', () => ACT.sample(null, 'finjani'));
 }
 </script>
 </body>

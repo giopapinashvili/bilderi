@@ -254,6 +254,11 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .toast button{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:9px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer}
 .toast button:empty{display:none}
 
+[hidden]{display:none!important}
+.loading{position:fixed;inset:0;z-index:150;display:grid;place-items:center;background:rgba(255,255,255,.97)}
+.loading>div{display:grid;justify-items:center;gap:14px;text-align:center;padding:24px;max-width:420px;font-size:16px;color:var(--ink-2)}
+.spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--red);border-right-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:1180px){body{grid-template-columns:72px 340px minmax(0,1fr)}.saved span,.back span{display:none}}
 @media(max-width:900px){
 body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) minmax(0,1fr) 64px;grid-template-areas:"bar" "canvas" "panel" "rail"}
@@ -335,8 +340,13 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     <div class="vstage" id="vstage"><iframe id="vframe" title="საიტი"></iframe></div>
   </div>
 </div>
+<div class="loading" id="loading" hidden><div><span class="spin"></span><p id="loading-msg">საიტი იტვირთება…</p><a class="btn btn-line" id="loading-act" href="/app/" hidden>ჩემ საიტებზე დაბრუნება</a></div></div>
 <div class="toast" id="toast" role="status"><span id="toast-msg"></span><button type="button" id="toast-act"></button></div>
 
+<script src="/js/firebase-config.js"></script>
+<script>
+/*BACKEND*/
+</script>
 <script>
 /*SUPRA*/
 </script>
@@ -417,11 +427,17 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
   const state = { tab: 'sections', sec: null, adding: false };
   const closedCats = new Set(), openItems = new Set();
   const fromSample = (slug) => { const s = clone(SAMPLES.find((x) => x.slug === slug) || SAMPLES[0]); s.artKey = s.slug; s.brand = s.brand || {}; return s; };
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) { const d = JSON.parse(raw); if (d && d.site && d.site.sections) { site = d.site; IMGS = d.imgs || {}; published = d.published || null; } }
-  } catch (e) { /* ბრაუზერი შენახვას არ გვაძლევს */ }
-  const restored = !!site;
+  const SITE_ID = new URLSearchParams(location.search).get('site');
+  const REMOTE = !!(SITE_ID && window.Backend && Backend.configured());
+  const LIVE = /(^|\.)(pages\.dev|workers\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
+  let ready = !REMOTE;
+  if (!REMOTE) {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) { const d = JSON.parse(raw); if (d && d.site && d.site.sections) { site = d.site; IMGS = d.imgs || {}; published = d.published || null; } }
+    } catch (e) { /* ბრაუზერი შენახვას არ გვაძლევს */ }
+  }
+  const restored = !REMOTE && !!site;
   if (!site) site = fromSample('finjani');
 
   const srcOf = (src) => {
@@ -494,8 +510,23 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
   /* ---------- ისტორია და შენახვა ---------- */
   let hist = [JSON.stringify(site)], hi = 0, commitT = 0, saveT = 0;
   const setSaved = (t) => { $('#saved span:last-child').textContent = t; };
+  const uploaded = new Set();
+  let saving = false, again = false;
+  const remoteSave = async () => {
+    if (saving) { again = true; return; }
+    saving = true; setSaved('ინახება…');
+    try {
+      const used = new Set((JSON.stringify(site).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)));
+      for (const id of used) if (!uploaded.has(id) && IMGS[id]) { await Backend.saveImage(SITE_ID, id, IMGS[id]); uploaded.add(id); }
+      await Backend.saveSite(SITE_ID, site, published);
+      setSaved('შენახულია');
+    } catch (e) { setSaved('შენახვა ვერ მოხერხდა'); toast(Backend.message(e), 'თავიდან ცდა', () => remoteSave()); }
+    saving = false;
+    if (again) { again = false; remoteSave(); }
+  };
   const save = () => {
     clearTimeout(saveT);
+    if (REMOTE) { if (ready) saveT = setTimeout(remoteSave, 900); return; }
     saveT = setTimeout(() => {
       try { localStorage.setItem(KEY, JSON.stringify({ site, imgs: IMGS, published })); setSaved('შენახულია'); }
       catch (e) { setSaved('შენახულია ამ ფანჯარაში'); }
@@ -653,7 +684,8 @@ a{cursor:default}
       if (type === 'image/jpeg') { g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); }
       g.drawImage(im, 0, 0, w, h);
       URL.revokeObjectURL(url);
-      const out = cv.toDataURL(type, 0.82);
+      let q = 0.82, out = cv.toDataURL(type, q);
+      while (type === 'image/jpeg' && out.length > 900000 && q > 0.45) { q -= 0.12; out = cv.toDataURL(type, q); }
       res({ src: out, before: file.size, after: Math.round((out.length - out.indexOf(',') - 1) * 0.75) });
     };
     im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('read')); };
@@ -1006,11 +1038,10 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
   }
   $('#toast-act').addEventListener('click', () => { if (toastFn) toastFn(); $('#toast').classList.remove('on'); });
   const DEMO = { sites: '„ჩემი საიტები" შემდეგ ნაბიჯზე აიწყობა.', share: 'გამოქვეყნებულ ვერსიაში ეს ღილაკი გაზიარების ფანჯარას გახსნის.', qr: 'გამოქვეყნებულ ვერსიაში QR დასაბეჭდ ფაილად ჩამოიტვირთება.' };
-  const LIVE = /(^|\.)(pages\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
   document.addEventListener('click', (e) => {
     const d = e.target.closest('[data-demo]');
     if (!d) return;
-    if (LIVE && d.dataset.demo === 'sites') { location.href = '/'; return; }
+    if (LIVE && d.dataset.demo === 'sites') { location.href = REMOTE ? '/app/' : '/'; return; }
     toast(DEMO[d.dataset.demo]);
   });
 
@@ -1073,7 +1104,28 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
   /* ---------- დაწყება ---------- */
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { chrome(); if (state.tab === 'info') renderPanel(); });
   renderPanel(); updUndo(); status(); chrome();
-  if (restored) toast('შენი ბოლო ცვლილებები აღდგა', 'ნიმუშიდან დაწყება', () => ACT.sample(null, 'finjani'));
+  if (REMOTE) {
+    $('#loading').hidden = false;
+    (async () => {
+      try {
+        const u = await Backend.user();
+        if (!u) { location.href = '/login/?next=' + encodeURIComponent(location.pathname + location.search); return; }
+        const r = await Backend.loadSite(SITE_ID);
+        site = r.site; IMGS = r.imgs || {}; published = r.published || null;
+        site.brand = site.brand || {};
+        Object.keys(IMGS).forEach((k) => uploaded.add(k));
+        hist = [JSON.stringify(site)]; hi = 0; ready = true;
+        renderPanel(); updUndo(); status(); refresh(); chrome();
+        $('#loading').hidden = true;
+      } catch (e) {
+        $('#loading-msg').textContent = Backend.message(e);
+        $('#loading').querySelector('.spin').hidden = true;
+        $('#loading-act').hidden = false;
+      }
+    })();
+  } else if (LIVE && window.Backend && Backend.configured()) {
+    toast('სატესტო რეჟიმი: ცვლილებები მხოლოდ ამ ბრაუზერში ინახება.', 'შესვლა', () => { location.href = '/login/?next=' + encodeURIComponent('/app/'); });
+  } else if (restored) toast('შენი ბოლო ცვლილებები აღდგა', 'ნიმუშიდან დაწყება', () => ACT.sample(null, 'finjani'));
 }
 </script>
 </body>

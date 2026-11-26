@@ -541,12 +541,13 @@ body{font-size:16px}
     login: 'აქედან შესვლის გვერდი გაიხსნება. მას შემდეგ ნაბიჯებზე ავაწყობთ.',
     page: 'ეს გვერდი გაშვებამდე დაემატება.'
   };
-  const LIVE = /(^|\.)(pages\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
+  const LIVE = /(^|\.)(pages\.dev|workers\.dev|bilderi\.ge)$|^localhost$/.test(location.hostname);
+  const ROUTES = { signup: '/login/?mode=signup', login: '/login/' };
   document.addEventListener('click', (e) => {
     const a = e.target.closest('[data-demo]');
     if (!a) return;
     e.preventDefault();
-    if (LIVE && a.dataset.demo === 'signup') { location.href = '/editor/'; return; }
+    if (LIVE && ROUTES[a.dataset.demo]) { location.href = ROUTES[a.dataset.demo]; return; }
     toast(MSG[a.dataset.demo] || MSG.page);
   });
 

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>შესვლა, ბილდერი</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,300..900&family=Noto+Serif+Georgian:wght@400..800&display=swap">
+<style>
+/* ბილდერის საერთო სტილი: შესვლა და „ჩემი საიტები" */
+:root{color-scheme:light;--bg:#fff;--ink:#1A1423;--ink-2:#4A4352;--muted:#6E6876;--line:#E7E4EC;--line-2:#D9D5DF;--soft:#F6F4F9;--red:#E8253F;--red-d:#CC1730;--red-s:#FDECEF;--sun:#FFC83D;--cob:#2438D6;--cob-s:rgba(36,56,214,.12);--f:'Noto Sans Georgian','Noto Sans',system-ui,sans-serif;--serif:'Noto Serif Georgian','Noto Serif',Georgia,serif;--ease:cubic-bezier(.2,.7,.2,1);--pad:max(4vw,20px)}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--f)}
+h1,h2,h3{margin:0;font-weight:800;font-stretch:72%;letter-spacing:-.015em;line-height:1.02;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit}
+svg{display:block;flex:none}
+:focus-visible{outline:3px solid var(--cob);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-stretch:72%;font-size:27px;letter-spacing:-.01em;line-height:1}
+.mark{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--red);color:#fff;font-size:20px;font-stretch:100%;transform:rotate(-7deg);transition:transform .35s var(--ease)}
+.logo:hover .mark{transform:rotate(0) scale(1.06)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:2px solid transparent;font:600 16px/1 var(--f);text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .18s var(--ease),background-color .18s,color .18s,box-shadow .18s,border-color .18s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:default;transform:none}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover:not(:disabled){background:var(--red-d);box-shadow:0 12px 24px -12px rgba(232,37,63,.75)}
+.btn-ink{background:var(--ink);color:#fff}
+.btn-line{border-color:var(--line-2);background:#fff;color:var(--ink)}
+.btn-line:hover:not(:disabled){border-color:var(--ink)}
+.btn-sm{min-height:42px;padding:0 14px;font-size:15px;border-radius:11px}
+.wide{width:100%}
+.lnk{border:0;background:none;padding:0;font-weight:600;font-size:inherit;color:var(--cob);cursor:pointer;text-decoration:none}
+.lnk:hover{text-decoration:underline}
+.fld{display:block;margin-bottom:14px}
+.fld>.lt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.fld small{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+.inp{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:400 16px/1.3 var(--f);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.inp:hover{border-color:var(--line-2)}
+.inp:focus{outline:none;border-color:var(--cob);box-shadow:0 0 0 3px var(--cob-s)}
+.inp[aria-invalid=true]{border-color:var(--red)}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:14.5px;line-height:1.5}
+.note.err{background:var(--red-s);color:#A1102A}
+.note.ok{background:#EAF0FF;color:#1B2B9E}
+.note.warn{background:#FFF4DE;color:#7A4A00}
+.toast{position:fixed;left:50%;bottom:22px;z-index:120;max-width:calc(100% - 32px);transform:translate(-50%,12px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:rgba(26,20,35,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.modal.open{opacity:1;visibility:visible}
+.mbox{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:#fff;border-radius:24px;padding:28px;transform:translateY(16px) scale(.98);transition:transform .35s var(--ease)}
+.modal.open .mbox{transform:none}
+.x{position:absolute;right:12px;top:12px;width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:12px;background:var(--soft);cursor:pointer}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* VOICE   მეგობრული, მოკლე: ერთი ფორმა და მეტი არაფერი
+   IDEA    სტამბის აფიშა: მარჯვნივ ზაფრანისფერ კედელზე ნამდვილი საიტების ტელეფონები
+   PICTURE სამი ტელეფონი ნიმუში-საიტებით
+   COLOUR  თეთრი ფორმა, ზაფრანა #FFC83D, ბროწეული ღილაკი
+   TYPE    Noto Sans Georgian, სათაური ვიწრო 800
+   LAYOUT  ლეპტოპზე ფორმა მარცხნივ, აფიშა მარჯვნივ; ტელეფონზე მხოლოდ ფორმა */
+html,body{min-height:100%}
+.auth{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.side{display:flex;flex-direction:column;padding:24px var(--pad) 32px}
+.form-wrap{flex:1;display:grid;place-items:center;padding:32px 0}
+.card{width:min(420px,100%)}
+.card h1{font-size:clamp(42px,5vw,58px);margin-bottom:10px}
+.sub{color:var(--ink-2);font-size:17px;margin-bottom:24px;max-width:36ch}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:20px;border-radius:13px;background:var(--soft)}
+.tabs button{min-height:44px;border:0;border-radius:10px;background:transparent;font-weight:600;font-size:15px;color:var(--ink-2);cursor:pointer;transition:background-color .2s,color .2s,box-shadow .2s}
+.tabs button[aria-selected=true]{background:#fff;color:var(--ink);box-shadow:0 2px 10px -4px rgba(26,20,35,.35)}
+.g-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;border:1.5px solid var(--line-2);border-radius:12px;background:#fff;font-weight:600;font-size:16px;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s var(--ease)}
+.g-btn:hover:not(:disabled){border-color:var(--ink);box-shadow:0 10px 22px -16px rgba(26,20,35,.5);transform:translateY(-1px)}
+.g-btn:disabled{opacity:.55;cursor:default}
+.or{display:flex;align-items:center;gap:12px;margin:20px 0;font-size:13.5px;color:var(--muted)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.pw{position:relative}
+.pw .inp{padding-right:52px}
+.eye{position:absolute;right:4px;top:4px;width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:9px;background:none;color:var(--muted);cursor:pointer}
+.eye:hover{background:var(--soft);color:var(--ink)}
+#msg{margin-bottom:14px}
+.submit{position:relative}
+.submit .spin{position:absolute;right:16px;width:18px;height:18px;border-width:2.5px}
+.fine{margin-top:16px;font-size:13.5px;color:var(--muted);text-align:center}
+.fine a{color:var(--ink-2);font-weight:600}
+.back{margin-top:18px;text-align:center}
+.art{position:relative;overflow:hidden;background:var(--sun);display:flex;flex-direction:column;justify-content:space-between;padding:clamp(32px,5vw,64px)}
+.art::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 60% at 80% 10%,rgba(255,255,255,.5),transparent 70%),radial-gradient(rgba(26,20,35,.1) 1.3px,transparent 1.6px) 0 0/22px 22px;pointer-events:none}
+.art h2{position:relative;font-size:clamp(40px,4.6vw,64px);max-width:11ch}
+.art p{position:relative;margin-top:16px;font-size:17px;max-width:32ch;color:#3a2e14}
+.phones{position:relative;display:flex;justify-content:center;gap:18px;margin:40px -10px -120px;height:380px}
+.mphone{flex:none;width:clamp(130px,12vw,180px);aspect-ratio:9/19;border-radius:30px;background:var(--ink);padding:7px;transform:translateY(var(--y)) rotate(var(--r));box-shadow:0 40px 60px -36px rgba(26,20,35,.6)}
+.ms{height:100%;border-radius:24px;overflow:hidden;background:var(--b)}
+.ms b{display:flex;align-items:flex-end;height:44%;padding:14px;background:var(--c);color:var(--tc);font-weight:800;font-stretch:72%;font-size:clamp(20px,2vw,28px);line-height:1}
+.ms.serif b{font-family:var(--serif);font-stretch:100%;font-weight:700;font-size:clamp(17px,1.7vw,23px)}
+.ms div{display:flex;gap:6px;align-items:baseline;margin:10px 12px 0;font-size:11.5px;font-weight:600;color:var(--t)}
+.ms div i{flex:1;border-bottom:1.5px dotted currentColor;opacity:.35;transform:translateY(-3px)}
+@media(max-width:900px){.auth{grid-template-columns:minmax(0,1fr)}.art{display:none}.form-wrap{place-items:start center;padding-top:24px}}
+</style>
+</head>
+<body>
+<main class="auth">
+  <section class="side">
+    <a class="logo" href="/"><span class="mark">ბ</span>ბილდერი</a>
+    <div class="form-wrap">
+      <div class="card">
+        <h1 id="title">შესვლა</h1>
+        <p class="sub" id="sub">შედი და განაგრძე საიტზე მუშაობა.</p>
+        <div class="tabs" role="tablist" aria-label="შესვლა ან რეგისტრაცია" id="tabs">
+          <button type="button" role="tab" data-mode="login" aria-selected="true">შესვლა</button>
+          <button type="button" role="tab" data-mode="signup" aria-selected="false">რეგისტრაცია</button>
+        </div>
+        <div id="nocfg" class="note warn" hidden><span>შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია. მანამდე რედაქტორი <a href="/editor/">სატესტო რეჟიმში</a> მუშაობს.</span></div>
+        <div id="social">
+          <button class="g-btn" type="button" id="google"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>Google-ით გაგრძელება</button>
+          <div class="or">ან ელფოსტით</div>
+        </div>
+        <form id="form" novalidate>
+          <label class="fld" data-only="signup"><span class="lt">სახელი</span><input class="inp" id="name" autocomplete="name" placeholder="მაგ. ნინო"></label>
+          <label class="fld"><span class="lt">ელფოსტა</span><input class="inp" id="email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" required></label>
+          <div class="fld" data-hide="reset">
+            <span class="lt"><label for="pass">პაროლი</label><button class="lnk" type="button" data-mode="reset" data-only="login">დაგავიწყდა?</button></span>
+            <div class="pw"><input class="inp" id="pass" type="password" autocomplete="current-password" minlength="6" required><button class="eye" type="button" id="eye" aria-label="პაროლის ჩვენება" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+            <small data-only="signup">მინიმუმ 6 სიმბოლო</small>
+          </div>
+          <div id="msg" role="alert" aria-live="polite"></div>
+          <button class="btn btn-red wide submit" type="submit" id="submit"><span id="submit-t">შესვლა</span><span class="spin" hidden></span></button>
+        </form>
+        <p class="fine" data-only="signup">რეგისტრაციით ეთანხმები <a href="/terms/">წესებს</a> და <a href="/privacy/">კონფიდენციალურობის პოლიტიკას</a>.</p>
+        <p class="back" data-only="reset"><button class="lnk" type="button" data-mode="login">შესვლაზე დაბრუნება</button></p>
+      </div>
+    </div>
+  </section>
+  <aside class="art" aria-hidden="true">
+    <div><h2>შენი კაფის საიტი 10 წუთში</h2><p>უფასოდ, სამ საიტამდე. მენიუ, ფასები, ფოტოები და QR კოდი მაგიდებისთვის.</p></div>
+    <div class="phones" id="phones"></div>
+  </aside>
+</main>
+
+<script src="/js/firebase-config.js"></script>
+<script>
+/* ბილდერის backend: Firebase Auth (შესვლა) + Firestore (საიტები).
+   პარამეტრები public/js/firebase-config.js ფაილშია (window.FIREBASE_CONFIG).
+   თუ პარამეტრები არ არის, Backend.configured() აბრუნებს false-ს და გვერდები სატესტო რეჟიმში მუშაობს. */
+(function () {
+  'use strict';
+  if (window.__MOCK_BACKEND) { window.Backend = window.__MOCK_BACKEND; return; } // მხოლოდ ტესტებისთვის
+
+  const V = '11.0.2';
+  const CDN = (m) => `https://www.gstatic.com/firebasejs/${V}/firebase-${m}.js`;
+  const cfg = () => window.FIREBASE_CONFIG;
+  let boot = null;
+
+  function init() {
+    if (boot) return boot;
+    boot = (async () => {
+      if (!cfg() || !cfg().apiKey) return null;
+      const [app, A, F] = await Promise.all([import(CDN('app')), import(CDN('auth')), import(CDN('firestore'))]);
+      const a = app.initializeApp(cfg());
+      const auth = A.getAuth(a);
+      auth.languageCode = 'ka';
+      return { auth, A, db: F.getFirestore(a), F };
+    })();
+    return boot;
+  }
+  const need = async () => { const f = await init(); if (!f) throw Object.assign(new Error('not configured'), { code: 'bilderi/not-configured' }); return f; };
+  const uid = (f) => { const u = f.auth.currentUser; if (!u) throw Object.assign(new Error('signed out'), { code: 'bilderi/signed-out' }); return u.uid; };
+  const ms = (t) => (t && t.toMillis ? t.toMillis() : 0);
+
+  const MSG = {
+    'auth/invalid-email': 'ელფოსტა არასწორადაა ჩაწერილი.',
+    'auth/missing-email': 'ჩაწერე ელფოსტა.',
+    'auth/missing-password': 'ჩაწერე პაროლი.',
+    'auth/invalid-credential': 'ელფოსტა ან პაროლი არასწორია.',
+    'auth/wrong-password': 'ელფოსტა ან პაროლი არასწორია.',
+    'auth/user-not-found': 'ამ ელფოსტით ანგარიში ვერ მოიძებნა.',
+    'auth/email-already-in-use': 'ამ ელფოსტით ანგარიში უკვე არსებობს. სცადე შესვლა.',
+    'auth/weak-password': 'პაროლი მინიმუმ 6 სიმბოლო უნდა იყოს.',
+    'auth/too-many-requests': 'ძალიან ბევრი მცდელობა იყო. ცოტა ხანში სცადე თავიდან.',
+    'auth/network-request-failed': 'ინტერნეტთან კავშირი ვერ მოხერხდა. შეამოწმე კავშირი და სცადე თავიდან.',
+    'auth/popup-blocked': 'ბრაუზერმა Google-ის ფანჯარა დაბლოკა. ნება დართე ამომხტარ ფანჯრებს და სცადე თავიდან.',
+    'auth/unauthorized-domain': 'ეს მისამართი Firebase-ში დაშვებულ დომენებში არ არის დამატებული.',
+    'auth/operation-not-allowed': 'შესვლის ეს გზა Firebase-ში ჯერ ჩართული არ არის.',
+    'auth/account-exists-with-different-credential': 'ეს ელფოსტა სხვა გზით არის დარეგისტრირებული. სცადე ელფოსტით და პაროლით შესვლა.',
+    'permission-denied': 'ამ საიტზე წვდომა არ გაქვს.',
+    'not-found': 'საიტი ვერ მოიძებნა. შეიძლება წაშლილია.',
+    'unavailable': 'სერვერთან კავშირი ვერ მოხერხდა. სცადე თავიდან.',
+    'bilderi/not-configured': 'შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია.',
+    'bilderi/signed-out': 'ჯერ შედი ანგარიშზე.',
+    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.'
+  };
+
+  const B = {
+    configured: () => !!(cfg() && cfg().apiKey),
+    message(e) {
+      const c = (e && e.code) || '';
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return '';
+      return MSG[c] || MSG[c.replace(/^firestore\//, '')] || 'რაღაც შეცდომა მოხდა. სცადე თავიდან.';
+    },
+
+    async user() { const f = await init(); if (!f) return null; await f.auth.authStateReady(); return f.auth.currentUser; },
+    async google() { const f = await need(); const p = new f.A.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' }); return (await f.A.signInWithPopup(f.auth, p)).user; },
+    async signIn(email, pass) { const f = await need(); return (await f.A.signInWithEmailAndPassword(f.auth, email, pass)).user; },
+    async signUp(name, email, pass) {
+      const f = await need();
+      const c = await f.A.createUserWithEmailAndPassword(f.auth, email, pass);
+      if (name) await f.A.updateProfile(c.user, { displayName: name });
+      try { await f.A.sendEmailVerification(c.user); } catch (e) { /* არ არის აუცილებელი */ }
+      return c.user;
+    },
+    async reset(email) { const f = await need(); return f.A.sendPasswordResetEmail(f.auth, email); },
+    async signOut() { const f = await init(); if (f) await f.A.signOut(f.auth); },
+
+    async listSites() {
+      const f = await need(), F = f.F;
+      const snap = await F.getDocs(F.query(F.collection(f.db, 'sites'), F.where('owner', '==', uid(f))));
+      return snap.docs.map((d) => {
+        const x = d.data();
+        let data = {};
+        try { data = JSON.parse(x.data || '{}'); } catch (e) { /* დაზიანებული ჩანაწერი */ }
+        return { id: d.id, name: x.name, slug: x.slug, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
+      }).sort((a, b) => b.updated - a.updated);
+    },
+    async createSite(site) {
+      const f = await need(), F = f.F;
+      const ref = await F.addDoc(F.collection(f.db, 'sites'), { owner: uid(f), name: site.name || '', slug: site.slug || '', data: JSON.stringify(site), published: null, createdAt: F.serverTimestamp(), updatedAt: F.serverTimestamp() });
+      return ref.id;
+    },
+    async loadSite(id) {
+      const f = await need(), F = f.F;
+      uid(f);
+      const snap = await F.getDoc(F.doc(f.db, 'sites', id));
+      if (!snap.exists()) throw Object.assign(new Error('missing'), { code: 'not-found' });
+      const x = snap.data();
+      const imgs = {};
+      (await F.getDocs(F.collection(f.db, 'sites', id, 'images'))).forEach((d) => { imgs[d.id] = d.data().data; });
+      return { site: JSON.parse(x.data), imgs, published: x.published || null };
+    },
+    async saveSite(id, site, published) {
+      const f = await need(), F = f.F;
+      await F.updateDoc(F.doc(f.db, 'sites', id), { name: site.name || '', slug: site.slug || '', data: JSON.stringify(site), published: published || null, updatedAt: F.serverTimestamp() });
+    },
+    async saveImage(id, imgId, dataUrl) {
+      const f = await need(), F = f.F;
+      if (dataUrl.length > 1000000) throw Object.assign(new Error('too big'), { code: 'bilderi/too-big' });
+      await F.setDoc(F.doc(f.db, 'sites', id, 'images', imgId), { owner: uid(f), data: dataUrl });
+    },
+    async deleteSite(id) {
+      const f = await need(), F = f.F;
+      uid(f);
+      const imgs = await F.getDocs(F.collection(f.db, 'sites', id, 'images'));
+      await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
+      await F.deleteDoc(F.doc(f.db, 'sites', id));
+    }
+  };
+  window.Backend = B;
+})();
+
+</script>
+<script>
+{
+  const SITES = [{"template":"supra","slug":"finjani","name":"ფინჯანი","kind":"ყავის სახლი","meta":{"title":"ფინჯანი, ყავის სახლი ვაკეში","description":"სპეშელთი ყავა და ადგილზე გამომცხვარი დესერტები ვაკის პარკთან."},"theme":{"font":"modern","corners":"round","colors":{"bg":"#ffffff","ink":"#151a3d","surface":"#fff4c7","accent":"#2438d6","accentInk":"#ffffff"}},"contact":{"phone":"+995 555 01 23 45","whatsapp":"995555012345","address":"ჭავჭავაძის გამზ. 37, ვაკე, თბილისი","instagram":"finjani.vake","facebook":"finjani.vake"},"hours":[{"days":"ორშაბათი–პარასკევი","time":"08:00–22:00"},{"days":"შაბათი–კვირა","time":"09:00–23:00"}],"sections":[{"type":"hero","variant":"poster","tone":"accent","tagline":"სპეშელთი ყავა და დილით გამომცხვარი დესერტები, ვაკის პარკიდან ორ ნაბიჯზე.","note":"ყოველდღე 08:00-დან","image":{"src":"demo:cup","alt":"კაპუჩინოს ფინჯანი თეფშზე"},"buttons":[{"label":"მენიუს ნახვა","link":"#menu"},{"label":"დარეკვა","link":"tel:+995555012345"}]},{"type":"menu","tone":"base","title":"მენიუ","note":"რძე შეგიძლიათ შვრიის ან ნუშის რძით შეცვალოთ, ფასი იგივე რჩება.","categories":[{"name":"ყავა","items":[{"name":"ესპრესო","price":5},{"name":"ამერიკანო","price":6},{"name":"კაპუჩინო","price":8,"desc":"ორმაგი ესპრესო, ათქვეფილი რძე"},{"name":"ფლეტ უაითი","price":9},{"name":"რაფი ვანილით","price":10,"tag":"ახალი"},{"name":"ცივი ყავა","price":9,"desc":"12 საათი ცივ წყალში დაყენებული"}]},{"name":"ჩაი და სხვა","items":[{"name":"ქართული შავი ჩაი","price":5,"desc":"გურული, ფოთლოვანი"},{"name":"ცხელი შოკოლადი","price":9},{"name":"სახლის ლიმონათი","price":7,"desc":"მსხალი ან ტარხუნა"}]},{"name":"საუზმე და დესერტი","items":[{"name":"ავოკადოს ტოსტი","price":18,"desc":"სახლის პური, კვერცხი, ჩილის ფანტელი"},{"name":"ომლეტი სულგუნით","price":15},{"name":"პენოვანი ხაჭაპური","price":9},{"name":"ნაპოლეონი","price":11,"tag":"ჩვენი"},{"name":"ჩიზქეიქი","price":12}]}]},{"type":"about","tone":"surface","title":"პატარა კაფე დიდი ფანჯრით","image":{"src":"demo:interior","alt":"კაფის ინტერიერი თაღოვანი ფანჯრით"},"paragraphs":["2019 წელს ვაკეში პატარა ფართი ვიქირავეთ და ყავის აპარატი ფანჯარასთან დავდგით. დღეს მარცვლებს თვითონ ვხალავთ და ყოველ თვე ახალ ჯიშს ვცდით.","დესერტებს დილით ადგილზე ვაცხობთ. ლეპტოპით მუშაობა აქ მისასალმებელია: Wi-Fi უფასოა და როზეტი ყველა მაგიდასთანაა."]},{"type":"gallery","tone":"base","title":"ფოტოები","images":[{"src":"demo:cake","alt":"ნაპოლეონის ნაჭერი"},{"src":"demo:drink","alt":"სახლის ლიმონათი"},{"src":"demo:khachapuri","alt":"ხაჭაპური საუზმეზე"}]},{"type":"visit","tone":"accent","title":"გვესტუმრეთ","note":"პარკინგი შენობის უკან, ეზოშია."}]},{"template":"supra","slug":"dzveli-ubani","name":"ძველი უბანი","kind":"ქართული რესტორანი","meta":{"title":"ძველი უბანი, ქართული რესტორანი სოლოლაკში","description":"ოჯახური რეცეპტები, ქვევრის ღვინო და ცოცხალი მუსიკა პარასკევობით."},"theme":{"font":"classic","corners":"sharp","colors":{"bg":"#3a0c19","ink":"#fbefe9","surface":"#4f1426","accent":"#ff5a6e","accentInk":"#2a0610"}},"contact":{"phone":"+995 555 67 89 01","address":"ლერმონტოვის ქ. 8, სოლოლაკი, თბილისი","instagram":"dzveliubani","facebook":"dzveliubani.restaurant"},"hours":[{"days":"ორშაბათი–ხუთშაბათი","time":"12:00–23:00"},{"days":"პარასკევი–შაბათი","time":"12:00–01:00"},{"days":"კვირა","time":"13:00–23:00"}],"sections":[{"type":"hero","variant":"photo","tagline":"ქართული სამზარეულო სოლოლაკის ძველ სახლში. ოჯახური რეცეპტები, ქვევრის ღვინო და ცოცხალი მუსიკა პარასკევობით.","note":"ჯგუფებისთვის 20 სტუმრამდე ცალკე დარბაზი გვაქვს","image":{"src":"demo:supra","alt":"გაშლილი ქართული სუფრა"},"buttons":[{"label":"მაგიდის დაჯავშნა","link":"tel:+995555678901"},{"label":"მენიუ","link":"#menu"}]},{"type":"about","tone":"base","title":"სუფრა, როგორც ეზოში","image":{"src":"demo:interior","alt":"დარბაზი თაღოვანი ფანჯრით"},"paragraphs":["სოლოლაკის ძველ სახლში, სადაც მეზობლები ოდესღაც ერთ ეზოში იკრიბებოდნენ, ახლა ჩვენი სუფრაა.","კერძებს რაჭული და იმერული ოჯახური რეცეპტებით ვამზადებთ. ღვინოს პატარა მარნებიდან ვარჩევთ და ყოველ სეზონზე ახალს ვამატებთ."]},{"type":"menu","tone":"inverse","title":"მენიუ","note":"ხინკალი ცალობით იყიდება, მინიმუმ 5 ცალი.","categories":[{"name":"ცივი კერძები","items":[{"name":"ფხალის ასორტი","price":18,"desc":"ისპანახი, ჭარხალი, პრასი, ნიგოზი"},{"name":"ბადრიჯანი ნიგვზით","price":16},{"name":"ქართული სალათი","price":14,"desc":"კიტრი, პომიდორი, კახური ზეთი"},{"name":"სულგუნის ასორტი","price":17}]},{"name":"ცხელი კერძები","items":[{"name":"ხინკალი ქალაქური","price":1.8,"desc":"ფასი ერთ ცალზე"},{"name":"აჭარული ხაჭაპური","price":22},{"name":"ჩაქაფული","price":32,"tag":"სეზონური"},{"name":"შქმერული","price":30,"desc":"წიწილა რძესა და ნივრში, კეცზე"},{"name":"ღორის მწვადი","price":26}]},{"name":"ღვინო, ჭიქით","items":[{"name":"საფერავი","price":12},{"name":"რქაწითელი, ქვევრის","price":14},{"name":"ხვანჭკარა","price":15},{"name":"ჭაჭა, 50 მლ","price":8}]}]},{"type":"gallery","tone":"surface","title":"ჩვენი სუფრიდან","images":[{"src":"demo:khinkali","alt":"ხინკალი"},{"src":"demo:wine","alt":"საფერავის ბოთლი და ჭიქა"},{"src":"demo:khachapuri","alt":"აჭარული ხაჭაპური"},{"src":"demo:cake","alt":"დესერტი"},{"src":"demo:drink","alt":"ლიმონათი"}]},{"type":"visit","tone":"base","title":"სად ვართ","note":"პარასკევს და შაბათს საღამოს მაგიდა წინასწარ დაჯავშნეთ."}]},{"template":"supra","slug":"talgha","name":"ტალღა","kind":"ზღვისპირა ბარი","meta":{"title":"ტალღა, ბარი ბათუმის ბულვარზე","description":"კოქტეილები, გრილი და მზის ჩასვლა ზღვის პირას."},"theme":{"font":"modern","corners":"soft","colors":{"bg":"#ffffff","ink":"#0a3a8f","surface":"#e4f1ff","accent":"#ff6a3d","accentInk":"#1f0b04"}},"contact":{"phone":"+995 555 24 68 10","whatsapp":"995555246810","address":"ბათუმის ბულვარი, ნაპირი 14","mapQuery":"Batumi Boulevard","instagram":"talgha.batumi"},"hours":[{"days":"მაისი–ოქტომბერი, ყოველდღე","time":"11:00–02:00"},{"days":"ნოემბერი–აპრილი","time":"დაკეტილია"}],"sections":[{"type":"hero","variant":"poster","tone":"inverse","tagline":"ბარი ბათუმის ბულვარზე, პირდაპირ ზღვის პირას. კოქტეილები, გრილი და მზის ჩასვლა ყოველ საღამოს.","note":"ღიაა მაისიდან ოქტომბრამდე","image":{"src":"demo:sea","alt":"მზის ჩასვლა ზღვაზე, ქოლგა ქვიშაზე"},"buttons":[{"label":"მენიუ","link":"#menu"},{"label":"WhatsApp","link":"https://wa.me/995555246810"}]},{"type":"gallery","tone":"base","title":"ზაფხული ტალღაზე","note":"შაბათობით 21:00-დან დიჯეი უკრავს.","images":[{"src":"demo:drink","alt":"ცივი კოქტეილი ლიმონით"},{"src":"demo:khachapuri","alt":"აჭარული ხაჭაპური"},{"src":"demo:wine","alt":"ღვინო"},{"src":"demo:interior","alt":"ბარის დარბაზი"},{"src":"demo:cake","alt":"დესერტი"}]},{"type":"menu","tone":"surface","title":"მენიუ","categories":[{"name":"კოქტეილები","items":[{"name":"აპეროლ სპრიცი","price":22},{"name":"მოხიტო","price":20},{"name":"ჭაჭა-ტონიკი","price":18,"tag":"ჩვენი"},{"name":"მოხიტო ალკოჰოლის გარეშე","price":14}]},{"name":"გრილი სასმელები","items":[{"name":"ფორთოხლის ფრეში","price":12},{"name":"ლუდი, 0.5 ლ","price":9},{"name":"სახლის ლიმონათი","price":7}]},{"name":"საჭმელი","items":[{"name":"აჭარული ხაჭაპური","price":20},{"name":"კალმარი გრილზე","price":28,"desc":"ლიმონი, ნიორი, მწვანილი"},{"name":"კარტოფილი ფრი","price":9},{"name":"ხილის ასორტი","price":25,"desc":"ორი-სამი ადამიანისთვის"}]}]},{"type":"about","enabled":false,"title":"ჩვენ შესახებ","paragraphs":["ეს სექცია გამორთულია: საიტზე არ ჩანს, მაგრამ ტექსტი შენახულია."]},{"type":"visit","tone":"inverse","title":"სად გვიპოვო","note":"ბულვარზე, ბორბლის მხრიდან მეოთხე ბარი."}]}];
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('next') || '';
+  const next = /^\/(?!\/)[\w\-./?=&%]*$/.test(raw) ? raw : '/app/';
+  const TEXT = {
+    login: ['შესვლა', 'შედი და განაგრძე საიტზე მუშაობა.', 'შესვლა'],
+    signup: ['რეგისტრაცია', 'შექმენი ანგარიში და პირველი საიტი დღესვე გამოაქვეყნე. უფასოა.', 'ანგარიშის შექმნა'],
+    reset: ['პაროლის აღდგენა', 'ჩაწერე ელფოსტა და აღდგენის ბმულს გამოგიგზავნით.', 'ბმულის გაგზავნა']
+  };
+  let mode = ['signup', 'reset'].includes(params.get('mode')) ? params.get('mode') : 'login';
+  let busy = false;
+
+  const msg = (type, text) => { $('#msg').innerHTML = text ? `<div class="note ${type}">${esc(text)}</div>` : ''; };
+  function setMode(m) {
+    mode = m;
+    const [t, s, b] = TEXT[m];
+    $('#title').textContent = t; $('#sub').textContent = s; $('#submit-t').textContent = b;
+    document.title = t + ', ბილდერი';
+    $$('#tabs button').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.mode === m)));
+    $('#tabs').hidden = m === 'reset';
+    $('#social').hidden = m === 'reset';
+    $$('[data-only]').forEach((el) => { el.hidden = el.dataset.only !== m; });
+    $$('[data-hide]').forEach((el) => { el.hidden = el.dataset.hide === m; });
+    $('#pass').autocomplete = m === 'signup' ? 'new-password' : 'current-password';
+    msg('', '');
+    const u = new URL(location.href); if (m === 'login') u.searchParams.delete('mode'); else u.searchParams.set('mode', m);
+    history.replaceState(null, '', u);
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (b) { setMode(b.dataset.mode); (mode === 'signup' ? $('#name') : $('#email')).focus(); } });
+  $('#eye').addEventListener('click', () => { const on = $('#pass').type === 'password'; $('#pass').type = on ? 'text' : 'password'; $('#eye').setAttribute('aria-pressed', String(on)); });
+
+  const setBusy = (on) => { busy = on; $('#submit').disabled = on; $('#google').disabled = on; $('.submit .spin').hidden = !on; };
+  const done = () => { location.href = next; };
+  const fail = (e) => { setBusy(false); const t = Backend.message(e); if (t) msg('err', t); };
+
+  $('#google').addEventListener('click', async () => {
+    if (busy) return;
+    msg('', ''); setBusy(true);
+    try { await Backend.google(); done(); } catch (e) { fail(e); }
+  });
+  $('#form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (busy) return;
+    const email = $('#email').value.trim(), pass = $('#pass').value, name = $('#name').value.trim();
+    $$('.inp').forEach((i) => i.removeAttribute('aria-invalid'));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('#email').setAttribute('aria-invalid', 'true'); $('#email').focus(); return msg('err', 'ჩაწერე სწორი ელფოსტა.'); }
+    if (mode !== 'reset' && pass.length < 6) { $('#pass').setAttribute('aria-invalid', 'true'); $('#pass').focus(); return msg('err', 'პაროლი მინიმუმ 6 სიმბოლო უნდა იყოს.'); }
+    msg('', ''); setBusy(true);
+    try {
+      if (mode === 'login') { await Backend.signIn(email, pass); done(); }
+      else if (mode === 'signup') { await Backend.signUp(name, email, pass); done(); }
+      else { await Backend.reset(email); setBusy(false); msg('ok', `აღდგენის ბმული გაიგზავნა ${email}-ზე. შეამოწმე ფოსტა, Spam საქაღალდეც.`); }
+    } catch (err) { fail(err); }
+  });
+
+  /* აფიშის ტელეფონები ნიმუშებიდან */
+  const hero = (s) => { const h = s.sections.find((x) => x.type === 'hero'), c = s.theme.colors; return h.variant === 'photo' ? [c.bg, '#fff'] : h.tone === 'inverse' ? [c.ink, c.bg] : [c.accent, c.accentInk]; };
+  $('#phones').innerHTML = SITES.map((s, i) => {
+    const [bg, fg] = hero(s), c = s.theme.colors;
+    const rows = s.sections.find((x) => x.type === 'menu').categories.flatMap((k) => k.items).slice(0, 5).map((it) => `<div>${esc(it.name)}<i></i>${Number.isInteger(it.price) ? it.price : Number(it.price).toFixed(2)} ₾</div>`).join('');
+    return `<div class="mphone" style="--r:${[-7, 0, 7][i]}deg;--y:${[40, 0, 40][i]}px"><div class="ms${s.theme.font === 'classic' ? ' serif' : ''}" style="--b:${c.bg};--t:${c.ink};--c:${bg};--tc:${fg}"><b>${esc(s.name)}</b>${rows}</div></div>`;
+  }).join('');
+
+  setMode(mode);
+  if (!Backend.configured()) {
+    $('#nocfg').hidden = false;
+    $$('#form input, #form button, #google').forEach((x) => { x.disabled = true; });
+  } else {
+    Backend.user().then((u) => { if (u) done(); }).catch(() => {});
+  }
+}
+</script>
+</body>
+</html>
