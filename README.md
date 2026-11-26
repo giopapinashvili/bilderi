@@ -21,10 +21,12 @@
 - `wrangler.jsonc` — Cloudflare Worker-ის პარამეტრები
 
 ## მისამართი
-https://bilderi.gio-papinashvili20-bd3.workers.dev
+https://bilderi.pages.dev (Cloudflare Pages). გამოქვეყნებული საიტები: `https://bilderi.pages.dev/s/{მისამართი}/`.
+ძველი Worker-იც მუშაობს: https://bilderi.gio-papinashvili20-bd3.workers.dev
 
 ## Firebase
 პროექტი `bilderi-ge`: შესვლა (ელფოსტა/პაროლი და Google) და Firestore (ევროპა, eur3). წესები: `firestore.rules`, გამოქვეყნება: `firebase deploy --only firestore,auth`.
 
 ## Cloudflare
+Pages პროექტი `bilderi`: Build output directory `public`, Build command ცარიელი. `functions/s/[[path]].js` გამოქვეყნებულ საიტებს აჩვენებს (კოდი `src/worker.js`-შია).
 Worker `bilderi`, დაკავშირებულია ამ რეპოსთან. ყოველ push-ზე Cloudflare თავისით აქვეყნებს `public/` საქაღალდეს (`npx wrangler deploy`).

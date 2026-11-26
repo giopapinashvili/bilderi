@@ -49,7 +49,9 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
 .thumb .l1{bottom:44px}.thumb .l2{bottom:30px;right:45%}.thumb .l3{bottom:16px;right:62%;background:var(--c);opacity:.7}
 .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .body h3{font-size:24px;font-stretch:80%}
-.addr{font-size:14px;color:var(--cob);font-weight:600;overflow-wrap:anywhere}
+.addr{font-size:14px;color:var(--cob);font-weight:600;overflow-wrap:anywhere;text-decoration:none}
+a.addr:hover{text-decoration:underline}
+.addr.muted{color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13.5px;color:var(--muted)}
 .pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;background:var(--soft);font-size:12.5px;font-weight:600;color:var(--ink-2)}
 .pill i{width:7px;height:7px;border-radius:50%;background:#A8A2B0}
@@ -141,7 +143,8 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
 <script>
 {
   const SAMPLES = /*SAMPLES*/;
-  const LIMIT = 3, DOMAIN = 'bilderi.ge';
+  const LIMIT = 3, SITE_ORIGIN = 'https://bilderi.pages.dev';
+  const siteUrl = (slug) => SITE_ORIGIN + '/s/' + slug + '/';
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -195,9 +198,9 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
     }
     $('#grid').innerHTML = sites.map((x) => {
       const st = !x.published ? ['', 'მონახაზი'] : x.changed ? ['chg', 'გამოუქვეყნებელი ცვლილებები'] : ['live', 'გამოქვეყნებული'];
-      return `<article class="card"><div>${thumb(x.site, x.id)}</div><div class="body"><h3>${esc(x.name || 'უსახელო')}</h3><span class="addr">${esc((x.slug || 'saiti') + '.' + DOMAIN)}</span>
+      return `<article class="card"><div>${thumb(x.site, x.id)}</div><div class="body"><h3>${esc(x.name || 'უსახელო')}</h3>${x.live ? `<a class="addr" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">${esc(siteUrl(x.live).replace(/^https:\/\//, '').replace(/\/$/, ''))}</a>` : `<span class="addr muted">${esc(siteUrl(x.slug || 'saiti').replace(/^https:\/\//, '').replace(/\/$/, ''))}</span>`}
 <div class="meta"><span class="pill ${st[0]}"><i></i>${st[1]}</span><span>შეცვლილია ${ago(x.updated)}</span></div>
-<div class="acts"><a class="btn btn-ink btn-sm" href="/editor/?site=${encodeURIComponent(x.id)}">რედაქტირება</a>
+<div class="acts"><a class="btn btn-ink btn-sm" href="/editor/?site=${encodeURIComponent(x.id)}">რედაქტირება</a>${x.live ? `<a class="btn btn-line btn-sm" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">ნახვა</a>` : ''}
 <div class="more"><button class="ib" type="button" data-more="${esc(x.id)}" aria-label="სხვა მოქმედებები" aria-expanded="false" aria-haspopup="menu">${IC.more}</button>
 <div class="menu" role="menu"><button type="button" role="menuitem" class="danger" data-del="${esc(x.id)}">საიტის წაშლა</button></div></div></div></div></article>`;
     }).join('') + `<button class="add" type="button" data-new${n >= LIMIT ? ' disabled' : ''}><span class="plus">${IC.plus}</span>ახალი საიტი<small>${n >= LIMIT ? `უფასოდ ${LIMIT} საიტამდე შეგიძლია. ახალი რომ დაამატო, ერთ-ერთი წაშალე.` : `კიდევ ${LIMIT - n} საიტის შექმნა შეგიძლია`}</small></button>`;

@@ -98,7 +98,9 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
 .thumb .l1{bottom:44px}.thumb .l2{bottom:30px;right:45%}.thumb .l3{bottom:16px;right:62%;background:var(--c);opacity:.7}
 .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .body h3{font-size:24px;font-stretch:80%}
-.addr{font-size:14px;color:var(--cob);font-weight:600;overflow-wrap:anywhere}
+.addr{font-size:14px;color:var(--cob);font-weight:600;overflow-wrap:anywhere;text-decoration:none}
+a.addr:hover{text-decoration:underline}
+.addr.muted{color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13.5px;color:var(--muted)}
 .pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;background:var(--soft);font-size:12.5px;font-weight:600;color:var(--ink-2)}
 .pill i{width:7px;height:7px;border-radius:50%;background:#A8A2B0}
@@ -212,6 +214,12 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
   const need = async () => { const f = await init(); if (!f) throw Object.assign(new Error('not configured'), { code: 'bilderi/not-configured' }); return f; };
   const uid = (f) => { const u = f.auth.currentUser; if (!u) throw Object.assign(new Error('signed out'), { code: 'bilderi/signed-out' }); return u.uid; };
   const ms = (t) => (t && t.toMillis ? t.toMillis() : 0);
+  async function removePublished(f, slug) {
+    const F = f.F;
+    const imgs = await F.getDocs(F.collection(f.db, 'published', slug, 'images'));
+    await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
+    await F.deleteDoc(F.doc(f.db, 'published', slug));
+  }
 
   const MSG = {
     'auth/invalid-email': 'ელფოსტა არასწორადაა ჩაწერილი.',
@@ -233,7 +241,8 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
     'unavailable': 'სერვერთან კავშირი ვერ მოხერხდა. სცადე თავიდან.',
     'bilderi/not-configured': 'შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია.',
     'bilderi/signed-out': 'ჯერ შედი ანგარიშზე.',
-    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.'
+    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.',
+    'bilderi/slug-taken': 'ეს მისამართი უკვე დაკავებულია. Google-ის ჩანართში სხვა მისამართი აირჩიე.'
   };
 
   const B = {
@@ -264,7 +273,7 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
         const x = d.data();
         let data = {};
         try { data = JSON.parse(x.data || '{}'); } catch (e) { /* დაზიანებული ჩანაწერი */ }
-        return { id: d.id, name: x.name, slug: x.slug, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
+        return { id: d.id, name: x.name, slug: x.slug, live: x.publishedSlug || null, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
       }).sort((a, b) => b.updated - a.updated);
     },
     async createSite(site) {
@@ -291,9 +300,34 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
       if (dataUrl.length > 1000000) throw Object.assign(new Error('too big'), { code: 'bilderi/too-big' });
       await F.setDoc(F.doc(f.db, 'sites', id, 'images', imgId), { owner: uid(f), data: dataUrl });
     },
+    async slugStatus(slug, siteId) {
+      const f = await need(), F = f.F, u = uid(f);
+      const s = await F.getDoc(F.doc(f.db, 'published', slug));
+      if (!s.exists()) return 'free';
+      const x = s.data();
+      return x.owner === u && x.siteId === siteId ? 'mine' : 'taken';
+    },
+    async publish(siteId, slug, payload, imgs) {
+      const f = await need(), F = f.F, u = uid(f);
+      const ref = F.doc(f.db, 'published', slug);
+      const cur = await F.getDoc(ref);
+      if (cur.exists() && (cur.data().owner !== u || cur.data().siteId !== siteId)) throw Object.assign(new Error('taken'), { code: 'bilderi/slug-taken' });
+      const siteRef = F.doc(f.db, 'sites', siteId);
+      const sdoc = await F.getDoc(siteRef);
+      const old = sdoc.exists() ? sdoc.data().publishedSlug : null;
+      const used = [...new Set((JSON.stringify(payload).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)))].filter((id) => imgs[id]);
+      const have = cur.exists() ? cur.data().imgs || [] : [];
+      await F.setDoc(ref, { owner: u, siteId, data: JSON.stringify(payload), imgs: used, updatedAt: F.serverTimestamp() });
+      for (const id of used) if (!have.includes(id)) await F.setDoc(F.doc(f.db, 'published', slug, 'images', id), { owner: u, data: imgs[id] });
+      if (old && old !== slug) { try { await removePublished(f, old); } catch (e) { /* ძველი მისამართი უკვე წაშლილია */ } }
+      await F.updateDoc(siteRef, { publishedSlug: slug });
+    },
     async deleteSite(id) {
       const f = await need(), F = f.F;
       uid(f);
+      const sd = await F.getDoc(F.doc(f.db, 'sites', id));
+      const live = sd.exists() ? sd.data().publishedSlug : null;
+      if (live) { try { await removePublished(f, live); } catch (e) { /* უკვე წაშლილია */ } }
       const imgs = await F.getDocs(F.collection(f.db, 'sites', id, 'images'));
       await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
       await F.deleteDoc(F.doc(f.db, 'sites', id));
@@ -306,7 +340,8 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
 <script>
 {
   const SAMPLES = [{"template":"supra","slug":"finjani","name":"ფინჯანი","kind":"ყავის სახლი","meta":{"title":"ფინჯანი, ყავის სახლი ვაკეში","description":"სპეშელთი ყავა და ადგილზე გამომცხვარი დესერტები ვაკის პარკთან."},"theme":{"font":"modern","corners":"round","colors":{"bg":"#ffffff","ink":"#151a3d","surface":"#fff4c7","accent":"#2438d6","accentInk":"#ffffff"}},"contact":{"phone":"+995 555 01 23 45","whatsapp":"995555012345","address":"ჭავჭავაძის გამზ. 37, ვაკე, თბილისი","instagram":"finjani.vake","facebook":"finjani.vake"},"hours":[{"days":"ორშაბათი–პარასკევი","time":"08:00–22:00"},{"days":"შაბათი–კვირა","time":"09:00–23:00"}],"sections":[{"type":"hero","variant":"poster","tone":"accent","tagline":"სპეშელთი ყავა და დილით გამომცხვარი დესერტები, ვაკის პარკიდან ორ ნაბიჯზე.","note":"ყოველდღე 08:00-დან","image":{"src":"demo:cup","alt":"კაპუჩინოს ფინჯანი თეფშზე"},"buttons":[{"label":"მენიუს ნახვა","link":"#menu"},{"label":"დარეკვა","link":"tel:+995555012345"}]},{"type":"menu","tone":"base","title":"მენიუ","note":"რძე შეგიძლიათ შვრიის ან ნუშის რძით შეცვალოთ, ფასი იგივე რჩება.","categories":[{"name":"ყავა","items":[{"name":"ესპრესო","price":5},{"name":"ამერიკანო","price":6},{"name":"კაპუჩინო","price":8,"desc":"ორმაგი ესპრესო, ათქვეფილი რძე"},{"name":"ფლეტ უაითი","price":9},{"name":"რაფი ვანილით","price":10,"tag":"ახალი"},{"name":"ცივი ყავა","price":9,"desc":"12 საათი ცივ წყალში დაყენებული"}]},{"name":"ჩაი და სხვა","items":[{"name":"ქართული შავი ჩაი","price":5,"desc":"გურული, ფოთლოვანი"},{"name":"ცხელი შოკოლადი","price":9},{"name":"სახლის ლიმონათი","price":7,"desc":"მსხალი ან ტარხუნა"}]},{"name":"საუზმე და დესერტი","items":[{"name":"ავოკადოს ტოსტი","price":18,"desc":"სახლის პური, კვერცხი, ჩილის ფანტელი"},{"name":"ომლეტი სულგუნით","price":15},{"name":"პენოვანი ხაჭაპური","price":9},{"name":"ნაპოლეონი","price":11,"tag":"ჩვენი"},{"name":"ჩიზქეიქი","price":12}]}]},{"type":"about","tone":"surface","title":"პატარა კაფე დიდი ფანჯრით","image":{"src":"demo:interior","alt":"კაფის ინტერიერი თაღოვანი ფანჯრით"},"paragraphs":["2019 წელს ვაკეში პატარა ფართი ვიქირავეთ და ყავის აპარატი ფანჯარასთან დავდგით. დღეს მარცვლებს თვითონ ვხალავთ და ყოველ თვე ახალ ჯიშს ვცდით.","დესერტებს დილით ადგილზე ვაცხობთ. ლეპტოპით მუშაობა აქ მისასალმებელია: Wi-Fi უფასოა და როზეტი ყველა მაგიდასთანაა."]},{"type":"gallery","tone":"base","title":"ფოტოები","images":[{"src":"demo:cake","alt":"ნაპოლეონის ნაჭერი"},{"src":"demo:drink","alt":"სახლის ლიმონათი"},{"src":"demo:khachapuri","alt":"ხაჭაპური საუზმეზე"}]},{"type":"visit","tone":"accent","title":"გვესტუმრეთ","note":"პარკინგი შენობის უკან, ეზოშია."}]},{"template":"supra","slug":"dzveli-ubani","name":"ძველი უბანი","kind":"ქართული რესტორანი","meta":{"title":"ძველი უბანი, ქართული რესტორანი სოლოლაკში","description":"ოჯახური რეცეპტები, ქვევრის ღვინო და ცოცხალი მუსიკა პარასკევობით."},"theme":{"font":"classic","corners":"sharp","colors":{"bg":"#3a0c19","ink":"#fbefe9","surface":"#4f1426","accent":"#ff5a6e","accentInk":"#2a0610"}},"contact":{"phone":"+995 555 67 89 01","address":"ლერმონტოვის ქ. 8, სოლოლაკი, თბილისი","instagram":"dzveliubani","facebook":"dzveliubani.restaurant"},"hours":[{"days":"ორშაბათი–ხუთშაბათი","time":"12:00–23:00"},{"days":"პარასკევი–შაბათი","time":"12:00–01:00"},{"days":"კვირა","time":"13:00–23:00"}],"sections":[{"type":"hero","variant":"photo","tagline":"ქართული სამზარეულო სოლოლაკის ძველ სახლში. ოჯახური რეცეპტები, ქვევრის ღვინო და ცოცხალი მუსიკა პარასკევობით.","note":"ჯგუფებისთვის 20 სტუმრამდე ცალკე დარბაზი გვაქვს","image":{"src":"demo:supra","alt":"გაშლილი ქართული სუფრა"},"buttons":[{"label":"მაგიდის დაჯავშნა","link":"tel:+995555678901"},{"label":"მენიუ","link":"#menu"}]},{"type":"about","tone":"base","title":"სუფრა, როგორც ეზოში","image":{"src":"demo:interior","alt":"დარბაზი თაღოვანი ფანჯრით"},"paragraphs":["სოლოლაკის ძველ სახლში, სადაც მეზობლები ოდესღაც ერთ ეზოში იკრიბებოდნენ, ახლა ჩვენი სუფრაა.","კერძებს რაჭული და იმერული ოჯახური რეცეპტებით ვამზადებთ. ღვინოს პატარა მარნებიდან ვარჩევთ და ყოველ სეზონზე ახალს ვამატებთ."]},{"type":"menu","tone":"inverse","title":"მენიუ","note":"ხინკალი ცალობით იყიდება, მინიმუმ 5 ცალი.","categories":[{"name":"ცივი კერძები","items":[{"name":"ფხალის ასორტი","price":18,"desc":"ისპანახი, ჭარხალი, პრასი, ნიგოზი"},{"name":"ბადრიჯანი ნიგვზით","price":16},{"name":"ქართული სალათი","price":14,"desc":"კიტრი, პომიდორი, კახური ზეთი"},{"name":"სულგუნის ასორტი","price":17}]},{"name":"ცხელი კერძები","items":[{"name":"ხინკალი ქალაქური","price":1.8,"desc":"ფასი ერთ ცალზე"},{"name":"აჭარული ხაჭაპური","price":22},{"name":"ჩაქაფული","price":32,"tag":"სეზონური"},{"name":"შქმერული","price":30,"desc":"წიწილა რძესა და ნივრში, კეცზე"},{"name":"ღორის მწვადი","price":26}]},{"name":"ღვინო, ჭიქით","items":[{"name":"საფერავი","price":12},{"name":"რქაწითელი, ქვევრის","price":14},{"name":"ხვანჭკარა","price":15},{"name":"ჭაჭა, 50 მლ","price":8}]}]},{"type":"gallery","tone":"surface","title":"ჩვენი სუფრიდან","images":[{"src":"demo:khinkali","alt":"ხინკალი"},{"src":"demo:wine","alt":"საფერავის ბოთლი და ჭიქა"},{"src":"demo:khachapuri","alt":"აჭარული ხაჭაპური"},{"src":"demo:cake","alt":"დესერტი"},{"src":"demo:drink","alt":"ლიმონათი"}]},{"type":"visit","tone":"base","title":"სად ვართ","note":"პარასკევს და შაბათს საღამოს მაგიდა წინასწარ დაჯავშნეთ."}]},{"template":"supra","slug":"talgha","name":"ტალღა","kind":"ზღვისპირა ბარი","meta":{"title":"ტალღა, ბარი ბათუმის ბულვარზე","description":"კოქტეილები, გრილი და მზის ჩასვლა ზღვის პირას."},"theme":{"font":"modern","corners":"soft","colors":{"bg":"#ffffff","ink":"#0a3a8f","surface":"#e4f1ff","accent":"#ff6a3d","accentInk":"#1f0b04"}},"contact":{"phone":"+995 555 24 68 10","whatsapp":"995555246810","address":"ბათუმის ბულვარი, ნაპირი 14","mapQuery":"Batumi Boulevard","instagram":"talgha.batumi"},"hours":[{"days":"მაისი–ოქტომბერი, ყოველდღე","time":"11:00–02:00"},{"days":"ნოემბერი–აპრილი","time":"დაკეტილია"}],"sections":[{"type":"hero","variant":"poster","tone":"inverse","tagline":"ბარი ბათუმის ბულვარზე, პირდაპირ ზღვის პირას. კოქტეილები, გრილი და მზის ჩასვლა ყოველ საღამოს.","note":"ღიაა მაისიდან ოქტომბრამდე","image":{"src":"demo:sea","alt":"მზის ჩასვლა ზღვაზე, ქოლგა ქვიშაზე"},"buttons":[{"label":"მენიუ","link":"#menu"},{"label":"WhatsApp","link":"https://wa.me/995555246810"}]},{"type":"gallery","tone":"base","title":"ზაფხული ტალღაზე","note":"შაბათობით 21:00-დან დიჯეი უკრავს.","images":[{"src":"demo:drink","alt":"ცივი კოქტეილი ლიმონით"},{"src":"demo:khachapuri","alt":"აჭარული ხაჭაპური"},{"src":"demo:wine","alt":"ღვინო"},{"src":"demo:interior","alt":"ბარის დარბაზი"},{"src":"demo:cake","alt":"დესერტი"}]},{"type":"menu","tone":"surface","title":"მენიუ","categories":[{"name":"კოქტეილები","items":[{"name":"აპეროლ სპრიცი","price":22},{"name":"მოხიტო","price":20},{"name":"ჭაჭა-ტონიკი","price":18,"tag":"ჩვენი"},{"name":"მოხიტო ალკოჰოლის გარეშე","price":14}]},{"name":"გრილი სასმელები","items":[{"name":"ფორთოხლის ფრეში","price":12},{"name":"ლუდი, 0.5 ლ","price":9},{"name":"სახლის ლიმონათი","price":7}]},{"name":"საჭმელი","items":[{"name":"აჭარული ხაჭაპური","price":20},{"name":"კალმარი გრილზე","price":28,"desc":"ლიმონი, ნიორი, მწვანილი"},{"name":"კარტოფილი ფრი","price":9},{"name":"ხილის ასორტი","price":25,"desc":"ორი-სამი ადამიანისთვის"}]}]},{"type":"about","enabled":false,"title":"ჩვენ შესახებ","paragraphs":["ეს სექცია გამორთულია: საიტზე არ ჩანს, მაგრამ ტექსტი შენახულია."]},{"type":"visit","tone":"inverse","title":"სად გვიპოვო","note":"ბულვარზე, ბორბლის მხრიდან მეოთხე ბარი."}]}];
-  const LIMIT = 3, DOMAIN = 'bilderi.ge';
+  const LIMIT = 3, SITE_ORIGIN = 'https://bilderi.pages.dev';
+  const siteUrl = (slug) => SITE_ORIGIN + '/s/' + slug + '/';
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -360,9 +395,9 @@ main{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,52px) var(--pad) 64px
     }
     $('#grid').innerHTML = sites.map((x) => {
       const st = !x.published ? ['', 'მონახაზი'] : x.changed ? ['chg', 'გამოუქვეყნებელი ცვლილებები'] : ['live', 'გამოქვეყნებული'];
-      return `<article class="card"><div>${thumb(x.site, x.id)}</div><div class="body"><h3>${esc(x.name || 'უსახელო')}</h3><span class="addr">${esc((x.slug || 'saiti') + '.' + DOMAIN)}</span>
+      return `<article class="card"><div>${thumb(x.site, x.id)}</div><div class="body"><h3>${esc(x.name || 'უსახელო')}</h3>${x.live ? `<a class="addr" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">${esc(siteUrl(x.live).replace(/^https:\/\//, '').replace(/\/$/, ''))}</a>` : `<span class="addr muted">${esc(siteUrl(x.slug || 'saiti').replace(/^https:\/\//, '').replace(/\/$/, ''))}</span>`}
 <div class="meta"><span class="pill ${st[0]}"><i></i>${st[1]}</span><span>შეცვლილია ${ago(x.updated)}</span></div>
-<div class="acts"><a class="btn btn-ink btn-sm" href="/editor/?site=${encodeURIComponent(x.id)}">რედაქტირება</a>
+<div class="acts"><a class="btn btn-ink btn-sm" href="/editor/?site=${encodeURIComponent(x.id)}">რედაქტირება</a>${x.live ? `<a class="btn btn-line btn-sm" href="${esc(siteUrl(x.live))}" target="_blank" rel="noopener">ნახვა</a>` : ''}
 <div class="more"><button class="ib" type="button" data-more="${esc(x.id)}" aria-label="სხვა მოქმედებები" aria-expanded="false" aria-haspopup="menu">${IC.more}</button>
 <div class="menu" role="menu"><button type="button" role="menuitem" class="danger" data-del="${esc(x.id)}">საიტის წაშლა</button></div></div></div></div></article>`;
     }).join('') + `<button class="add" type="button" data-new${n >= LIMIT ? ' disabled' : ''}><span class="plus">${IC.plus}</span>ახალი საიტი<small>${n >= LIMIT ? `უფასოდ ${LIMIT} საიტამდე შეგიძლია. ახალი რომ დაამატო, ერთ-ერთი წაშალე.` : `კიდევ ${LIMIT - n} საიტის შექმნა შეგიძლია`}</small></button>`;

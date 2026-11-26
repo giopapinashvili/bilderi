@@ -325,8 +325,8 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
     <h3 id="pub-t">საიტი გამოქვეყნდა!</h3>
     <p>ახლა ყველას შეუძლია მისი ნახვა:</p>
     <div class="copy"><span id="pub-url"></span><button class="btn btn-line btn-xs" type="button" id="copy">კოპირება</button></div>
-    <div class="share"><button class="btn btn-line" type="button" data-demo="share">Facebook</button><button class="btn btn-line" type="button" data-demo="share">WhatsApp</button><button class="btn btn-line" type="button" data-demo="share">Messenger</button></div>
-    <div class="qrb"><span id="qr"></span><div><b>QR კოდი მაგიდებისთვის</b><p>დაბეჭდე და დადე მაგიდებზე. სტუმარი მენიუს ტელეფონზე ნახავს.</p><button class="btn btn-line btn-xs" type="button" data-demo="qr">QR-ის გადმოწერა</button></div></div>
+    <div class="share"><a class="btn btn-line" id="sh-fb" target="_blank" rel="noopener">Facebook</a><a class="btn btn-line" id="sh-wa" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-line" id="sh-vb" rel="noopener">Viber</a></div>
+    <div class="qrb"><span id="qr"></span><div><b>QR კოდი მაგიდებისთვის</b><p>დაბეჭდე და დადე მაგიდებზე. სტუმარი მენიუს ტელეფონზე ნახავს.</p><button class="btn btn-line btn-xs" type="button" id="qr-dl">QR-ის გადმოწერა</button></div></div>
     <button class="btn btn-red wide" type="button" id="pub-view">საიტის ნახვა</button>
   </div>
 </div>
@@ -356,7 +356,9 @@ body{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,44%) m
 <script>
 {
   const SAMPLES = /*SAMPLES*/;
-  const DOMAIN = 'bilderi.ge';
+  const SITE_ORIGIN = 'https://bilderi.pages.dev';
+  const siteUrl = (slug) => SITE_ORIGIN + '/s/' + (slug || 'saiti') + '/';
+  const siteLabel = (slug) => siteUrl(slug).replace(/^https:\/\//, '').replace(/\/$/, '');
   const KEY = 'bilderi:editor:v1';
   const L = Supra.LABELS;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -580,7 +582,7 @@ a{cursor:default}
     const title = (site.meta && site.meta.title) || site.name || '';
     $('#tab-title').textContent = title;
     $('#tab-fav').src = favUrl();
-    $('#b-url').textContent = (site.slug || 'saiti') + '.' + DOMAIN;
+    $('#b-url').textContent = siteLabel(site.slug);
     $('#e-name').textContent = site.name || 'უსახელო';
     document.title = (site.name || 'საიტი') + ', რედაქტორი';
   };
@@ -878,7 +880,7 @@ ${grp('ქვედა ზოლი', fld('დამატებითი ტე
   };
   const seoPrev = () => {
     const r = resolve(), m = site.meta || {};
-    const title = m.title || site.name || '', desc = m.description || '', url = (site.slug || 'saiti') + '.' + DOMAIN;
+    const title = m.title || site.name || '', desc = m.description || '', url = siteLabel(site.slug);
     const img = r.meta && r.meta.image && r.meta.image.src;
     return `<div class="serp"><small>${esc(url)}</small><b>${esc(title)}</b><p>${esc(desc || 'აღწერა ჯერ არ არის.')}</p></div>
 <div class="fb">${img ? `<img src="${esc(img)}" alt="">` : ''}<div><small>${esc(url.toUpperCase())}</small><b>${esc(title)}</b><p>${esc(desc)}</p></div></div>`;
@@ -886,7 +888,7 @@ ${grp('ქვედა ზოლი', fld('დამატებითი ტე
   function pSeo() {
     const [st, msg] = slugCheck(site.slug);
     return `<div class="p-head"><h2>Google და გაზიარება</h2></div><p class="p-sub">როგორ ჩანს საიტი Google-ში და Facebook-ზე გაზიარებისას.</p>
-${grp('საიტის მისამართი', fld('მისამართი', 'slug', { suf: '.' + DOMAIN, after: 'slug', ph: 'saxeli' }) + `<p class="st ${st}" id="slug-st">${st === 'ok' ? IC.check : IC.x}${msg}</p>`)}
+${grp('საიტის მისამართი', fld('მისამართი', 'slug', { pre: 'bilderi.pages.dev/s/', after: 'slug', ph: 'saxeli' }) + `<p class="st ${st}" id="slug-st">${st === 'ok' ? IC.check : IC.x}${msg}</p>`)}
 ${grp('Google', fld('სათაური', 'meta.title', { count: 60, after: 'seo', ph: site.name }) + fld('აღწერა', 'meta.description', { count: 160, rows: 3, after: 'seo' }))}
 ${grp('გაზიარების სურათი', imgFld('meta.image', 'share', { alt: false }) + '<p class="hint">თუ არ ატვირთავ, მთავარი ბლოკის ფოტო გამოჩნდება.</p>')}
 ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev()}</div>`)}`;
@@ -915,12 +917,22 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
   }
 
   /* ---------- ველების კავშირი ---------- */
+  let slugT = 0;
   const AFTER = {
     slug: (t) => {
       const low = t.value.toLowerCase();
       if (low !== t.value) { t.value = low; set(site, 'slug', low); }
       const [st, msg] = slugCheck(low), el = $('#slug-st');
       if (el) { el.className = 'st ' + st; el.innerHTML = (st === 'ok' ? IC.check : IC.x) + msg; }
+      clearTimeout(slugT);
+      if (REMOTE && st === 'ok') slugT = setTimeout(async () => {
+        try {
+          const r = await Backend.slugStatus(low, SITE_ID), e2 = $('#slug-st');
+          if (!e2 || site.slug !== low) return;
+          if (r === 'taken') { e2.className = 'st bad'; e2.innerHTML = IC.x + 'დაკავებულია, აირჩიე სხვა'; }
+          else { e2.className = 'st ok'; e2.innerHTML = IC.check + (r === 'mine' ? 'ეს შენი საიტის მისამართია' : 'თავისუფალია'); }
+        } catch (e) { /* შემოწმება გამოქვეყნებისას განმეორდება */ }
+      }, 450);
     },
     seo: () => { const el = $('#seo-prev'); if (el) el.innerHTML = seoPrev(); },
     logoh: (t) => { const s = t.closest('.fld').querySelector('small'); if (s) s.textContent = t.value + 'px'; }
@@ -1055,7 +1067,7 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
   const vframe = $('#vframe');
   const showView = () => {
     if (commitT) commit();
-    $('#v-title').textContent = (site.slug || 'saiti') + '.' + DOMAIN;
+    $('#v-title').textContent = siteLabel(site.slug);
     vframe.srcdoc = Supra.renderSite(resolve());
     openModal($('#view'));
   };
@@ -1076,7 +1088,7 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     $$('[data-vdev]').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
   }));
   $('#preview-btn').addEventListener('click', showView);
-  $('#pub-view').addEventListener('click', () => { closeModal($('#pub')); showView(); });
+  $('#pub-view').addEventListener('click', () => { closeModal($('#pub')); if (REMOTE) window.open(siteUrl(site.slug), '_blank', 'noopener'); else showView(); });
   const qr = (seed) => {
     let s = seed;
     const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -1086,18 +1098,77 @@ ${grp('ასე გამოჩნდება', `<div id="seo-prev">${seoPrev(
     const f = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3"/>`;
     return `<svg viewBox="-1 -1 ${N + 2} ${N + 2}" shape-rendering="crispEdges" aria-label="QR კოდი (ნიმუში)"><rect x="-1" y="-1" width="${N + 2}" height="${N + 2}" fill="#fff"/><g fill="#1A1423">${cells}${f(0, 0)}${f(N - 7, 0)}${f(0, N - 7)}</g></svg>`;
   };
-  $('#publish-btn').addEventListener('click', () => {
+  let qrLib = null, qrObj = null;
+  const loadQR = () => qrLib || (qrLib = new Promise((res, rej) => {
+    if (window.qrcode) return res(window.qrcode);
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+    sc.onload = () => (window.qrcode ? res(window.qrcode) : rej(new Error('qr')));
+    sc.onerror = () => { qrLib = null; rej(new Error('qr')); };
+    document.head.appendChild(sc);
+  }));
+  const qrSvg = (q) => {
+    const n = q.getModuleCount();
+    let d = '';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+    return `<svg viewBox="-2 -2 ${n + 4} ${n + 4}" shape-rendering="crispEdges" aria-label="QR კოდი: ${esc(siteLabel(site.slug))}"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><path d="${d}" fill="#1A1423"/></svg>`;
+  };
+  const showPub = async () => {
+    const url = siteUrl(site.slug);
+    $('#pub-url').textContent = siteLabel(site.slug);
+    $('#sh-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+    $('#sh-wa').href = 'https://wa.me/?text=' + encodeURIComponent((site.name || '') + ' ' + url);
+    $('#sh-vb').href = 'viber://forward?text=' + encodeURIComponent((site.name || '') + ' ' + url);
+    $('#qr').innerHTML = qr(url.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7) % 2147483646 + 1);
+    qrObj = null;
+    openModal($('#pub'));
+    try { const q = (await loadQR())(0, 'M'); q.addData(url); q.make(); qrObj = q; $('#qr').innerHTML = qrSvg(q); } catch (e) { /* QR ბიბლიოთეკა ვერ ჩაიტვირთა */ }
+  };
+  $('#qr-dl').addEventListener('click', () => {
+    if (!qrObj) { toast('QR ჯერ არ ჩატვირთულა. სცადე ცოტა ხანში.'); return; }
+    const n = qrObj.getModuleCount(), k = 16, pad = 4 * k, W = n * k + pad * 2, H = W + 150;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const g = cv.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#1A1423';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qrObj.isDark(r, c)) g.fillRect(pad + c * k, pad + r * k, k, k);
+    g.textAlign = 'center';
+    g.font = "800 44px 'Noto Sans Georgian',sans-serif"; g.fillText(site.name || '', W / 2, W + 40);
+    g.font = "500 28px 'Noto Sans Georgian',sans-serif"; g.fillStyle = '#4A4352'; g.fillText('დაასკანერე და ნახე მენიუ', W / 2, W + 90);
+    const a = document.createElement('a');
+    a.href = cv.toDataURL('image/png'); a.download = (site.slug || 'saiti') + '-qr.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  $('#publish-btn').addEventListener('click', async () => {
     if (commitT) commit();
     const [st, msg] = slugCheck(site.slug);
     if (st !== 'ok') { goTab('seo'); toast('ჯერ საიტის მისამართი შეასწორე: ' + msg); return; }
-    published = hist[hi]; save(); status();
-    const url = site.slug + '.' + DOMAIN;
-    $('#pub-url').textContent = url;
-    $('#qr').innerHTML = qr(url.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7) % 2147483646 + 1);
-    openModal($('#pub'));
+    if (!REMOTE) {
+      if (LIVE) { toast('გამოსაქვეყნებლად ჯერ შედი ანგარიშზე.', 'შესვლა', () => { location.href = '/login/?next=' + encodeURIComponent('/app/'); }); return; }
+      published = hist[hi]; save(); status(); showPub(); return;
+    }
+    if (!ready) return;
+    const btn = $('#publish-btn');
+    btn.disabled = true; btn.textContent = 'ქვეყნდება…';
+    try {
+      const payload = clone(site);
+      payload.brand = payload.brand || {};
+      payload.brand.favicon = favUrl();
+      if (!(payload.meta && payload.meta.image && payload.meta.image.src)) {
+        const h = payload.sections.find((x) => x.type === 'hero');
+        if (h && h.image && h.image.src) { payload.meta = payload.meta || {}; payload.meta.image = h.image; }
+      }
+      await Backend.publish(SITE_ID, site.slug, payload, IMGS);
+      published = hist[hi]; save(); status();
+      showPub();
+    } catch (e) {
+      toast(Backend.message(e));
+      if (e && e.code === 'bilderi/slug-taken') goTab('seo');
+    }
+    btn.disabled = false; btn.textContent = 'გამოქვეყნება';
   });
   $('#copy').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText('https://' + $('#pub-url').textContent); toast('მისამართი დაკოპირდა'); }
+    try { await navigator.clipboard.writeText(siteUrl(site.slug)); toast('მისამართი დაკოპირდა'); }
     catch (e) { toast('კოპირება ვერ მოხერხდა: მონიშნე და დააკოპირე ხელით'); }
   });
 

@@ -25,5 +25,32 @@ service cloud.firestore {
           && request.resource.data.data.size() < 1000000;
       }
     }
+
+    // გამოქვეყნებული საიტები: ყველას შეუძლია ნახვა, ცვლა მხოლოდ მფლობელს.
+    // დოკუმენტის ID საიტის მისამართია (slug), ამიტომ ერთ მისამართს მხოლოდ ერთი მფლობელი ჰყავს.
+    function pubOwner(slug) {
+      return get(/databases/$(database)/documents/published/$(slug)).data.owner == request.auth.uid;
+    }
+    match /published/{slug} {
+      allow get: if true;
+      allow create: if signedIn()
+        && request.resource.data.owner == request.auth.uid
+        && slug.matches('^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$')
+        && !(slug in ['admin', 'api', 'app', 'www', 'mail', 'bog', 'tbc', 'bank', 'gov', 'police', 'support', 'help', 'login', 'bilderi', 'pay', 'editor', 'templates'])
+        && request.resource.data.data is string
+        && request.resource.data.data.size() < 900000;
+      allow update: if signedIn()
+        && resource.data.owner == request.auth.uid
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.data.size() < 900000;
+      allow delete: if signedIn() && resource.data.owner == request.auth.uid;
+
+      match /images/{imgId} {
+        allow get: if true;
+        allow list, delete: if signedIn() && pubOwner(slug);
+        allow create, update: if signedIn() && pubOwner(slug)
+          && request.resource.data.data.size() < 1000000;
+      }
+    }
   }
 }

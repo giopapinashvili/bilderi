@@ -25,6 +25,12 @@
   const need = async () => { const f = await init(); if (!f) throw Object.assign(new Error('not configured'), { code: 'bilderi/not-configured' }); return f; };
   const uid = (f) => { const u = f.auth.currentUser; if (!u) throw Object.assign(new Error('signed out'), { code: 'bilderi/signed-out' }); return u.uid; };
   const ms = (t) => (t && t.toMillis ? t.toMillis() : 0);
+  async function removePublished(f, slug) {
+    const F = f.F;
+    const imgs = await F.getDocs(F.collection(f.db, 'published', slug, 'images'));
+    await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
+    await F.deleteDoc(F.doc(f.db, 'published', slug));
+  }
 
   const MSG = {
     'auth/invalid-email': 'ელფოსტა არასწორადაა ჩაწერილი.',
@@ -46,7 +52,8 @@
     'unavailable': 'სერვერთან კავშირი ვერ მოხერხდა. სცადე თავიდან.',
     'bilderi/not-configured': 'შესვლა ჯერ ჩართული არ არის: Firebase-ის პარამეტრები აკლია.',
     'bilderi/signed-out': 'ჯერ შედი ანგარიშზე.',
-    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.'
+    'bilderi/too-big': 'ფოტო ძალიან დიდია. სცადე უფრო პატარა.',
+    'bilderi/slug-taken': 'ეს მისამართი უკვე დაკავებულია. Google-ის ჩანართში სხვა მისამართი აირჩიე.'
   };
 
   const B = {
@@ -77,7 +84,7 @@
         const x = d.data();
         let data = {};
         try { data = JSON.parse(x.data || '{}'); } catch (e) { /* დაზიანებული ჩანაწერი */ }
-        return { id: d.id, name: x.name, slug: x.slug, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
+        return { id: d.id, name: x.name, slug: x.slug, live: x.publishedSlug || null, site: data, published: !!x.published, changed: !!x.published && x.published !== x.data, updated: ms(x.updatedAt) };
       }).sort((a, b) => b.updated - a.updated);
     },
     async createSite(site) {
@@ -104,9 +111,34 @@
       if (dataUrl.length > 1000000) throw Object.assign(new Error('too big'), { code: 'bilderi/too-big' });
       await F.setDoc(F.doc(f.db, 'sites', id, 'images', imgId), { owner: uid(f), data: dataUrl });
     },
+    async slugStatus(slug, siteId) {
+      const f = await need(), F = f.F, u = uid(f);
+      const s = await F.getDoc(F.doc(f.db, 'published', slug));
+      if (!s.exists()) return 'free';
+      const x = s.data();
+      return x.owner === u && x.siteId === siteId ? 'mine' : 'taken';
+    },
+    async publish(siteId, slug, payload, imgs) {
+      const f = await need(), F = f.F, u = uid(f);
+      const ref = F.doc(f.db, 'published', slug);
+      const cur = await F.getDoc(ref);
+      if (cur.exists() && (cur.data().owner !== u || cur.data().siteId !== siteId)) throw Object.assign(new Error('taken'), { code: 'bilderi/slug-taken' });
+      const siteRef = F.doc(f.db, 'sites', siteId);
+      const sdoc = await F.getDoc(siteRef);
+      const old = sdoc.exists() ? sdoc.data().publishedSlug : null;
+      const used = [...new Set((JSON.stringify(payload).match(/img:[a-z0-9]+/g) || []).map((x) => x.slice(4)))].filter((id) => imgs[id]);
+      const have = cur.exists() ? cur.data().imgs || [] : [];
+      await F.setDoc(ref, { owner: u, siteId, data: JSON.stringify(payload), imgs: used, updatedAt: F.serverTimestamp() });
+      for (const id of used) if (!have.includes(id)) await F.setDoc(F.doc(f.db, 'published', slug, 'images', id), { owner: u, data: imgs[id] });
+      if (old && old !== slug) { try { await removePublished(f, old); } catch (e) { /* ძველი მისამართი უკვე წაშლილია */ } }
+      await F.updateDoc(siteRef, { publishedSlug: slug });
+    },
     async deleteSite(id) {
       const f = await need(), F = f.F;
       uid(f);
+      const sd = await F.getDoc(F.doc(f.db, 'sites', id));
+      const live = sd.exists() ? sd.data().publishedSlug : null;
+      if (live) { try { await removePublished(f, live); } catch (e) { /* უკვე წაშლილია */ } }
       const imgs = await F.getDocs(F.collection(f.db, 'sites', id, 'images'));
       await Promise.all(imgs.docs.map((d) => F.deleteDoc(d.ref)));
       await F.deleteDoc(F.doc(f.db, 'sites', id));

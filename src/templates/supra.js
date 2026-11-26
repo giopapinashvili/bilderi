@@ -6,7 +6,7 @@
 (function (root) {
   'use strict';
 
-  const PLATFORM = { madeWith: 'აწყობილია ბილდერზე', url: '#' }; // დროებითი სახელი
+  const PLATFORM = { madeWith: 'აწყობილია ბილდერზე', url: '/' }; // დროებითი სახელი
 
   const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wdth,wght@62.5..100,300..900&family=Noto+Serif+Georgian:wght@400..800&display=swap';
 
